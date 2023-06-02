@@ -6,3 +6,5 @@ async def message():
     webhook = Webhook.from_url(os.environ["webhook_url"], session=session)
     await webhook.send("heyy")
     print("sent lol")
+
+await message()
