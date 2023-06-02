@@ -1,0 +1,521 @@
+{
+  "kind": "youtube#playlistItemListResponse",
+  "etag": "1PzGDEyaSApk_Phb99OWowvJU3k",
+  "nextPageToken": "EAAaBlBUOkNBbw",
+  "items": [
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "lWzzHtexxPkkQjUe5XQOZCWZuU4",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LkhwTC0ySzVCS3dB",
+      "snippet": {
+        "publishedAt": "2023-06-01T16:44:14Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Ash's best gameplay #gaming #brawlstars",
+        "description": "Ash's best gameplay :\nToday I'm going to show you my Ash gameplay that I recorded last week, Ash is a very strong roller in the matter and it can be a formidable force in the right hands.\nHope you enjoy the gameplay \ud83d\ude0a\n\nCredits : \nSong - Mortals (feat. Laura Brehm) [NCS Release] \nArtist - Warriyo, Laura Brehm \nSong available on @NoCopyrightSounds  \nSong link : https://youtu.be/yJg-Y5byMMw\n\nTags:\n#viral #gaming #gamingvideos #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/HpL-2K5BKwA/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/HpL-2K5BKwA/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/HpL-2K5BKwA/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/HpL-2K5BKwA/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/HpL-2K5BKwA/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 0,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "HpL-2K5BKwA"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "HpL-2K5BKwA",
+        "videoPublishedAt": "2023-06-01T16:44:14Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "mUJsIaIYP8-ZLMRzYoCceDucQeY",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LnUweFVWLVcxd0NZ",
+      "snippet": {
+        "publishedAt": "2023-05-31T15:14:31Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Stop Teaming \ud83d\ude42 #shorts #brawlstars",
+        "description": "Stop teaming \ud83d\ude42 :\nOne of the ways to stop teaming is by using Shelly. In Brawl Stars, Shelly is a formidable choice for players who seek dominance in Solo Showdown, a thrilling game mode where individual skill and strategy reign supreme. With her trusty boomstick, Shelly's versatile playstyle and high burst damage make her a force to be reckoned with.\n\nOne of Shelly's defining abilities is her Super, the Super Shell. This powerful skill not only deals considerable damage but also knocks back enemies, providing her with an invaluable tool for controlling the flow of battle. Utilizing her Super strategically, Shelly can disrupt enemy advances, push opponents into hazardous terrain, or create openings for herself to secure power cubes and dominate the arena.\n\n#shorts #short #viral #youtubeshorts #gaming #gameplay #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/u0xUV-W1wCY/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/u0xUV-W1wCY/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/u0xUV-W1wCY/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/u0xUV-W1wCY/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/u0xUV-W1wCY/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 1,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "u0xUV-W1wCY"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "u0xUV-W1wCY",
+        "videoPublishedAt": "2023-05-31T15:14:31Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "zPY82SvQT_1QrYgUzGTDReJR1f8",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LjlEMG1CX01QRmNF",
+      "snippet": {
+        "publishedAt": "2023-05-30T14:49:57Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Bibi's Bubblegum vs Brawlers #shorts #brawlstars",
+        "description": "Bibi's Bubblegum vs Brawlers :\n\nin this video I am going to perform an experiment - which brawlers can survive Bibi's bubble gum super when she have 15 power cubes. It basically depends on the abilities of the brawlers along with their health pool.\nPS: Don't miss the funny ending \ud83d\ude04\ud83d\ude04\n\n#shorts #short #viral #youtubeshorts #gaming #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/9D0mB_MPFcE/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/9D0mB_MPFcE/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/9D0mB_MPFcE/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/9D0mB_MPFcE/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/9D0mB_MPFcE/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 2,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "9D0mB_MPFcE"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "9D0mB_MPFcE",
+        "videoPublishedAt": "2023-05-30T14:49:57Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "LJHqvMQkGhk7iU4k2lPIXAhcIaQ",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LnhveFBhMzdVT3dj",
+      "snippet": {
+        "publishedAt": "2023-05-29T08:24:21Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Your month your brawler Brawl Stars pt.3 #shorts #brawlstars",
+        "description": "Your month your brawler in Brawl Stars pt.3 :\n\nTrying out a new trend for Brawl Stars !! \nThis trend is popular in anime, but I want to bring it in Brawl Stars. Depending on your birth month, I'll tell you your brawler \ud83e\udee3\n\nIn Brawl Stars, you play as a unique character with special abilities, called Brawlers. You can choose from a variety of Brawlers, each with their own strengths and weaknesses, and team up with other players to battle it out in real-time.\n\n#shorts #short #viral #youtubeshorts #gaming #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/xoxPa37UOwc/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/xoxPa37UOwc/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/xoxPa37UOwc/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/xoxPa37UOwc/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/xoxPa37UOwc/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 3,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "xoxPa37UOwc"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "xoxPa37UOwc",
+        "videoPublishedAt": "2023-05-29T08:24:21Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "Hhy8IpjNz3ZTqJsBQpyxAUutZG0",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LmU5SFI5emRNQ0pJ",
+      "snippet": {
+        "publishedAt": "2023-05-28T15:51:51Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Your month your brawler Brawl Stars pt.2 #shorts #brawlstars",
+        "description": "Your month your brawler in Brawl Stars pt.2 :\n\nTrying out a new trend for Brawl Stars !! \nThis trend is popular in anime, but I want to bring it in Brawl Stars. Depending on your birth month, I'll tell you your brawler \ud83e\udee3\n\nIn Brawl Stars, you play as a unique character with special abilities, called Brawlers. You can choose from a variety of Brawlers, each with their own strengths and weaknesses, and team up with other players to battle it out in real-time.\n\n#shorts #short #viral #youtubeshorts #gaming #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/e9HR9zdMCJI/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/e9HR9zdMCJI/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/e9HR9zdMCJI/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/e9HR9zdMCJI/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/e9HR9zdMCJI/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 4,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "e9HR9zdMCJI"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "e9HR9zdMCJI",
+        "videoPublishedAt": "2023-05-28T15:51:51Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "aNIriV52j8_WbZhSW-3qsr5X1M8",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3Lktyc05SZ1lCbllN",
+      "snippet": {
+        "publishedAt": "2023-05-28T06:50:06Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Your month your brawler Brawl Stars #shorts #brawlstars",
+        "description": "Your month is your brawler in Brawl Stars :\n\nTrying out a new trend for Brawl Stars !! \nThis trend is popular in anime, but I want to bring it in Brawl Stars. Depending on your birth month, I'll tell you your brawler \ud83e\udee3\n\nIn Brawl Stars, you play as a unique character with special abilities, called Brawlers. You can choose from a variety of Brawlers, each with their own strengths and weaknesses, and team up with other players to battle it out in real-time.\n\n#shorts #short #viral #youtubeshorts #gaming #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/KrsNRgYBnYM/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/KrsNRgYBnYM/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/KrsNRgYBnYM/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/KrsNRgYBnYM/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/KrsNRgYBnYM/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 5,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "KrsNRgYBnYM"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "KrsNRgYBnYM",
+        "videoPublishedAt": "2023-05-28T06:50:06Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "2A6j8ZPVbYSAtM_K8oC4GdOGlxM",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LldPUlpSd3FZaUZF",
+      "snippet": {
+        "publishedAt": "2023-05-27T06:15:35Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Mothers' Challenge Brawl Stars #shorts #brawlstars",
+        "description": "Mothers' challenge Brawl Stars :\nA new challenge is out in the game which has unlimited lives. You can play it how many times you want without the fear of losing the challenge. \nTake this opportunity and don't fear to experiment with new brawlers brawlers, best of luck to everyone !\n\n#shorts #short #viral #youtubeshorts #gaming #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/WORZRwqYiFE/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/WORZRwqYiFE/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/WORZRwqYiFE/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/WORZRwqYiFE/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/WORZRwqYiFE/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 6,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "WORZRwqYiFE"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "WORZRwqYiFE",
+        "videoPublishedAt": "2023-05-27T06:15:35Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "lUm2O01L5109wlOHmCHMbhckNJ4",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LnBmRFo3bUpwTGpv",
+      "snippet": {
+        "publishedAt": "2023-05-26T06:28:08Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Frost Queen Amber \ud83e\udd76\ud83e\udd76 #shorts #brawlstars",
+        "description": "Buying Frost Queen Amber using bling and gems \ud83d\ude09\ud83d\ude09\nThe new currency bling has replaced star points and can be used to purchase skins and other cosmetics in the game. \nThere are few skins that provide insane value for example the Frost Queen Amber skin I'm buying is really cool looking at a very decent prize rate. It should at least cost 199 gems.\n\n#shorts #short #viral #youtubeshorts #gaming #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/pfDZ7mJpLjo/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/pfDZ7mJpLjo/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/pfDZ7mJpLjo/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/pfDZ7mJpLjo/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/pfDZ7mJpLjo/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 7,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "pfDZ7mJpLjo"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "pfDZ7mJpLjo",
+        "videoPublishedAt": "2023-05-26T06:28:08Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "z4rZSMdVi2hT0vlEYj5Ji8QIqXI",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LnNUeFRUQjFkMkUw",
+      "snippet": {
+        "publishedAt": "2023-05-25T03:33:06Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Nita's Bear vs Brawlers #shorts #brawlstars",
+        "description": "Nita's Bear vs Brawlers :\n\nIn this video we are going to see which brawlers can survive Nita's Bear by using their normal attacks and super combined, I have provided Nita a lot of power cubes so that her bear can become stronger and the video becomes more thrilling to watch !! \n\n#shorts #short #viral #youtubeshorts #gaming #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/sTxTTB1d2E0/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/sTxTTB1d2E0/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/sTxTTB1d2E0/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/sTxTTB1d2E0/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/sTxTTB1d2E0/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 8,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "sTxTTB1d2E0"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "sTxTTB1d2E0",
+        "videoPublishedAt": "2023-05-25T03:33:06Z"
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "URS2xKAy8mlmEQlr58sv_8eFoTk",
+      "id": "VVV5ankzTFRMN0FJVl9Jd2Y0QTlQZUd3LmhCbDRVQWFZcEJj",
+      "snippet": {
+        "publishedAt": "2023-05-24T05:22:00Z",
+        "channelId": "UCyjy3LTL7AIV_Iwf4A9PeGw",
+        "title": "Brawl Stars rank up \ud83d\udcc8 #shorts #brawlstars",
+        "description": "Brawl stars rank up viral trend \ud83d\udcc8 \nIn Brawl Stars, you play as a unique character with special abilities, called Brawlers. You can choose from a variety of Brawlers, each with their own strengths and weaknesses, and team up with other players to battle it out in real-time. The game features various game modes, including Gem Grab, Showdown, Brawl Ball, Heist, Bounty, Siege, and Hot Zone, each with its own objectives and challenges.\n\nWhether you're a casual gamer or a competitive player, Brawl Stars has something for everyone. You can collect and upgrade your Brawlers, unlock new skins and abilities, and climb up the leaderboards to become the ultimate champion. The game also features regular updates, with new Brawlers, game modes, and features added all the time.\n\n#shorts #short #viral #youtubeshorts  #gaming #brawlstars #supercell #juuzougaming",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/hBl4UAaYpBc/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/hBl4UAaYpBc/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/hBl4UAaYpBc/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/hBl4UAaYpBc/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/hBl4UAaYpBc/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Juuzou Gaming",
+        "playlistId": "UUyjy3LTL7AIV_Iwf4A9PeGw",
+        "position": 9,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "hBl4UAaYpBc"
+        },
+        "videoOwnerChannelTitle": "Juuzou Gaming",
+        "videoOwnerChannelId": "UCyjy3LTL7AIV_Iwf4A9PeGw"
+      },
+      "contentDetails": {
+        "videoId": "hBl4UAaYpBc",
+        "videoPublishedAt": "2023-05-24T05:22:00Z"
+      }
+    }
+  ],
+  "pageInfo": {
+    "totalResults": 142,
+    "resultsPerPage": 10
+  }
+}

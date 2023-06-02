@@ -11,6 +11,8 @@ Flask = "^2.2.0"
 urllib3 = "^1.26.12"
 requests = "^2.31.0"
 py-cord = "^2.4.1"
+discord-webhook = "^1.1.0"
+google-api-python-client = "^2.88.0"
 
 [tool.poetry.dev-dependencies]
 debugpy = "^1.6.2"
