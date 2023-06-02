@@ -1,10 +1,6 @@
-from discord import Webhook
-import aiohttp, os
+from discord_webhook import DiscordWebhook
+import os
 
-async def message():
-  async with aiohttp.ClientSession() as session:
-    webhook = Webhook.from_url(os.environ["webhook_url"], session=session)
-    await webhook.send("heyy")
-    print("sent lol")
-
-await message()
+webhook = DiscordWebhook(url=os.environ["webhook_url"], content="please work")
+res = webhook.execute()
+print(res)
