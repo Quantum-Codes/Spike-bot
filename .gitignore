@@ -1,0 +1,8 @@
+/__pycache__
+**/__pycache__
+.replit
+replit.nix
+/venv
+.breakpoints
+/.config
+.env
