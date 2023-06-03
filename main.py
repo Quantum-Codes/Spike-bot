@@ -1,62 +1,48 @@
-from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, json
+#For replit only:
+#make pycord work by making guessImports = false in .replit
+#also add pkgs.ffmpeg in replit.nix for voice
 
-# -*- coding: utf-8 -*-
+import discord, os
+from keep_alive import keep_alive
 
-# Sample Python code for youtube.channels.list
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/code-samples#python
-
-import googleapiclient.discovery
-
-def main():
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
-
-    api_service_name = "youtube"
-    api_version = "v3"
-    DEVELOPER_KEY = os.environ["yt_key"]
-
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, developerKey = DEVELOPER_KEY, static_discovery=False)
-
-    request = youtube.channels().list(
-        part="snippet,contentDetails",
-        id="UCyjy3LTL7AIV_Iwf4A9PeGw"
-    )
-    response = request.execute()["items"][0]
-
-    #print(response)
-    request = youtube.playlistItems().list(
-        part="snippet,contentDetails",
-        maxResults=10,
-        playlistId= response["contentDetails"]["relatedPlaylists"]["uploads"]
-    )
-    response2 = request.execute()
-    return response, response2
-   
-channel, videos = main()
-with open("abc.json", "w") as file:
-  json.dump(videos, file, indent=2)
-#print(channel)
+if "REPL_SLUG" not in os.environ: #detect replit
+  import dotenv
+  dotenv.load_dotenv()
+  
 
 
-video = videos["items"][0]
+bot = discord.Bot()
+guild_ids = [1099306183426326589] #replace here
+
+@bot.event
+async def on_ready():
+  print(f"{bot.user} is ready and online!")
+
+@bot.event
+async def on_message(message):
+  if bot.user.mentioned_in(message):
+    await message.reply("Why u pinged me? I was sleeping :(")
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+  if after.channel: #joined
+    if not bot.voice_clients: 
+      await after.channel.connect()
+  else: #left
+    if len(before.channel.members) < 2: #after is None. so use before.
+      for channel in bot.voice_clients:
+        if channel.channel == before.channel:
+          await channel.disconnect()
 
 
-webhook = DiscordWebhook(url=os.environ["webhook_url"])
-
-embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"], color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
-embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
-embed.set_image(url=video["snippet"]["thumbnails"]["maxres"]["url"])
-##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
-#embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
-#embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
-#embed.add_embed_field(name='Field 2', value='dolor sit') 
-webhook.add_embed(embed)
-#"""
-res = webhook.execute()
-print(res)
-print(res.json())
-#"""
+#bot.load_extension("commands.general")
+bot.load_extension("commands.webhook")
+"""
+bot.load_extension("commands.voice")
+bot.load_extension("commands.menu")
+"""
+keep_alive()
+try:
+  bot.run(os.environ["token"])
+except discord.errors.HTTPException:
+  os.system("kill 1")
