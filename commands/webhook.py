@@ -30,7 +30,7 @@ def yt_webhook():
   #   json.dump(videos, file, indent=2)
   # #print(channel)  
   video = videos["items"][0]
-  webhook = DiscordWebhook(url=os.environ["webhook_url"])
+  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyooone New video")#, allowed_mentions=["everyone"])
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"], color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["snippet"]["thumbnails"]["maxres"]["url"])
@@ -50,8 +50,11 @@ class yt_notify_webhook(discord.Cog):
   
   @discord.slash_command(name="notify", description ="youtube video notification", guild_ids=guild_ids)
   async def notify(self, ctx):
-    yt_webhook()
-    await ctx.respond("done")
+    if ctx.author.id in [638738610564235265,718830331356250202]:
+      yt_webhook()
+      await ctx.respond("done")
+    else:
+      await ctx.respond("who are you??")
 
 
 
