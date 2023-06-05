@@ -31,7 +31,7 @@ def yt_webhook():
   # #print(channel)  
   video = videos["items"][0]
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")#, allowed_mentions=["everyone"])
-  embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150], color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
+  embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["snippet"]["thumbnails"]["maxres"]["url"])
   ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
