@@ -24,16 +24,8 @@ async def on_message(message):
     await message.reply("Why u pinged me? I was sleeping :(")
 
 @bot.event
-async def on_voice_state_update(member, before, after):
-  if after.channel: #joined
-    if not bot.voice_clients: 
-      await after.channel.connect()
-  else: #left
-    if len(before.channel.members) < 2: #after is None. so use before.
-      for channel in bot.voice_clients:
-        if channel.channel == before.channel:
-          await channel.disconnect()
-
+async def on_member_join(member):
+    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
 
 #bot.load_extension("commands.general")
 bot.load_extension("commands.webhook")
