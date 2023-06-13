@@ -13,6 +13,7 @@ requests = "^2.31.0"
 py-cord = "^2.4.1"
 discord-webhook = "^1.1.0"
 google-api-python-client = "^2.88.0"
+xmltodict = "^0.13.0"
 
 [tool.poetry.dev-dependencies]
 debugpy = "^1.6.2"

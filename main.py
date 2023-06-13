@@ -11,8 +11,8 @@ if "REPL_SLUG" not in os.environ: #detect replit
   
 
 
-bot = discord.Bot()
-guild_ids = [1099306183426326589] #replace here
+bot = discord.Bot(intents=discord.Intents.all())
+guild_ids = [1099306183426326589] #HARDCODED IN OTHER PLACES
 
 @bot.event
 async def on_ready():
@@ -20,12 +20,12 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-   if bot.user.mentioned_in(message) and message.mentions: #message.mentions empty when everyone ping
+  if bot.user.mentioned_in(message) and message.mentions: #message.mentions empty when everyone ping
     await message.reply("Why u pinged me? I was sleeping :(")
 
 @bot.event
 async def on_member_join(member):
-    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
+  await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
 
 #bot.load_extension("commands.general")
 bot.load_extension("commands.webhook")
