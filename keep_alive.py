@@ -1,7 +1,7 @@
 from flask import Flask, request
 from threading import Thread
 from commands.webhook import yt_webhook 
-import xmltodict
+import xmltodict, time
 from xml.parsers.expat import ExpatError
 
 
@@ -58,7 +58,8 @@ def feed():
 
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
-        print("New video URL: {}".format(video_url))
+        print(f"New video URL: {video_url}")
+        time.sleep(2)
         yt_webhook()
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook

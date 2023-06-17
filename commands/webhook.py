@@ -30,9 +30,10 @@ def yt_webhook(repeat=False):
   if not repeat:
     with open("abc.json", "r") as file:
       if video['contentDetails']['videoId'] in file.read():
+        print("blocked ")
         return "done before"
     with open("abc.json", "a") as file:
-      file.write(video['contentDetails']['videoId'])
+      file.write(video['contentDetails']['videoId']+"\n")
       
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
@@ -93,7 +94,7 @@ class yt_notify_webhook(discord.Cog):
   async def notify(self, ctx):
     if ctx.author.id in [638738610564235265,718830331356250202]:
       if yt_webhook() == "done before":
-        await ctx.respond("I have already posted about the latest video.", view=confirm_repeat(timeout=30))#yt_webhook))
+        await ctx.respond("I have already posted about the latest video.", view=confirm_repeat(timeout=30))
       else:
         await ctx.respond("done")
     else:
