@@ -3,6 +3,7 @@ import os, discord
 import googleapiclient.discovery
 
 guild_ids = [1099306183426326589]
+channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 
 def yt_webhook(repeat=False):
   os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
@@ -15,7 +16,7 @@ def yt_webhook(repeat=False):
 
   request = youtube.channels().list(
       part="snippet,contentDetails",
-      id="UCyjy3LTL7AIV_Iwf4A9PeGw"
+      id=channelid
   )
   response = request.execute()["items"][0]
 
@@ -29,7 +30,7 @@ def yt_webhook(repeat=False):
   video = videos["items"][0]
   if not repeat:
     with open("abc.json", "r") as file:
-      if video['contentDetails']['videoId'] in file.read():
+      if video['contentDetails']['videoId'] in file.read().split:
         print("blocked ")
         return "done before"
     with open("abc.json", "a") as file:

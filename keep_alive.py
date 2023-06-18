@@ -40,10 +40,11 @@ def feed():
     """Accept and parse requests from YT's pubsubhubbub.
     https://developers.google.com/youtube/v3/guides/push_notifications
     """
-
+    print("entry")
     challenge = request.args.get("hub.challenge")
     if challenge:
         # YT will send a challenge from time to time to confirm the server is alive.
+        print("challenged")
         return challenge
 
     try:
@@ -54,6 +55,7 @@ def feed():
         # set in config["channel_ids"].  Skip the check if that config option is empty.
         channel_id = xml_dict["feed"]["entry"]["yt:channelId"]
         if channel_id not in ["UCyjy3LTL7AIV_Iwf4A9PeGw"]:
+            print("channelid error")
             return "", 403
 
         # Parse out the video URL.
