@@ -30,11 +30,9 @@ def yt_webhook(repeat=False):
   video = videos["items"][0]
   if not repeat:
     with open("abc.json", "r") as file:
-      if video['contentDetails']['videoId'] in file.read().split:
+      if video['contentDetails']['videoId'] in file.read().split("\n"):
         print("blocked ")
         return "done before"
-    with open("abc.json", "a") as file:
-      file.write(video['contentDetails']['videoId']+"\n")
       
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
@@ -46,8 +44,11 @@ def yt_webhook(repeat=False):
   #embed.add_embed_field(name='Field 2', value='dolor sit') 
   webhook.add_embed(embed)
   res = webhook.execute()
+  with open("abc.json", "a") as file:
+      file.write(video['contentDetails']['videoId']+"\n")
   print(res)
   print(res.json())
+
 
 class confirm_repeat(discord.ui.View):
   async def on_timeout(self):
