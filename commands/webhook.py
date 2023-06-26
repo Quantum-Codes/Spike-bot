@@ -22,12 +22,12 @@ def yt_webhook(repeat=False, video=0):
 
   request = youtube.playlistItems().list(
       part="snippet,contentDetails",
-      maxResults=2,
+      maxResults=3,
       playlistId= response["contentDetails"]["relatedPlaylists"]["uploads"]
   )
   response2 = request.execute()
   channel, videos = response, response2
-  video = videos["items"][0]
+  video = videos["items"][video]
   if not repeat:
     with open("abc.json", "r") as file:
       if video['contentDetails']['videoId'] in file.read().split("\n"):
@@ -69,7 +69,7 @@ class confirm_repeat(discord.ui.View):
       max_values = 1, # the maximum number of values that can be selected by the users
       options = [ # the list of options from which users can choose, a required field
           discord.SelectOption(
-              label="Last video",
+              label="last video",
               description="Re-notify for last video"
           ),
           discord.SelectOption(
@@ -83,9 +83,11 @@ class confirm_repeat(discord.ui.View):
       ]
   )
   async def select_callback(self, select, interaction): # the function called when the user is done selecting options
+    options = ("last", "2nd", "3rd")
     self.disable_all_items()
     await interaction.response.edit_message(view=self)
-    await interaction.followup.send(f"Alright! Sending the 3rd last video {select.values[0]}")
+    await interaction.followup.send(f"Alright! Sending the  {select.values[0]}")
+    yt_webhook(True, options.index(select.values[0].split()[0]))
 
 
 class yt_notify_webhook(discord.Cog):
