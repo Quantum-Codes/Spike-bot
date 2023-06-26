@@ -5,7 +5,7 @@ import googleapiclient.discovery
 guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 
-def yt_webhook(repeat=False):
+def yt_webhook(repeat=False, video=0):
   os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
   api_service_name = "youtube"
   api_version = "v3"
@@ -32,7 +32,7 @@ def yt_webhook(repeat=False):
     with open("abc.json", "r") as file:
       if video['contentDetails']['videoId'] in file.read().split("\n"):
         print("blocked ")
-        return "done before"
+        return 500
       
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
@@ -70,22 +70,22 @@ class confirm_repeat(discord.ui.View):
       options = [ # the list of options from which users can choose, a required field
           discord.SelectOption(
               label="Last video",
-              description="idk"
+              description="Re-notify for last video"
           ),
           discord.SelectOption(
               label="2nd last video",
-              description="idk"
+              description="Re-notify for 2nd last video"
           ),
           discord.SelectOption(
               label="3rd last video",
-              description="idk"
+              description="Re-notify for last video"
           )
       ]
   )
   async def select_callback(self, select, interaction): # the function called when the user is done selecting options
     self.disable_all_items()
     await interaction.response.edit_message(view=self)
-    await interaction.followup.send(f"Awesome! But select menu doesn't work now. use button instead")
+    await interaction.followup.send(f"Alright! Sending the 3rd last video {select.values[0]}")
 
 
 class yt_notify_webhook(discord.Cog):
@@ -94,13 +94,14 @@ class yt_notify_webhook(discord.Cog):
   
   @discord.slash_command(name="notify", description ="youtube video notification", guild_ids=guild_ids)
   async def notify(self, ctx):
+    await ctx.defer()
     if ctx.author.id in [638738610564235265,718830331356250202]:
-      if yt_webhook() == "done before":
+      if yt_webhook() == 500:
         await ctx.respond("I have already posted about the latest video.", view=confirm_repeat(timeout=30))
       else:
-        await ctx.respond("done")
+        await ctx.followup.send("done")
     else:
-      await ctx.respond("who are you??")
+      await ctx.followup.send("who are you??")
 
 
 

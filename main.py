@@ -1,3 +1,4 @@
+#ONLY ADDED VIDEO PARAM IN LINE 8 WEBHOOK.PY. code doesnt use it. make it use
 #For replit only:
 #make pycord work by making guessImports = false in .replit
 #also add pkgs.ffmpeg in replit.nix for voice

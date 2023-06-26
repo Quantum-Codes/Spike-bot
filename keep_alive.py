@@ -35,16 +35,22 @@ channel_ids: []
 message_prefix:
 """
 
+def writelog(txt):
+  print(txt)
+  with open("log.json", "a") as file:
+    file.write(txt+"\n")
+
 @app.route("/feed", methods=["GET", "POST"])
 def feed():
     """Accept and parse requests from YT's pubsubhubbub.
     https://developers.google.com/youtube/v3/guides/push_notifications
     """
-    print("entry")
+    
+    writelog("entry")
     challenge = request.args.get("hub.challenge")
     if challenge:
         # YT will send a challenge from time to time to confirm the server is alive.
-        print("challenged")
+        writelog("challenged")
         return challenge
 
     try:
@@ -55,12 +61,12 @@ def feed():
         # set in config["channel_ids"].  Skip the check if that config option is empty.
         channel_id = xml_dict["feed"]["entry"]["yt:channelId"]
         if channel_id not in ["UCyjy3LTL7AIV_Iwf4A9PeGw"]:
-            print("channelid error")
+            writelog("channelid error")
             return "", 403
 
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
-        print(f"New video URL: {video_url}")
+        writelog(f"New video URL: {video_url}")
         time.sleep(2)
         yt_webhook()
         # # Send the message to the webhook URL.
