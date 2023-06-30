@@ -37,6 +37,9 @@ class brawl(discord.Cog):
       await ctx.followup.send(embed=embed_player(data))
     else:
       await ctx.followup.send("error")
+      print(data)
+      print(data.json())
+
 
 
 
