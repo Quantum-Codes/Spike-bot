@@ -1,6 +1,9 @@
-import discord, json, requests 
+import discord, json, requests, os
 from main import guild_ids
 
+headers = {
+  "Authorization": f"Bearer {os.environ['bs_token']}"
+}
 
 def embed_player(data):
   embed = discord.Embed(
@@ -31,9 +34,10 @@ class brawl(discord.Cog):
     await ctx.defer()
     if player_id.startswith("#"):
       player_id = player_id[1:]
-    data = requests.get(f"https://cr.is-a.dev/{player_id}")
+    data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_id}", headers=headers)
     if data.status_code == 200:
       data = data.json()
+      print("DATA", data)
       await ctx.followup.send(embed=embed_player(data))
     else:
       await ctx.followup.send("error")
