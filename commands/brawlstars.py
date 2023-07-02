@@ -32,19 +32,15 @@ class brawl(discord.Cog):
   @discord.slash_command(name="playerstats", description ="GET a player's stats", guild_ids=guild_ids)
   async def playerstats(self, ctx, player_id: str):
     await ctx.defer()
-    if player_id.startswith("#"):
-      player_id = player_id[1:]
+    if not player_id.startswith("#"):
+      player_id = "#"+player_id
+    player_id = player_id.replace("#", "%23")
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_id}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      print("DATA", data)
       await ctx.followup.send(embed=embed_player(data))
     else:
       await ctx.followup.send("error")
-      print(data)
-      print(data.json())
-
-
 
 
 

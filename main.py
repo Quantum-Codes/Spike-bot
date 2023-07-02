@@ -6,6 +6,10 @@
 import discord, os
 from keep_alive import keep_alive
 
+
+
+
+
 if "REPL_SLUG" not in os.environ: #detect replit
   import dotenv
   dotenv.load_dotenv()
