@@ -39,6 +39,10 @@ class brawl(discord.Cog):
     if data.status_code == 200:
       data = data.json()
       await ctx.followup.send(embed=embed_player(data))
+    elif data.status_code == 404:
+        if data.json().get("reason"):
+          if data.json()["reason"] == "notFound":
+            await ctx.followup.send("No such player exists")
     else:
       await ctx.followup.send("error")
 

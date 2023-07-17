@@ -107,6 +107,5 @@ class yt_notify_webhook(discord.Cog):
 
 
 
-
 def setup(bot):
   bot.add_cog(yt_notify_webhook(bot))
