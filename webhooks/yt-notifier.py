@@ -29,7 +29,7 @@ def yt_webhook(video=0):
   response2 = request.execute()
   video_set = set([json.dumps(item) for item in response2["items"]])
   with open("webhooks/videoset.dat", "rb+") as file:
-    old_video_set = set(list(pickle.load(file))[1:3])
+    old_video_set = pickle.load(file)
     file.seek(0)
     file.truncate(0)
     pickle.dump(video_set, file)
@@ -45,7 +45,7 @@ def yt_webhook(video=0):
 
 def webhook_sender(channel, video_item, content):
   video = video_item["snippet"]
-  webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1131213193570685038/sTINemugekqwHx9_71jP1ewoJrdmlPpYMIeXmbKiGFxIAZbTLnK7NiVE-rtFK4wKfQms", content="@everyone New video" if content else None)
+  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video" if content else None)
   embed = DiscordEmbed(title=video["title"], description=video["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video_item['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["thumbnails"]["maxres"]["url"])
