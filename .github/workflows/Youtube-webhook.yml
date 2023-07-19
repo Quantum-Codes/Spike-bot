@@ -5,7 +5,7 @@ name: youtube webhook
 
 on:
   schedule:
-    - cron: 15 * * * *
+    - cron: 0 * * * *
   
   workflow_dispatch:
 
@@ -39,3 +39,10 @@ jobs:
         yt_key: ${{ secrets.yt_key }}
       run: |
         python webhooks/yt-notifier.py
+    - name: Push to github
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "graphed"
+        git push
