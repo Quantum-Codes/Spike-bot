@@ -1,13 +1,12 @@
+# FIX FROM LINE 42
 from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, json
+import os, json, pickle 
 import googleapiclient.discovery
 
 guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 
 def yt_webhook(video=0):
-  
-  stringify = lambda x: [json.dumps(item) for item in x]
   
   os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
   api_service_name = "youtube"
@@ -27,16 +26,14 @@ def yt_webhook(video=0):
       maxResults=5,
       playlistId= response[0]["contentDetails"]["relatedPlaylists"]["uploads"]
   )
+
   response2 = request.execute()
-  video_set = [item["snippet"] for item in response2["items"]]
-  with open("webhooks/videoset.json", "r+") as file:
-    print(file.read())
+  video_set = set([json.dumps(item["snippet"]) for item in response2["items"]])
+  with open("webhooks/videoset.dat", "rb+") as file:
     file.seek(0)
-    old_video_set = json.loads(file.read())
+    old_video_set = pickle.load(file)
     file.truncate(0)
-    json.dump(video_set, file, indent=2)
-  video_set = set(stringify(video_set))
-  old_video_set = set(stringify(old_video_set))
+    pickle.dump(video_set, file)
   new_videos = video_set - old_video_set
   print(len(new_videos))
   channel, videos = response, response2
