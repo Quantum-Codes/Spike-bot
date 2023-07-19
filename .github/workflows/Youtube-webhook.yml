@@ -5,7 +5,7 @@ name: youtube webhook
 
 on:
   schedule:
-    - cron: 0 * * * *
+    - cron: 35 * * * *
   
   workflow_dispatch:
 
