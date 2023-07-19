@@ -36,5 +36,6 @@ jobs:
     - name: Run
       env:
         webhook_url: ${{ secrets.yt_webhook }}
+        yt_key: ${{ secrets.yt_key }}
       run: |
         python webhooks/yt-notifier.py
