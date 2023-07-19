@@ -34,7 +34,7 @@ def yt_webhook(video=0):
     file.truncate(0)
     pickle.dump(video_set, file)
   new_videos = video_set - old_video_set
-  print(len(new_videos))
+  print("New videos:", len(new_videos))
   channel, videos = response[0], [json.loads(item) for item in new_videos]
   
   content = 1 #ping only once
