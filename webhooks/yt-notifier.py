@@ -29,11 +29,11 @@ def yt_webhook(video=0):
   response2 = request.execute()
   video_set = set([json.dumps(item) for item in response2["items"]])
   with open("webhooks/videoset.dat", "rb+") as file:
-    #old_video_set = pickle.load(file)
+    old_video_set = pickle.load(file)
     file.seek(0)
     file.truncate(0)
     pickle.dump(video_set, file)
-  new_videos = video_set #- old_video_set
+  new_videos = video_set - old_video_set
   print(len(new_videos))
   channel, videos = response[0], [json.loads(item) for item in new_videos]
   
