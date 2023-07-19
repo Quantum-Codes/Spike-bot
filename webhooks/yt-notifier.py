@@ -1,4 +1,3 @@
-# FIX FROM LINE 42
 from discord_webhook import DiscordWebhook, DiscordEmbed 
 import os, json, pickle 
 import googleapiclient.discovery
@@ -28,20 +27,26 @@ def yt_webhook(video=0):
   )
 
   response2 = request.execute()
-  video_set = set([json.dumps(item["snippet"]) for item in response2["items"]])
+  video_set = set([json.dumps(item) for item in response2["items"]])
   with open("webhooks/videoset.dat", "rb+") as file:
+    old_video_set = set(list(pickle.load(file))[1:3])
     file.seek(0)
-    old_video_set = pickle.load(file)
     file.truncate(0)
     pickle.dump(video_set, file)
   new_videos = video_set - old_video_set
   print(len(new_videos))
-  channel, videos = response, response2
-  video = videos["items"][video]
+  channel, videos = response[0], [json.loads(item) for item in new_videos]
+  
+  content = 1 #ping only once
+  for item in videos:
+    webhook_sender(channel, item, content)
+    content = 0
 
 
-  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")
-  embed = DiscordEmbed(title=video["title"], description=video["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
+def webhook_sender(channel, video_item, content):
+  video = video_item["snippet"]
+  webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1131213193570685038/sTINemugekqwHx9_71jP1ewoJrdmlPpYMIeXmbKiGFxIAZbTLnK7NiVE-rtFK4wKfQms", content="@everyone New video" if content else None)
+  embed = DiscordEmbed(title=video["title"], description=video["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video_item['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["thumbnails"]["maxres"]["url"])
   ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
@@ -49,11 +54,7 @@ def yt_webhook(video=0):
   #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
   #embed.add_embed_field(name='Field 2', value='dolor sit') 
   webhook.add_embed(embed)
-  """
   res = webhook.execute()
-  with open("abc.json", "a") as file:
-      file.write(video['contentDetails']['videoId']+"\n")
   print(res)
-  print(res.json())
-  """
+ 
 yt_webhook()
