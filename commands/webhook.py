@@ -4,16 +4,18 @@ import googleapiclient.discovery
 
 guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
+global_videolist = [{"snippet":{"title": "ab"}}, {"snippet":{"title": "bc"}}, {"snippet":{"title": "ca"}}]
+#setup Google api
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
+api_service_name = "youtube"
+api_version = "v3"
+DEVELOPER_KEY = os.environ["yt_key"]
 
-def yt_webhook(repeat=False, video=0):
-  os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
-  api_service_name = "youtube"
-  api_version = "v3"
-  DEVELOPER_KEY = os.environ["yt_key"]
+youtube = googleapiclient.discovery.build(
+    api_service_name, api_version, developerKey = DEVELOPER_KEY, static_discovery=False)
 
-  youtube = googleapiclient.discovery.build(
-      api_service_name, api_version, developerKey = DEVELOPER_KEY, static_discovery=False)
 
+def yt_webhook(video=0):
   request = youtube.channels().list(
       part="snippet,contentDetails",
       id=channelid
@@ -28,10 +30,8 @@ def yt_webhook(repeat=False, video=0):
   response2 = request.execute()
   channel, videos = response, response2
   video = videos["items"][video]
-  if not repeat:
-    return 500
       
-  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyone New video")
+  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="@everyoe New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["snippet"]["thumbnails"]["maxres"]["url"])
@@ -50,12 +50,12 @@ class confirm_repeat(discord.ui.View):
     self.disable_all_items()
     await self.message.edit(view=self)
 
-  @discord.ui.button(label= "Post again!", style=discord.ButtonStyle.primary, emoji=None)
+  @discord.ui.button(label= "Post latest video", style=discord.ButtonStyle.primary, emoji=None)
   async def button_callback(self, button, interaction):
     button.disabled = True
     button.style = discord.ButtonStyle.success
     await interaction.response.edit_message(view=self)
-    yt_webhook(repeat=True)
+    yt_webhook()
     await interaction.followup.send("done")
     
   @discord.ui.select( # the decorator that lets you specify the properties of the select menu
@@ -64,15 +64,15 @@ class confirm_repeat(discord.ui.View):
       max_values = 1, # the maximum number of values that can be selected by the users
       options = [ # the list of options from which users can choose, a required field
           discord.SelectOption(
-              label="last video",
+              label = global_videolist[0]["snippet"]["title"],
               description="Re-notify for last video"
           ),
           discord.SelectOption(
-              label="2nd last video",
+              label = global_videolist[1]["snippet"]["title"],
               description="Re-notify for 2nd last video"
           ),
           discord.SelectOption(
-              label="3rd last video",
+              label = global_videolist[2]["snippet"]["title"],
               description="Re-notify for last video"
           )
       ]
@@ -81,8 +81,8 @@ class confirm_repeat(discord.ui.View):
     options = ("last", "2nd", "3rd")
     self.disable_all_items()
     await interaction.response.edit_message(view=self)
-    await interaction.followup.send(f"Alright! Sending the  {select.values[0]}")
-    yt_webhook(True, options.index(select.values[0].split()[0]))
+    await interaction.followup.send(f"Alright! Sending **{select.values[0]}**")
+    yt_webhook(options.index([item["snippet"]["title"] for item in global_videolist].index(select.values[0])))
 
 
 class yt_notify_webhook(discord.Cog):
@@ -91,12 +91,16 @@ class yt_notify_webhook(discord.Cog):
   
   @discord.slash_command(name="notify", description ="youtube video notification", guild_ids=guild_ids)
   async def notify(self, ctx):
+    global global_videolist
     await ctx.defer()
     if ctx.author.id in [638738610564235265,718830331356250202]:
-      if yt_webhook() == 500:
-        await ctx.respond("I have already posted about the latest video.", view=confirm_repeat(timeout=30))
-      else:
-        await ctx.followup.send("done")
+      request = youtube.playlistItems().list(
+        part="snippet,contentDetails",
+        maxResults=3,
+        playlistId= "UUyjy3LTL7AIV_Iwf4A9PeGw"
+      )
+      print(global_videolist := request.execute()["items"])  #to add these to the select menu 
+      await ctx.respond("Choose one: ", view=confirm_repeat(timeout=30))
     else:
       await ctx.followup.send("who are you??")
 
