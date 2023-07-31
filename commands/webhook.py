@@ -4,7 +4,7 @@ import googleapiclient.discovery
 
 guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
-global_videolist = [{"snippet":{"title": "ab"}}, {"snippet":{"title": "bc"}}, {"snippet":{"title": "ca"}}]
+global_videolist =[] 
 #setup Google api
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 api_service_name = "youtube"
@@ -44,21 +44,28 @@ def yt_webhook(video=0):
   print(res)
   print(res.json())
 
+class yt_notify_webhook(discord.Cog):
+  def __init__(self, bot):
+    self.bot = bot
+  
+  @discord.slash_command(name="notify", description ="youtube video notification", guild_ids=guild_ids)
+  async def notify(self, ctx):
+    global global_videolist
+    await ctx.defer()
+    if ctx.author.id in [638738610564235265,718830331356250202]:
+      request = youtube.playlistItems().list(
+        part="snippet,contentDetails",
+        maxResults=3,
+        playlistId= "UUyjy3LTL7AIV_Iwf4A9PeGw"
+      )
+      global_videolist = request.execute()["items"]
 
-class confirm_repeat(discord.ui.View):
-  async def on_timeout(self):
-    self.disable_all_items()
-    await self.message.edit(view=self)
+      async def select_callback(interaction): # the function called when the user is done selecting options
+        #await interaction.delete_original_response() doesn't work
+        yt_webhook([item["snippet"]["title"] for item in global_videolist].index(interaction.data["values"][0]))
 
-  @discord.ui.button(label= "Post latest video", style=discord.ButtonStyle.primary, emoji=None)
-  async def button_callback(self, button, interaction):
-    button.disabled = True
-    button.style = discord.ButtonStyle.success
-    await interaction.response.edit_message(view=self)
-    yt_webhook()
-    await interaction.followup.send("done")
-    
-  @discord.ui.select( # the decorator that lets you specify the properties of the select menu
+      
+      select_menu = discord.ui.Select( # the decorator that lets you specify the properties of the select menu
       placeholder = "Choose another video", # the placeholder text that will be displayed if nothing is selected
       min_values = 1, # the minimum number of values that must be selected by the users
       max_values = 1, # the maximum number of values that can be selected by the users
@@ -76,31 +83,10 @@ class confirm_repeat(discord.ui.View):
               description="Re-notify for last video"
           )
       ]
-  )
-  async def select_callback(self, select, interaction): # the function called when the user is done selecting options
-    options = ("last", "2nd", "3rd")
-    self.disable_all_items()
-    await interaction.response.edit_message(view=self)
-    await interaction.followup.send(f"Alright! Sending **{select.values[0]}**")
-    yt_webhook(options.index([item["snippet"]["title"] for item in global_videolist].index(select.values[0])))
-
-
-class yt_notify_webhook(discord.Cog):
-  def __init__(self, bot):
-    self.bot = bot
-  
-  @discord.slash_command(name="notify", description ="youtube video notification", guild_ids=guild_ids)
-  async def notify(self, ctx):
-    global global_videolist
-    await ctx.defer()
-    if ctx.author.id in [638738610564235265,718830331356250202]:
-      request = youtube.playlistItems().list(
-        part="snippet,contentDetails",
-        maxResults=3,
-        playlistId= "UUyjy3LTL7AIV_Iwf4A9PeGw"
       )
-      print(global_videolist := request.execute()["items"])  #to add these to the select menu 
-      await ctx.respond("Choose one: ", view=confirm_repeat(timeout=30))
+      select_menu.callback = select_callback
+      msg = await ctx.respond("Choose one (you have 2mins to do so): ", view = discord.ui.View(select_menu))
+      await msg.delete(delay=120)
     else:
       await ctx.followup.send("who are you??")
 
