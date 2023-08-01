@@ -40,6 +40,10 @@ def writelog(txt):
   with open("log.json", "a") as file:
     file.write(txt+"\n")
 
+def getlog():
+  with open("log.json", "r") as file:
+    return file.read()
+
 @app.route("/feed", methods=["GET", "POST"])
 def feed():
     """Accept and parse requests from YT's pubsubhubbub.
@@ -66,9 +70,10 @@ def feed():
 
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
-        writelog(f"New video URL: {video_url}")
-        time.sleep(2)
-        yt_webhook()
+        if video_url not in getlog():
+          writelog(f"New video URL: {video_url}")
+          time.sleep(2)
+          yt_webhook()
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook
         # message = config["message_prefix"] + "\n" + video_url
