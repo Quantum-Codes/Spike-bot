@@ -35,7 +35,7 @@ async def on_member_join(member):
 #bot.load_extension("commands.general")
 bot.load_extension("commands.webhook") #-- add back if needed youtube commands
 bot.load_extension("commands.brawlstars")
-#bot.load_extension("commands.menu")
+bot.load_extension("commands.menus")
 keep_alive()
 try:
   bot.run(os.environ["token"])
