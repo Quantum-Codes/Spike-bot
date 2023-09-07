@@ -10,18 +10,14 @@ class message_commands(discord.Cog):
 
   @discord.message_command(name="giveaway", guild_ids= guild_ids)
   async def giveaway_winner(self, ctx, message):
-    await ctx.send_modal(GetWinnersCount(title="Set Winners"))
+    #await ctx.defer()
     #await ctx.defer(ephemeral=True)
+    """
     print("works")
-    content = ""
-    participants = []
-    for item in message.reactions:
-      #content += str(item.emoji)
-      participants.extend([I.name for I in await item.users().flatten()])
-      #content += "\n"
-    participants = list(set(participants))
-
-    await ctx.followup.send(f"Participants: ```{json.dumps(participants)}```", ephemeral = True)#, view=GetWinnersCount())
+    
+    """
+    await ctx.send_modal(GetWinnersCount(title="Set Winners", message =message))
+    #await ctx.followup.send()#, view=GetWinnersCount())
 
 def setup(bot):
   bot.add_cog(message_commands(bot))
