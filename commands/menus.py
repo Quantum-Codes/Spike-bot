@@ -1,6 +1,7 @@
-import discord, random
+import discord, random, json
 from main import guild_ids
 from components.buttons import ConfirmWinners
+from components.modals import GetWinnersCount
 
 
 class message_commands(discord.Cog):
@@ -9,16 +10,18 @@ class message_commands(discord.Cog):
 
   @discord.message_command(name="giveaway", guild_ids= guild_ids)
   async def giveaway_winner(self, ctx, message):
-    await ctx.defer(ephemeral=True)
+    await ctx.send_modal(GetWinnersCount(title="Set Winners"))
+    #await ctx.defer(ephemeral=True)
+    print("works")
     content = ""
     participants = []
     for item in message.reactions:
       #content += str(item.emoji)
       participants.extend([I.name for I in await item.users().flatten()])
       #content += "\n"
-    participants = set(participants)
-    content = f"The winners are:\n **@{',<ENTERCHR101>@'.join(random.sample(participants, 5))}**\n(First x winners are given the reward where x = number of rewards)\n\n **Participants**: {', '.join(participants)}".replace("<ENTERCHR101>", "\n") #can't use backslash in fitting expressions
-    await ctx.followup.send(content, ephemeral = True, view=ConfirmWinners())
+    participants = list(set(participants))
+
+    await ctx.followup.send(f"Participants: ```{json.dumps(participants)}```", ephemeral = True)#, view=GetWinnersCount())
 
 def setup(bot):
   bot.add_cog(message_commands(bot))
