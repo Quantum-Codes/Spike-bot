@@ -32,7 +32,7 @@ async def on_message(message):
 async def on_member_join(member):
   await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
 
-#bot.load_extension("commands.general")
+bot.load_extension("commands.general")
 bot.load_extension("commands.webhook") #-- add back if needed youtube commands
 bot.load_extension("commands.brawlstars")
 bot.load_extension("commands.menus")

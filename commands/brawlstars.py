@@ -29,7 +29,7 @@ class brawl(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
   
-  @discord.slash_command(name="playerstats", description ="GET a player's stats", guild_ids=guild_ids)
+  @discord.slash_command(name="playerstats", description ="GET a player's stats")
   async def playerstats(self, ctx, player_tag: str):
     await ctx.defer()
     if not player_tag.startswith("#"):

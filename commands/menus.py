@@ -7,7 +7,7 @@ class message_commands(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
 
-  @discord.message_command(name="giveaway", guild_ids= guild_ids)
+  @discord.message_command(name="giveaway")
   async def giveaway_winner(self, ctx, message):
     #await ctx.defer()
     #await ctx.defer(ephemeral=True)
