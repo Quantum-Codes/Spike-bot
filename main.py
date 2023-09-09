@@ -30,7 +30,8 @@ async def on_message(message):
 
 @bot.event
 async def on_member_join(member):
-  await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
+  if member.guild.id == 1099306183426326589:
+    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
 
 bot.load_extension("commands.general")
 bot.load_extension("commands.webhook") #-- add back if needed youtube commands
