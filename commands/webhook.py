@@ -70,6 +70,7 @@ class yt_notify_webhook(discord.Cog):
       async def select_callback(interaction): # the function called when the user is done selecting options
         #await interaction.delete_original_response() doesn't work
         yt_webhook([item["snippet"]["title"] for item in global_videolist].index(interaction.data["values"][0]))
+        await interaction.response.send_message("Done", ephemeral = True)
 
       
       select_menu = discord.ui.Select( # the decorator that lets you specify the properties of the select menu
@@ -87,7 +88,7 @@ class yt_notify_webhook(discord.Cog):
           ),
           discord.SelectOption(
               label = global_videolist[2]["snippet"]["title"],
-              description="Re-notify for last video"
+              description="Re-notify for 3rd last video"
           )
       ]
       )

@@ -64,8 +64,8 @@ def feed():
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
         if video_url not in getlog():
-          writelog(f"New video URL: {video_url}")
           yt_webhook(check_old = True)
+          writelog(f"New video URL: {video_url}")
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook
         # message = config["message_prefix"] + "\n" + video_url
