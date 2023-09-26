@@ -1,4 +1,5 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed 
+from logger import getlog, writelog
 import os, discord
 import googleapiclient.discovery
 
@@ -15,7 +16,7 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey = DEVELOPER_KEY, static_discovery=False)
 
 
-def yt_webhook(video=0):
+def yt_webhook(video=0, check_old = False):
   request = youtube.channels().list(
       part="snippet,contentDetails",
       id=channelid
@@ -30,7 +31,13 @@ def yt_webhook(video=0):
   response2 = request.execute()
   channel, videos = response, response2
   video = videos["items"][video]
+
+  if check_old:
+    if video['contentDetails']['videoId'] in getlog():
+      writelog(f"Repeated video. Rejected. {video['contentDetails']['videoId']}")
+      return "Repeated"
       
+  
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="<@&1149699372209164370> New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 

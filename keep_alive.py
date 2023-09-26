@@ -1,8 +1,9 @@
 from flask import Flask, request
 from threading import Thread
 from commands.webhook import yt_webhook 
-import xmltodict, time
+import xmltodict
 from xml.parsers.expat import ExpatError
+from logger import getlog, writelog
 
 
 app = Flask(__name__)
@@ -35,14 +36,6 @@ channel_ids: []
 message_prefix:
 """
 
-def writelog(txt):
-  print(txt)
-  with open("log.json", "a") as file:
-    file.write(txt+"\n")
-
-def getlog():
-  with open("log.json", "r") as file:
-    return file.read()
 
 @app.route("/feed", methods=["GET", "POST"])
 def feed():
@@ -72,8 +65,7 @@ def feed():
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
         if video_url not in getlog():
           writelog(f"New video URL: {video_url}")
-          time.sleep(2)
-          yt_webhook()
+          yt_webhook(check_old = True)
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook
         # message = config["message_prefix"] + "\n" + video_url
