@@ -6,7 +6,7 @@ headers = {
 }
 
 def get_battledata(player_tag):
-  if not player_tag.startswith("#"):
+  if not player_tag.startswith("#") and not player_tag.startswith("%23"):
     player_tag = "#"+player_tag
   player_tag = player_tag.replace("#", "%23").strip().upper()
   
@@ -20,14 +20,14 @@ def get_battledata(player_tag):
       battleresult = item["battle"]["result"]
       if raw_stats.get(battleresult) is not None:
         raw_stats[battleresult] += 1
-        print(battleresult )
+       # print(battleresult )
       else:
         raw_stats.setdefault(battleresult, 1)
-        print(battleresult, "new")
+       # print(battleresult, "new")
     stats = {}
     print(raw_stats )
     for k, v in raw_stats.items():
-      stats[k+"_rate"] = round(v / sum(raw_stats.values()), 4)
+      stats[k+"_rate"] = round(v / sum(raw_stats.values()), 4)*100
 
     return (player, stats)
          
@@ -39,9 +39,9 @@ def get_battledata(player_tag):
     return 500
 
 
-def embed_player(data):
+def embed_player(data, battle_data):
   embed = discord.Embed(
-        title=f"{data['name']}'s stats",
+        title=f"{data['name']}",
         color= int(data['nameColor'][4:], base=16),
  )
   embed.add_field(name="Trophies", value=data['trophies'])
@@ -51,6 +51,10 @@ def embed_player(data):
   embed.add_field(name="3v3 wins", value=data['3vs3Victories'])
   embed.add_field(name="solo wins", value=data['soloVictories'], inline=True)
   embed.add_field(name="duo wins", value=data['duoVictories'],  inline=True)
+
+  embed.add_field(name="Recent Win rate", value=str(battle_data["victory_rate"])+"%")
+  embed.add_field(name = "placeholder", value="placeholder", inline=True)
+  embed.add_field(name = "placeholder2", value="placeholder", inline=True)
   
   embed.add_field(name="Club tag", value=data['club']['tag'])
   embed.add_field(name="Club name", value=data['club']['name'], inline=True)
@@ -66,14 +70,16 @@ class brawl(discord.Cog):
   @discord.slash_command(name="playerstats", description ="GET a player's stats")
   async def playerstats(self, ctx, player_tag: str):
     await ctx.defer()
-    if not player_tag.startswith("#"):
+    if not player_tag.startswith("#") and not player_tag.startswith("%23"):
       player_tag = "#"+player_tag
     player_tag = player_tag.replace("#", "%23").strip().upper()
     
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      await ctx.followup.send(embed=embed_player(data))
+      print(player_tag)
+      battle_data = get_battledata(player_tag)[1]
+      await ctx.followup.send(embed=embed_player(data, battle_data))
     elif data.status_code == 404:
         if data.json().get("reason"):
           if data.json()["reason"] == "notFound":
@@ -95,7 +101,7 @@ class brawl(discord.Cog):
         color=discord.Colour.dark_teal()
       )
       for k,v in data.items():
-        embed.add_field(name=k, value=str(v*100)+"%")
+        embed.add_field(name=k, value=str(v)+"%")
       embed.set_footer(text="Data from last 25 matches")
   
       await ctx.followup.send(embed=embed)
