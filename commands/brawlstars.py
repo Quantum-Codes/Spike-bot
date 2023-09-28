@@ -11,7 +11,7 @@ def get_battledata(player_tag, player=None):
   player_tag = player_tag.replace("#", "%23").strip().upper()
   print (player_tag)
   data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}/battlelog", headers=headers)
-  if data.status_code == 200:  #CHANGE FROM HERE
+  if data.status_code == 200: 
     data = data.json()
     if not player:
       player = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers).json()
@@ -24,10 +24,8 @@ def get_battledata(player_tag, player=None):
         if battleresult == "victory":
           if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
             raw_stats["starplayer"] += 1
-       # print(battleresult )
       else:
         raw_stats.setdefault(battleresult, 1)
-       # print(battleresult, "new")
     stats = {}
     print(raw_stats)
     raw_stats2 = raw_stats.copy()
@@ -64,7 +62,7 @@ def embed_player(data, battle_data):
 
   embed.add_field(name="Recent Win rate", value=str(battle_data["victory_rate"])+"%")
   embed.add_field(name = "Recent starplayer rate", value=str(battle_data["starplayer_rate"])+"%", inline=True)
-  embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True)
+  embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed later
   
   embed.add_field(name="Club tag", value=data['club']['tag'])
   embed.add_field(name="Club name", value=data['club']['name'], inline=True)
@@ -98,7 +96,7 @@ class brawl(discord.Cog):
       await ctx.followup.send("error")
 
 
-  @discord.slash_command(name="battlestats", description ="GET a player's battle stats") #DOING
+  @discord.slash_command(name="battlestats", description ="GET a player's battle stats") 
   async def battlestats(self, ctx, player_tag: str):
     await ctx.defer()
     data_raw = get_battledata(player_tag)
