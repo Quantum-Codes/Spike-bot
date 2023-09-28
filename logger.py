@@ -11,5 +11,5 @@ def writelog(txt, obj = None):
       pickle.dump(obj, file)
     
 def getlog():
-  with open("log.json", "r") as file:
+  with open("logs/log.json", "r") as file:
     return file.read()
