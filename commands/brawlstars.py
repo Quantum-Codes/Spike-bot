@@ -18,7 +18,7 @@ def get_battledata(player_tag):
     player = data["items"][0]['battle']["teams"][0][0]
     for item in data["items"]:
       battleresult = item["battle"]["result"]
-      if raw_stats.get(battleresult):
+      if raw_stats.get(battleresult) is not None:
         raw_stats[battleresult] += 1
         print(battleresult )
       else:
@@ -27,7 +27,7 @@ def get_battledata(player_tag):
     stats = {}
     print(raw_stats )
     for k, v in raw_stats.items():
-      stats[k+"_rate"] = round(v / sum(raw_stats.values()), 2)
+      stats[k+"_rate"] = round(v / sum(raw_stats.values()), 4)
 
     return (player, stats)
          
@@ -90,7 +90,15 @@ class brawl(discord.Cog):
       player, data = data_raw
       message = f"# {player['name']}'s stats\n"
       message += "\n".join([f"**{I[0]}**: {I[1]}" for I in data.items()])
-      await ctx.followup.send(message)
+      embed = discord.Embed(
+        title=f"{player['name']}'s stats",
+        color=discord.Colour.dark_teal()
+      )
+      for k,v in data.items():
+        embed.add_field(name=k, value=str(v*100)+"%")
+      embed.set_footer(text="Data from last 25 matches")
+  
+      await ctx.followup.send(embed=embed)
     elif data_raw == 404:
       await ctx.followup.send("No such player exists")
     else:
