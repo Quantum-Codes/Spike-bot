@@ -37,11 +37,11 @@ def yt_webhook(video=0, check_old = False):
       writelog(f"Repeated video. Rejected. {video['contentDetails']['videoId']}")
       return "Repeated"
       
-  
+  print(video)
   webhook = DiscordWebhook(url=os.environ["webhook_url"], content="<@&1149699372209164370> New video")
   embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
-  embed.set_image(url=video["snippet"]["thumbnails"]["maxres"]["url"])
+  embed.set_image(url=video["snippet"]["thumbnails"]["high"]["url"])
   ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
   #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
   #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 

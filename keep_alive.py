@@ -73,6 +73,7 @@ def feed():
         # response = webhook.execute()
 
     except (ExpatError, LookupError):
+        writelog("malformed/no data")
         # request.data contains malformed XML or no XML at all, return FORBIDDEN.
         return "", 403
 
