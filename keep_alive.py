@@ -58,7 +58,7 @@ def feed():
         # set in config["channel_ids"].  Skip the check if that config option is empty.
         channel_id = xml_dict["feed"]["entry"]["yt:channelId"]
         if channel_id not in ["UCyjy3LTL7AIV_Iwf4A9PeGw"]:
-            writelog("channelid error")
+            writelog("channelid error", obj=xml_dict)
             return "", 403
 
         # Parse out the video URL.
@@ -73,7 +73,7 @@ def feed():
         # response = webhook.execute()
 
     except (ExpatError, LookupError):
-        writelog("malformed/no data")
+        writelog("malformed/no data", obj = xml_dict)
         # request.data contains malformed XML or no XML at all, return FORBIDDEN.
         return "", 403
 
