@@ -1,13 +1,12 @@
 import discord
 
-#confirm_repeat button in commands/webhook.py
 class ConfirmWinners(discord.ui.View):
   def __init__(self):
-    super().__init__(timeout = 10)
+    super().__init__(timeout = 240)
     
   async def on_timeout(self):
     self.disable_all_items()
-    await self.message.edit(":warning:You took longer than 4 minutes. Buttons disabled.:warning:"+self.message.content, view=self)
+    await self.message.edit(":warning:You took longer than 4 minutes. Buttons disabled.:warning:\n"+self.message.content, view=self)
   
   @discord.ui.button(label= "Confirm", style=discord.ButtonStyle.primary, emoji=None)
   async def confirm_callback(self, button, interaction):

@@ -1,4 +1,4 @@
-import discord, json, random
+import discord, random
 from components.buttons import ConfirmWinners
 
 class GetWinnersCount(discord.ui.Modal):
@@ -19,9 +19,7 @@ class GetWinnersCount(discord.ui.Modal):
     participants = []
     with interaction.channel.typing():
       for item in self.message.reactions:
-        #content += str(item.emoji)
         participants.extend([I.name for I in await item.users().flatten()])
-        #content += "\n"
       participants = list(set(participants))
       content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**@{',<ENTERCHR101>@'.join(random.sample(participants, winners))}**\n\n:partying_face:Congratulations!!:partying_face:\n\nParticipants: ```{', '.join(participants)[:-2]}```".replace("<ENTERCHR101>", "\n")
     view = ConfirmWinners()
