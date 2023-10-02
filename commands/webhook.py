@@ -50,6 +50,7 @@ def yt_webhook(video=0, check_old = False):
   res = webhook.execute()
   print(res)
   print(res.json())
+  writelog(f"notified: {video['contentDetails']['videoId']}")
 
 class yt_notify_webhook(discord.Cog):
   def __init__(self, bot):
