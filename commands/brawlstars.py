@@ -18,12 +18,23 @@ def get_battledata(player_tag, player=None):
     raw_stats = {"victory": 0, "defeat": 0, "draw": 0, "starplayer": 0}
    # print(data['items'][0]['battle'].keys())
     for item in data["items"]:
-      battleresult = item["battle"]["result"]
+    #  print(item)
+      battleresult = item["battle"].get("result")
+      if battleresult is None:#showdown
+        battleresult = item["battle"].get("rank")
+
+        if battleresult is None:
+          print("AHAHAHHAAH(!*@&*@")
+          print(item)
+          continue
+        battleresult = "victory" if battleresult <= 2 else "defeat"
       if raw_stats.get(battleresult) is not None:
         raw_stats[battleresult] += 1
         if battleresult == "victory":
-          if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
-            raw_stats["starplayer"] += 1
+          starplayer = item["battle"].get("starPlayer")
+          if starplayer is not None:
+            if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
+              raw_stats["starplayer"] += 1
       else:
         raw_stats.setdefault(battleresult, 1)
     stats = {}

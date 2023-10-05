@@ -20,8 +20,14 @@ class GetWinnersCount(discord.ui.Modal):
     with interaction.channel.typing():
       for item in self.message.reactions:
         participants.extend([I.name for I in await item.users().flatten()])
-      participants = list(set(participants))
-      content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**@{',<ENTERCHR101>@'.join(random.sample(participants, winners))}**\n\n:partying_face:Congratulations!!:partying_face:\n\nParticipants: ```{', '.join(participants)[:-2]}```".replace("<ENTERCHR101>", "\n")
+      participants = tuple(set(participants))
+      participants_formatted = ', '.join(participants) #2000 = discord char limit
+      a = 0
+      if len(participants_formatted) > 1600:
+        a = f"and {len(participants_formatted[1600:].split(', '))} others"
+      participants_formatted = participants_formatted[:1600]
+      participants_formatted= participants_formatted[:participants_formatted.rfind(",")] #don't combine the above line as .find will get wrong index. first shorten and assign  then find 
+      content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**@{',<ENTERCHR101>@'.join(random.sample(participants, winners))}**\n\n:partying_face:Congratulations!!:partying_face:\n\nParticipants: ```{participants_formatted} {a}```".replace("<ENTERCHR101>", "\n")
     view = ConfirmWinners()
     message = await interaction.followup.send(content, ephemeral = True, view = view)
     view.message = message

@@ -28,10 +28,29 @@ async def on_message(message):
   if bot.user.mentioned_in(message) and message.mentions: #message.mentions empty when everyone ping
     await message.reply("Why u pinged me? I was sleeping :(")
 
+def welcome_embed(user):
+  suffix_num = ["th","st", "nd", "rd"]
+  suffix_num.extend(["th"]*6)
+  temp =int(str(user.guild.member_count)[-1])
+  suffix_num = suffix_num[temp]
+  embed = discord.Embed(
+    title = f"Welcome to Juuzou's Server {user.display_name}",
+    color = discord.Colour.blurple(),
+    description = f"""🎉You are the {user.guild.member_count}{suffix_num} member of Juuzou Gaming Server!🎉
+----------------------------------------------
+Read the <#1114076581804126228>! 
+Check out <#1114076810901209088> to look for giveaways and announcements
+Or go to <#1099306183979970661> to chat with other users
+----------------------------------------------"""
+  )
+  embed.set_thumbnail(url=user.display_avatar)
+  embed.set_image(url="https://media.tenor.com/4GQvhQ5ISmUAAAAC/discord-server.gif")
+  return embed
+
 @bot.event
 async def on_member_join(member):
   if member.guild.id == 1099306183426326589:
-    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.')
+    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.', embed=welcome_embed(member))
 
 @bot.event
 async def on_member_update(before, after):
