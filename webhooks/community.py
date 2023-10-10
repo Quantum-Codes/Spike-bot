@@ -13,10 +13,10 @@ else:
   print(100/0) #for error
 
 
-webhook = DiscordWebhook(url=os.environ["communtiy_webhook_url"], content="<yt ping>")
+webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title="title", description="description"[:150], color='03b2f8', url=f"https://youtube.com/watch?v=")
-embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="a") 
-embed.set_image(url="ahah")
+#embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
+#embed.set_image(url="ahah")
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
 #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
 #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
