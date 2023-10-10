@@ -13,7 +13,7 @@ else:
   print(100/0) #for error
 
 
-post = data[0]
+post = data["items"][0]
 
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title="Community Post", description= post["community"][0]["contentText"][0]["text"][:150], color='03b2f8', url=f'https://www.youtube.com/post/{post["community"][0]["id"]}')
