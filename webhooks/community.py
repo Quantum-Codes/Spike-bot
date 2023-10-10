@@ -16,7 +16,7 @@ else:
 post = data[0]
 
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
-embed = DiscordEmbed(title="Community Post", description= post["community"][0]["contentText"][0]["text"][:150], color='03b2f8', url=f"https://www.youtube.com/post/{post["community"][0]["id"]}")
+embed = DiscordEmbed(title="Community Post", description= post["community"][0]["contentText"][0]["text"][:150], color='03b2f8', url=f'https://www.youtube.com/post/{post["community"][0]["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
 #embed.set_image(url="ahah")
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
