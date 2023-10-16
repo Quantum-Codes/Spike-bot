@@ -24,7 +24,7 @@ if postdata.get("poll"):
   for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
     options += f"{idx}. {option['text']}\n"
     if option.get("image"):
-      image = option["image"][0]["thumbnails"][-1]["url"]
+      image = option["image"]["thumbnails"][-1]["url"]
       print(image)
   print("OOOO",image)
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
