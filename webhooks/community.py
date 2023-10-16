@@ -13,19 +13,19 @@ else:
   
 print((("*"*50)+"\n")*3)
 post = data["items"][0]
-postdata = post["community"]
+postdata = post["community"][0]
 print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
 options = ""
-if postdata[0].get("poll"):
+if postdata.get("poll"):
   options = "\n".join([I["text"] for I in postdata["poll"]["options"]])
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
-embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata[0]["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata[0]["id"]}')
+embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
 
-if postdata[0].get("images"):
-  embed.set_image(url = postdata[0]["images"][0]["thumbnails"][-1]["url"])
+if postdata.get("images"):
+  embed.set_image(url = postdata["images"][0]["thumbnails"][-1]["url"])
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
 #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
 #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
