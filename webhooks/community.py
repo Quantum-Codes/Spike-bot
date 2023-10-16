@@ -24,7 +24,7 @@ if postdata.get("poll"):
   for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
     options += f"{idx}. {option['text']}\n"
     if option.get("images"):
-      image = option["images"][0]["thumbnails"][-1]["url"])
+      image = option["images"][0]["thumbnails"][-1]["url"]
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
