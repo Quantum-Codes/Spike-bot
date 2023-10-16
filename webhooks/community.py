@@ -13,7 +13,7 @@ else:
   
 print((("*"*50)+"\n")*3)
 post = data["items"][0]
-postdata = post["community"][0]
+postdata = post["community"][1]
 #print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
