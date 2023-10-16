@@ -1,5 +1,5 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, requests, json
+import os, requests, json, string
 
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
 if data.status_code == 200:
@@ -19,7 +19,9 @@ print((("*"*50)+"\n")*3)
 
 options = ""
 if postdata.get("poll"):
-  options = "\n".join([I["text"] for I in postdata["poll"]["choices"]])
+  options= "\n"
+  for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
+    options += f"{idx}. {option}\n"
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
