@@ -19,7 +19,7 @@ print((("*"*50)+"\n")*3)
 
 options = ""
 if postdata.get("poll"):
-  options = "\n".join([I["text"] for I in postdata["poll"]["options"]])
+  options = "\n".join([I["text"] for I in postdata["poll"]["choices"]])
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
