@@ -18,16 +18,20 @@ print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
 options = ""
+image = ""
 if postdata.get("poll"):
   options= "\n"
   for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
-    options += f"{idx}. {option}\n"
+    options += f"{idx}. {option['text']}\n"
+    if option.get("images"):
+      image = option["images"][0]["thumbnails"][-1]["url"])
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
 
 if postdata.get("images"):
-  embed.set_image(url = postdata["images"][0]["thumbnails"][-1]["url"])
+  image = postdata["images"][0]["thumbnails"][-1]["url"]
+embed.set_image(url = image)
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
 #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
 #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
