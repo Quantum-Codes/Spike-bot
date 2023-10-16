@@ -4,7 +4,7 @@ import os, requests, json, string
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
 if data.status_code == 200:
   data = data.json()
-  print(json.dumps(data, indent = 2))
+  #print(json.dumps(data, indent = 2))
 else:
   print(vars(data))
   print("------_-_-_-_-_-_-_-_-_-_-_-_-_-_")
@@ -14,7 +14,7 @@ else:
 print((("*"*50)+"\n")*3)
 post = data["items"][0]
 postdata = post["community"][0]
-print(json.dumps(postdata, indent = 2))
+#print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
 options = ""
@@ -25,12 +25,14 @@ if postdata.get("poll"):
     options += f"{idx}. {option['text']}\n"
     if option.get("images"):
       image = option["images"][0]["thumbnails"][-1]["url"]
+  print(image)
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
 
 if postdata.get("images"):
   image = postdata["images"][0]["thumbnails"][-1]["url"]
+print(image)
 embed.set_image(url = image)
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
 #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
