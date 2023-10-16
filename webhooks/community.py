@@ -17,10 +17,11 @@ postdata = post["community"]
 print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
-
-
+options = ""
+if postdata.get("poll"):
+  options = "\n".join([I["text"] for I in postdata["poll"]["options"])
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
-embed = DiscordEmbed(title="Community Post", description= postdata[0]["contentText"][0]["text"][:150], color='03b2f8', url=f'https://www.youtube.com/post/{postdata[0]["id"]}')
+embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata[0]["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata[0]["id"]}')
 #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
 
 if postdata[0].get("images"):
