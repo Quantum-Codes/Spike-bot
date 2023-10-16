@@ -1,20 +1,23 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, requests 
+import os, requests, json
 
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
-print(data)
 if data.status_code == 200:
   data = data.json()
-  print(data)
+  print(json.dumps(data, indent = 2))
 else:
   print(vars(data))
   print("------_-_-_-_-_-_-_-_-_-_-_-_-_-_")
   print(dir(data))
-  print(100/0) #for error
-
-
+  assert 1+1 == 5 #for error
+  
+print((("*"*50)+"\n")*3)
 post = data["items"][0]
 postdata = post["community"]
+print(json.dumps(postdata, indent = 2))
+print((("*"*50)+"\n")*3)
+
+
 
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title="Community Post", description= postdata[0]["contentText"][0]["text"][:150], color='03b2f8', url=f'https://www.youtube.com/post/{postdata[0]["id"]}')
