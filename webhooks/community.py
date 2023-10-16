@@ -25,6 +25,7 @@ if postdata.get("poll"):
     options += f"{idx}. {option['text']}\n"
     if option.get("images"):
       image = option["images"][0]["thumbnails"][-1]["url"]
+      print(image)
   print("OOOO",image)
 webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
 embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
@@ -32,6 +33,7 @@ embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", descrip
 
 if postdata.get("images"):
   image = postdata["images"][0]["thumbnails"][-1]["url"]
+  print(image, "last")
 print("OOOO",image)
 embed.set_image(url = image)
 ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
