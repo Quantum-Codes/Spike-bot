@@ -27,12 +27,16 @@ def get_battledata(player_tag, player=None):
           print("AHAHAHHAAH(!*@&*@")
           print(item)
           continue
-        battleresult = "victory" if battleresult <= 2 else "defeat"
+        battleresult = "victory" if battleresult <= (2 if item["event"]["mode"] == "duoShowdown" else 4) else "defeat" #since lonestar, takedown also has 4 winners. so on else clause
       if raw_stats.get(battleresult) is not None:
         raw_stats[battleresult] += 1
         if battleresult == "victory":
           starplayer = item["battle"].get("starPlayer")
-          if starplayer is not None:
+          if starplayer is None:
+            if "Showdown" in  item["event"]["mode"]:
+              if item["battle"]["rank"] <= (1 if "duo" in item["event"]["mode"] else 2):
+                raw_stats["starPlayer"] += 1
+          else:
             if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
               raw_stats["starplayer"] += 1
       else:

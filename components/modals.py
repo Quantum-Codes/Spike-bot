@@ -27,7 +27,7 @@ class GetWinnersCount(discord.ui.Modal):
         a = f"and {len(participants_formatted[1600:].split(', '))} others"
       participants_formatted = participants_formatted[:1600]
       participants_formatted= participants_formatted[:participants_formatted.rfind(",")] #don't combine the above line as .find will get wrong index. first shorten and assign  then find 
-      content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**@{',<ENTERCHR101>@'.join(random.sample(participants, winners))}**\n\n:partying_face:Congratulations!!:partying_face:\n\nParticipants: ```{participants_formatted} {a}```".replace("<ENTERCHR101>", "\n")
+      content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**@{' ,<ENTERCHR101>@'.join(random.sample(participants, winners))}**\n\n:partying_face:Congratulations!!:partying_face:\n\nParticipants: ```{participants_formatted} {a}```".replace("<ENTERCHR101>", "\n")
     view = ConfirmWinners()
     message = await interaction.followup.send(content, ephemeral = True, view = view)
     view.message = message
