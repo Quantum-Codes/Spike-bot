@@ -1,4 +1,4 @@
-import discord, random
+import discord, random, asyncio
 from components.buttons import ConfirmWinners
 
 class GetWinnersCount(discord.ui.Modal):
@@ -20,8 +20,10 @@ class GetWinnersCount(discord.ui.Modal):
     with interaction.channel.typing():
       for item in self.message.reactions:
         participants.extend([I.name for I in await item.users().flatten()])
+      print("tuple+joining")
       participants = tuple(set(participants))
       participants_formatted = ', '.join(participants) #2000 = discord char limit
+      
       a = 0
       if len(participants_formatted) > 1600:
         a = f"and {len(participants_formatted[1600:].split(', '))} others"
