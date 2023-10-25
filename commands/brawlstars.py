@@ -1,15 +1,21 @@
-import discord, json, requests, os
+import discord, json, requests, os, asyncio
+from db import db
 from main import guild_ids
 
+
+sql = db.cursor()
 headers = {
   "Authorization": f"Bearer {os.environ['bs_token']}"
 }
 
-def get_battledata(player_tag, player=None):
+def fix_playertag(player_tag):
   if not player_tag.startswith("#") and not player_tag.startswith("%23"):
     player_tag = "#"+player_tag
   player_tag = player_tag.replace("#", "%23").strip().upper()
-  print (player_tag)
+  return player_tag 
+
+def get_battledata(player_tag, player=None):
+  player_tag = fix_playertag(player_tag)
   data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}/battlelog", headers=headers)
   if data.status_code == 200: 
     data = data.json()
@@ -35,7 +41,7 @@ def get_battledata(player_tag, player=None):
           if starplayer is None:
             if "Showdown" in  item["event"]["mode"]:
               if item["battle"]["rank"] <= (1 if "duo" in item["event"]["mode"] else 2):
-                raw_stats["starPlayer"] += 1
+                raw_stats["starplayer"] += 1
           else:
             if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
               raw_stats["starplayer"] += 1
@@ -93,10 +99,7 @@ class brawl(discord.Cog):
   @discord.slash_command(name="playerstats", description ="GET a player's stats")
   async def playerstats(self, ctx, player_tag: str):
     await ctx.defer()
-    if not player_tag.startswith("#") and not player_tag.startswith("%23"):
-      player_tag = "#"+player_tag
-    player_tag = player_tag.replace("#", "%23").strip().upper()
-    
+    player_tag = fix_playertag(player_tag) 
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
@@ -134,6 +137,65 @@ class brawl(discord.Cog):
       await ctx.followup.send("error")
 
 
+  @discord.slash_command(name="save", description ="save or check your player tag")
+  async def save_tag(self, ctx, player_tag: str = ""):
+    embed = discord.Embed(colour = discord.Colour.green())
+    if not player_tag:
+      sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (ctx.author.id,))
+      data = sql.fetchone()
+      if not data:
+        embed.add_field(name= "Tag not saved", value="Save your tag first by using this command with the `player_tag` parameter")
+        embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
+        await ctx.respond(embed=embed)
+        return
+      else:
+        embed.add_field(name= "Your tag:", value = data[0].replace('%23', '#'))
+        await ctx.respond(embed = embed)
+      return
+    
+    player_tag = fix_playertag(player_tag)
+    #currently no verification system on tags. so duplicate checking is waste.
+    #sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker. 
+    #if sql.rowcount != 0:
+    #  await ctx.respond("Duplicate")
+    with ctx.channel.typing():
+      data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
+    if data.status_code == 200:
+      data = data.json()
+      bot_msg = await ctx.respond(f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
+      def check(reaction, user):
+        return user==ctx.author and str(reaction.emoji) in ("👍","👎")
+      try:
+        m = await bot_msg.original_message()
+        await m.add_reaction("👍")
+        await m.add_reaction("👎")
+        reaction, user = await self.bot.wait_for('reaction_add', timeout=120.0, check=check)
+      except asyncio.TimeoutError:
+        await ctx.send("you took too long.. try using command again...")
+        return 
+    elif data.status_code == 404:
+      embed.set_image(url = "https://i.imgur.com/PZBZ9a6.png")
+      embed.add_field(name="User not found", value = f"No such player exists with tag {player_tag}. Check the tag again.")
+      await ctx.respond(embed = embed)
+      return 
+    else:
+      await ctx.respond(f"error {data.status_code}")
+      return 
 
+    if str(reaction.emoji)=="👎":
+      await ctx.respond("Cancelled saving")
+      return 
+    sql.execute("SELECT * FROM spikebot_users WHERE user_id = %s;", (ctx.author.id,))
+    sql.fetchall() #BRUH unread result error
+    if sql.rowcount == 0:
+      sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (ctx.author.id, player_tag))
+    else:
+      sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, ctx.author.id))
+    embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
+    embed.set_footer(text= "To check your tag, use this command without filling the `player_tag` parameter.")
+    await ctx.respond(embed = embed)
+
+
+        
 def setup(bot):
   bot.add_cog(brawl(bot))
