@@ -1,8 +1,8 @@
 import discord, json, requests, os, asyncio
-from db import db
+from db import database
 from main import guild_ids
 
-
+db = database()
 sql = db.cursor()
 headers = {
   "Authorization": f"Bearer {os.environ['bs_token']}"
@@ -115,8 +115,10 @@ class brawl(discord.Cog):
 
 
   @discord.slash_command(name="battlestats", description ="GET a player's battle stats") 
-  async def battlestats(self, ctx, player_tag: str):
+  async def battlestats(self, ctx, player_tag: str = ""):
     await ctx.defer()
+    if not player_tag:
+      data = db.get_player_tag(ctx.author.id)
     data_raw = get_battledata(player_tag)
     if type(data_raw) is not int: 
       player, data = data_raw
@@ -141,8 +143,7 @@ class brawl(discord.Cog):
   async def save_tag(self, ctx, player_tag: str = ""):
     embed = discord.Embed(colour = discord.Colour.green())
     if not player_tag:
-      sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (ctx.author.id,))
-      data = sql.fetchone()
+      data = db.get_player_tag(ctx.author.id)
       if not data:
         embed.add_field(name= "Tag not saved", value="Save your tag first by using this command with the `player_tag` parameter")
         embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
@@ -185,9 +186,8 @@ class brawl(discord.Cog):
     if str(reaction.emoji)=="👎":
       await ctx.respond("Cancelled saving")
       return 
-    sql.execute("SELECT * FROM spikebot_users WHERE user_id = %s;", (ctx.author.id,))
-    sql.fetchall() #BRUH unread result error
-    if sql.rowcount == 0:
+    data2 = db.get_player_tag(ctx.author.id)
+    if len(data2) == 0:
       sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (ctx.author.id, player_tag))
     else:
       sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, ctx.author.id))
