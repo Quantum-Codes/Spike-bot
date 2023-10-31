@@ -33,6 +33,7 @@ def notify(postdata):
   #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
   
   if postdata.get("images"):
+    print(postdata)
     image = postdata["images"][0]["thumbnails"][-1]["url"]
     print(image, "last")
   print("OOOO",image)
@@ -46,6 +47,6 @@ def notify(postdata):
   print(res)
   #print(res.json())
 
-for i, item in enumerate(post["community"]):
+for i, item in enumerate((post["community"][9],)):
   notify(item)
   time.sleep(0.5)
