@@ -13,7 +13,7 @@ else:
   
 print((("*"*50)+"\n")*3)
 post = data["items"][0]
-postdata = post["community"][1]
+#postdata = post["community"][1]
 #print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
@@ -46,6 +46,6 @@ def notify(postdata):
   print(res)
   #print(res.json())
 
-for i, item in enumerate(post["communtiy"]):
+for i, item in enumerate(post["community"]):
   notify(item)
   time.sleep(0.5)
