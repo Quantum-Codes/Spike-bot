@@ -67,6 +67,14 @@ def get_battledata(player_tag, player=None):
   else:
     return 500
 
+def TagNotFoundEmbed(mode="save", player_tag=""):
+  embed = discord.Embed(colour = discord.Colour.magenta())
+  if mode == "save":
+    embed.add_field(name= "Tag not saved", value="Save your tag first by using `/save` command with the `player_tag` parameter")
+  elif mode == "404":
+    embed.add_field(name="User not found", value = f"No such player exists with tag {player_tag}. Check the tag again.")
+  embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
+  return embed
 
 def embed_player(data, battle_data):
   embed = discord.Embed(
@@ -97,9 +105,15 @@ class brawl(discord.Cog):
     self.bot = bot
   
   @discord.slash_command(name="playerstats", description ="GET a player's stats")
-  async def playerstats(self, ctx, player_tag: str):
+  async def playerstats(self, ctx, player_tag: str = ""):
     await ctx.defer()
-    player_tag = fix_playertag(player_tag) 
+    if not player_tag:
+      data = db.get_player_tag(ctx.author.id)
+      if data is None:
+        await ctx.respond(embed = TagNotFoundEmbed(mode = "save"))
+        return 
+      player_tag = data
+    player_tag = fix_playertag(player_tag)
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
@@ -119,6 +133,10 @@ class brawl(discord.Cog):
     await ctx.defer()
     if not player_tag:
       data = db.get_player_tag(ctx.author.id)
+      if data is None:
+        await ctx.respond(embed = TagNotFoundEmbed(mode = "save"))
+        return
+      player_tag = data
     data_raw = get_battledata(player_tag)
     if type(data_raw) is not int: 
       player, data = data_raw
@@ -141,18 +159,18 @@ class brawl(discord.Cog):
 
   @discord.slash_command(name="save", description ="save or check your player tag")
   async def save_tag(self, ctx, player_tag: str = ""):
-    embed = discord.Embed(colour = discord.Colour.green())
+    embed = discord.Embed(colour = discord.Colour.yellow())
     if not player_tag:
       data = db.get_player_tag(ctx.author.id)
       if not data:
-        embed.add_field(name= "Tag not saved", value="Save your tag first by using this command with the `player_tag` parameter")
-        embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
-        await ctx.respond(embed=embed)
+        await ctx.respond(embed=TagNotFoundEmbed(mode = "save"))
         return
       else:
-        embed.add_field(name= "Your tag:", value = data[0].replace('%23', '#'))
+        embed.colour = discord.Colour.green()
+        embed.add_field(name= "Your tag:", value = data.replace('%23', '#'))
+        embed.set_footer(text= "If the tag is not yours, either replace it with `/save` by filling `player_tag` parameter Or completely remove it by using `/removetag` command. ")
         await ctx.respond(embed = embed)
-      return
+        return
     
     player_tag = fix_playertag(player_tag)
     #currently no verification system on tags. so duplicate checking is waste.
@@ -163,38 +181,54 @@ class brawl(discord.Cog):
       data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      bot_msg = await ctx.respond(f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
+      embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
+      bot_msg = await ctx.respond(embed = embed)
       def check(reaction, user):
         return user==ctx.author and str(reaction.emoji) in ("👍","👎")
       try:
-        m = await bot_msg.original_message()
+        m = await bot_msg.original_response()
         await m.add_reaction("👍")
         await m.add_reaction("👎")
+        embed.fields = [] #clear for future usage 
         reaction, user = await self.bot.wait_for('reaction_add', timeout=120.0, check=check)
       except asyncio.TimeoutError:
-        await ctx.send("you took too long.. try using command again...")
+        embed.colour = discord.colour.red()
+        embed.fields = [] #just in case since in except loop
+        embed.add_field(name = "Timeout", value = "you took too long.. try using command again...")
+        await ctx.send(embed=embed)
         return 
     elif data.status_code == 404:
-      embed.set_image(url = "https://i.imgur.com/PZBZ9a6.png")
-      embed.add_field(name="User not found", value = f"No such player exists with tag {player_tag}. Check the tag again.")
-      await ctx.respond(embed = embed)
+      await ctx.respond(embed = TagNotFoundEmbed(mode="404", player_tag=player_tag))
       return 
     else:
       await ctx.respond(f"error {data.status_code}")
       return 
 
     if str(reaction.emoji)=="👎":
-      await ctx.respond("Cancelled saving")
+      embed.add_field(name = "Cancelled.", value = "")
+      embed.colour = discord.Colour.red()
+      await ctx.respond(embed = embed)
       return 
     data2 = db.get_player_tag(ctx.author.id)
-    if len(data2) == 0:
+    if data2 is None:
       sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (ctx.author.id, player_tag))
     else:
       sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, ctx.author.id))
+
+    embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
     embed.set_footer(text= "To check your tag, use this command without filling the `player_tag` parameter.")
     await ctx.respond(embed = embed)
 
+  @discord.slash_command(name="removetag", description ="delete your player tag")
+  async def delete_tag(self, ctx):
+    player_tag = db.get_player_tag(ctx.author.id)
+    if not player_tag:
+      await ctx.respond("You haven't saved a tag yet. If you want to save your tag instead,  use `/save` command.")
+      return
+    db.remove_tag(ctx.author.id)
+    await ctx.respond("Removed tag successfully.\n To save your tag again, use `/save` command.")
+  
 
         
 def setup(bot):

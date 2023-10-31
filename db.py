@@ -17,4 +17,11 @@ class database:
   
   def get_player_tag(self, discordid):
     self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
-    return self.sql.fetchone()
+    tag = self.sql.fetchone()
+    if tag is None:
+      return None
+    return tag[0]
+
+  def remove_tag(self, discordid):
+    self.sql.execute("UPDATE spikebot_users SET player_tag = NULL WHERE user_id = %s;", (discordid,))
+    
