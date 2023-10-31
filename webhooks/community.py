@@ -1,5 +1,5 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, requests, json, string
+import os, requests, json, string, time
 
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
 if data.status_code == 200:
@@ -17,30 +17,35 @@ postdata = post["community"][1]
 #print(json.dumps(postdata, indent = 2))
 print((("*"*50)+"\n")*3)
 
-options = ""
-image = ""
-if postdata.get("poll"):
-  options= "\n"
-  for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
-    options += f"{idx}. {option['text']}\n"
-    if option.get("image"):
-      image = option["image"]["thumbnails"][-1]["url"]
-      print(image)
+def notify(postdata):
+  options = ""
+  image = ""
+  if postdata.get("poll"):
+    options= "\n"
+    for idx, option in zip(string.ascii_uppercase, postdata["poll"]["choices"]):
+      options += f"{idx}. {option['text']}\n"
+      if option.get("image"):
+        image = option["image"]["thumbnails"][-1]["url"]
+        print(image)
+    print("OOOO",image)
+  webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
+  embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
+  #embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
+  
+  if postdata.get("images"):
+    image = postdata["images"][0]["thumbnails"][-1]["url"]
+    print(image, "last")
   print("OOOO",image)
-webhook = DiscordWebhook(url=os.environ["community_webhook_url"], content="<yt ping>")
-embed = DiscordEmbed(title=f"Community {'Poll' if options else 'Post'}", description= postdata["contentText"][0]["text"][:150] + options, color='03b2f8', url=f'https://www.youtube.com/post/{postdata["id"]}')
-#embed.set_author(name="@Juuzou_gaming", url=f'https://youtube.com/', icon_url="") 
+  embed.set_image(url = image)
+  ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
+  #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
+  #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
+  #embed.add_embed_field(name='Field 2', value='dolor sit') 
+  webhook.add_embed(embed)
+  res = webhook.execute()
+  print(res)
+  #print(res.json())
 
-if postdata.get("images"):
-  image = postdata["images"][0]["thumbnails"][-1]["url"]
-  print(image, "last")
-print("OOOO",image)
-embed.set_image(url = image)
-##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
-#embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
-#embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
-#embed.add_embed_field(name='Field 2', value='dolor sit') 
-webhook.add_embed(embed)
-res = webhook.execute()
-print(res)
-print(res.json())
+for i, item in enumerate(post):
+  notify(item)
+  time.sleep(0.5)
