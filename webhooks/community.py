@@ -46,6 +46,6 @@ def notify(postdata):
   print(res)
   #print(res.json())
 
-for i, item in enumerate(post):
+for i, item in enumerate(post["communtiy"]):
   notify(item)
   time.sleep(0.5)
