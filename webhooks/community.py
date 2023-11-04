@@ -1,5 +1,5 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed 
-import os, requests, json, string, time
+import os, requests, json, string, time,  logger
 
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
 if data.status_code == 200:
