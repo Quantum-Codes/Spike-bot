@@ -48,5 +48,7 @@ def notify(postdata):
   #print(res.json())
 
 for i, item in enumerate(post["community"]):
-  notify(item)
-  time.sleep(0.5)
+  if item["id"] not in logger.get_log(mode="community"):
+    notify(item)
+    logger.writelog(f"Notified: {item['id']}", mode = "community")
+    time.sleep(0.5)
