@@ -33,14 +33,14 @@ def get_battledata(player_tag, player=None):
           print("AHAHAHHAAH(!*@&*@")
           print(item)
           continue
-        battleresult = "victory" if battleresult <= (2 if item["event"]["mode"] == "duoShowdown" else 4) else "defeat" #since lonestar, takedown also has 4 winners. so on else clause
+        battleresult = "victory" if battleresult <= (2 if item["battle"]["mode"] == "duoShowdown" else 4) else "defeat" #since lonestar, takedown also has 4 winners. so on else clause
       if raw_stats.get(battleresult) is not None:
         raw_stats[battleresult] += 1
         if battleresult == "victory":
           starplayer = item["battle"].get("starPlayer")
           if starplayer is None:
-            if "Showdown" in  item["event"]["mode"]:
-              if item["battle"]["rank"] <= (1 if "duo" in item["event"]["mode"] else 2):
+            if "Showdown" in  item["battle"]["mode"]:
+              if item["battle"]["rank"] <= (1 if "duo" in item["battle"]["mode"] else 2):
                 raw_stats["starplayer"] += 1
           else:
             if item['battle']['starPlayer']['tag'].upper() == player['tag'].upper():
@@ -91,7 +91,7 @@ def embed_player(data, battle_data):
 
   embed.add_field(name="Recent Win rate", value=str(battle_data["victory_rate"])+"%")
   embed.add_field(name = "Recent starplayer rate", value=str(battle_data["starplayer_rate"])+"%", inline=True)
-  embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed later
+  embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed 
   
   embed.add_field(name="Club tag", value=data['club']['tag'])
   embed.add_field(name="Club name", value=data['club']['name'], inline=True)
@@ -211,9 +211,9 @@ class brawl(discord.Cog):
       return 
     data2 = db.get_player_tag(ctx.author.id)
     if data2 is None:
-      sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (ctx.author.id, player_tag))
+      db.add_user(ctx.author.id, player_tag = player_tag)
     else:
-      sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, ctx.author.id))
+      db.update_tag(ctx.author.id, player_tag)
 
     embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
@@ -226,7 +226,7 @@ class brawl(discord.Cog):
     if not player_tag:
       await ctx.respond("You haven't saved a tag yet. If you want to save your tag instead,  use `/save` command.")
       return
-    db.remove_tag(ctx.author.id)
+    db.update_tag(ctx.author.id, None)
     await ctx.respond("Removed tag successfully.\n To save your tag again, use `/save` command.")
   
 

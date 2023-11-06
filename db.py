@@ -22,6 +22,12 @@ class database:
       return None
     return tag[0]
 
-  def remove_tag(self, discordid):
-    self.sql.execute("UPDATE spikebot_users SET player_tag = NULL WHERE user_id = %s;", (discordid,))
+  def update_tag(self, discordid, player_tag = None):
+    self.sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, discordid))
+
+  def add_user(self, discordid, player_tag = None):
+    """
+    Only `discordid` is required. All others are optional params. default = None
+    """
+    self.sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (discordid, player_tag))
     
