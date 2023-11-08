@@ -30,4 +30,26 @@ class database:
     Only `discordid` is required. All others are optional params. default = None
     """
     self.sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (discordid, player_tag))
-    
+
+
+  def create_giveaway(self, messageid, winners):
+    """
+    All params required.
+    `winners` = Number of winners
+    `messageid`  = Message id of bot-posted giveaway 
+    """
+    self.sql.execute("INSERT INTO spikebot_giveaway_list (messageid, winners) VALUES (%s, %s);", (messageid, winners))
+
+  def check_joined_giveaway(self, messageid, userid):
+    self.sql.execute("SELECT * FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid, userid))
+    self.sql.fetchall()
+    return self.sql.rowcount
+
+  def join_leave_giveaway(self, messageid, userid, mode="join"):
+    if mode == "leave":
+      self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid,  userid))
+    else:
+      self.sql.execute("INSERT INTO spikebot_giveaway_joins (messageid, userid) VALUES (%s, %s);", (messageid, userid))
+
+db = database()
+sql = db.cursor()

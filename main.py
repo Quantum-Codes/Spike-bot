@@ -5,7 +5,7 @@
 
 import discord, os
 from keep_alive import keep_alive
-
+from components.buttons import GiveawayJoin
 
 
 
@@ -22,6 +22,7 @@ guild_ids = [1099306183426326589]#HARDCODED IN OTHER PLACES
 @bot.event
 async def on_ready():
   print(f"{bot.user} is ready and online!")
+  bot.add_view(GiveawayJoin())
 
 @bot.event
 async def on_message(message):
@@ -51,6 +52,11 @@ Or go to <#1099306183979970661> to chat with other users
 async def on_member_join(member):
   if member.guild.id == 1099306183426326589:
     await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.', embed=welcome_embed(member))
+
+@bot.listen()
+async def on_interaction(interaction):
+  print(interaction.data)
+  print(interaction.id)
 
 @bot.event
 async def on_member_update(before, after):

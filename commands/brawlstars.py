@@ -1,9 +1,8 @@
 import discord, json, requests, os, asyncio
-from db import database
+from db import db, sql
 from main import guild_ids
 
-db = database()
-sql = db.cursor()
+
 headers = {
   "Authorization": f"Bearer {os.environ['bs_token']}"
 }

@@ -1,4 +1,5 @@
-import discord
+import discord, random, string
+from db import db, sql
 
 class ConfirmWinners(discord.ui.View):
   def __init__(self):
@@ -24,4 +25,17 @@ class ConfirmWinners(discord.ui.View):
     await interaction.response.edit_message(view=self)
     await interaction.followup.send("Trigger giveaway command again to choose new winners.", ephemeral = True)
 
- 
+class GiveawayJoin(discord.ui.View):
+  def __init__(self):
+    super().__init__(timeout=None) #persistent view
+
+  @discord.ui.button(label= "Join Giveaway", style=discord.ButtonStyle.primary, emoji="🎁", custom_id = "meisid2")
+  async def join_callback(self, button, interaction):
+    await interaction.response.defer(ephemeral=True)
+    if db.check_joined_giveaway(interaction.message.id, interaction.user.id):
+      await interaction.followup.send("You have already joined the giveaway. <leave button>", ephemeral=True)
+      return
+    
+    db.join_leave_giveaway(interaction.message.id, interaction.user.id, mode="join")
+    await interaction.followup.send("Joined the giveaway!", ephemeral= True)
+    
