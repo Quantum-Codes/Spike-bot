@@ -55,15 +55,29 @@ class database:
     else:
       self.sql.execute("INSERT INTO spikebot_giveaway_joins (messageid, userid) VALUES (%s, %s);", (messageid, userid))
 
-  def cleanup_giveaway(self, messageid): # run after all rerolling and winner choosing done AND all prizes claimed.
+  def cleanup_giveaway(self, messageid): 
+    """
+    run after all rerolling and winner choosing done AND all prizes claimed.
+    deletes all joins and giveaway data from db.
+    """
     self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
     self.sql.execute("DELETE FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
 
   def end_giveaway(self, messageid):
-    self.sql.execute("SELECT DISTINCT userid FROM spikebot_giveaway_joins WHERE messageid = %s;")
-    self.sql.execute("SELECT winners FROM spikebot_giveaway_list WHERE messageid = %s;")
+    """
+    Does not edit/delete db. Only reads to db
+    Return value: dict. (keys: winners, winners_count, participants, participants_count)
+    participants, winners -> list of single item tuples with discord ID (int) inside them.
+    """
+    self.sql.execute("SELECT DISTINCT userid FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
+    participants = self.sql.fetchall()
+    participants_count = self.sql.rowcount
+    self.sql.execute("SELECT winners FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
     winnerscount = self.sql.fetchone()[0]
-    winners = random.sample()
+    if winnerscount > participants_count:
+      winnerscount = participants_count
+    winners = random.sample(participants, winnerscount)
+    return {"winners": winners, "winners_count": winnerscount, "participants": participants, "participants_count": participants_count}
 
 db = database()
 sql = db.cursor()

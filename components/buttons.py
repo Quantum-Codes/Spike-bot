@@ -15,7 +15,7 @@ class ConfirmWinners(discord.ui.View):
     button.label = "Approved."
     button.style = discord.ButtonStyle.success
     await interaction.response.edit_message(view=self)
-    await interaction.channel.send(interaction.message.content)
+    await interaction.channel.send(interaction.message.content, embed=interaction.message.embeds[0])
     
   @discord.ui.button(label= "Cancel", style=discord.ButtonStyle.danger, emoji=None)
   async def cancel_callback(self, button, interaction):

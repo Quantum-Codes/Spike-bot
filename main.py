@@ -75,9 +75,9 @@ async def on_member_update(before, after):
     await message.edit(embed=embed)
 
 bot.load_extension("commands.general")
-bot.load_extension("commands.webhook") #-- add back if needed youtube commands
+bot.load_extension("commands.webhook")
 bot.load_extension("commands.brawlstars")
-bot.load_extension("commands.menus")
+bot.load_extension("commands.message_commands")
 bot.load_extension("commands.rolestat")
 keep_alive()
 try:
