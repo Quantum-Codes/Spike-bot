@@ -23,15 +23,6 @@ guild_ids = [1099306183426326589]#HARDCODED IN OTHER PLACES
 async def on_ready():
   print(f"{bot.user} is ready and online!")
   bot.add_view(GiveawayJoin())
-  for item in bot.guilds:
-    print(item.name)
-    try:
-      invites = await item.invites()
-      for itemq in invites:
-        print(itemq.url, itemq.inviter.name, itemq.uses)
-    except discord.Forbidden:
-      print("bruh server")
-    print("\n\n")
 
 @bot.event
 async def on_message(message):
