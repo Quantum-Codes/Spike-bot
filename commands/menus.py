@@ -14,8 +14,16 @@ class message_commands(discord.Cog):
     if ctx.author.id in [638738610564235265,718830331356250202]:
       await ctx.send_modal(GetWinnersCount(title="Set Winners", message =message))
     else:
-      ctx.send("who tf are you??", ephemeral=True)
+      await ctx.send("who tf are you??", ephemeral=True)
     #await ctx.followup.send()#, view=GetWinnersCount())
+
+  @discord.message_command(name="EndGiveaway")
+  async def giveaway_end(self, ctx, message):
+    if ctx.author.id in [638738610564235265,718830331356250202]:
+      pass
+    else:
+      await ctx.send("who to are you??", ephemeral = True)      
+  
 
 def setup(bot):
   bot.add_cog(message_commands(bot))

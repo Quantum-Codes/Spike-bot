@@ -1,4 +1,4 @@
-import mysql.connector, os
+import mysql.connector, os, random
 
 
 class database:
@@ -43,13 +43,27 @@ class database:
   def check_joined_giveaway(self, messageid, userid):
     self.sql.execute("SELECT * FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid, userid))
     self.sql.fetchall()
-    return self.sql.rowcount
+    return self.sql.rowcount # tests truth value 
+
+  def check_valid_giveaway(self, messageid):
+    self.sql.execute("SELECT * FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
+    return len(self.sql.fetchall()) # tests truth value 
 
   def join_leave_giveaway(self, messageid, userid, mode="join"):
     if mode == "leave":
       self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid,  userid))
     else:
       self.sql.execute("INSERT INTO spikebot_giveaway_joins (messageid, userid) VALUES (%s, %s);", (messageid, userid))
+
+  def cleanup_giveaway(self, messageid): # run after all rerolling and winner choosing done AND all prizes claimed.
+    self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
+    self.sql.execute("DELETE FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
+
+  def end_giveaway(self, messageid):
+    self.sql.execute("SELECT DISTINCT userid FROM spikebot_giveaway_joins WHERE messageid = %s;")
+    self.sql.execute("SELECT winners FROM spikebot_giveaway_list WHERE messageid = %s;")
+    winnerscount = self.sql.fetchone()[0]
+    winners = random.sample()
 
 db = database()
 sql = db.cursor()

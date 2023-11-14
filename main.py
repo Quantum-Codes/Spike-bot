@@ -23,6 +23,15 @@ guild_ids = [1099306183426326589]#HARDCODED IN OTHER PLACES
 async def on_ready():
   print(f"{bot.user} is ready and online!")
   bot.add_view(GiveawayJoin())
+  for item in bot.guilds:
+    print(item.name)
+    try:
+      invites = await item.invites()
+      for itemq in invites:
+        print(itemq.url, itemq.inviter.name, itemq.uses)
+    except discord.Forbidden:
+      print("bruh server")
+    print("\n\n")
 
 @bot.event
 async def on_message(message):
@@ -53,10 +62,12 @@ async def on_member_join(member):
   if member.guild.id == 1099306183426326589:
     await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.', embed=welcome_embed(member))
 
+"""
 @bot.listen()
 async def on_interaction(interaction):
   print(interaction.data)
   print(interaction.id)
+"""
 
 @bot.event
 async def on_member_update(before, after):
