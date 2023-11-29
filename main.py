@@ -26,7 +26,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-  if bot.user.mentioned_in(message) and message.mentions: #message.mentions empty when everyone ping
+  if bot.user.mentioned_in(message) and bot.user in message.mentions: #message.mentions empty when everyone ping
     await message.reply("Why u pinged me? I was sleeping :(")
 
 def welcome_embed(user):
@@ -77,7 +77,7 @@ async def on_member_update(before, after):
 bot.load_extension("commands.general")
 bot.load_extension("commands.webhook")
 bot.load_extension("commands.brawlstars")
-bot.load_extension("commands.message_commands")
+#bot.load_extension("commands.message_commands")
 bot.load_extension("commands.rolestat")
 keep_alive()
 try:
