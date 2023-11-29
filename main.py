@@ -3,7 +3,7 @@
 #make pycord work by making guessImports = false in .replit
 #also add pkgs.ffmpeg in replit.nix for voice
 
-import discord, os
+import discord, os, time
 from keep_alive import keep_alive
 from components.buttons import GiveawayJoin
 
@@ -48,10 +48,19 @@ Or go to <#1099306183979970661> to chat with other users
   embed.set_image(url="https://media.tenor.com/4GQvhQ5ISmUAAAAC/discord-server.gif")
   return embed
 
+async def autokick(member):
+  print(member.created_at.timestamp() - time.time())
+  if time.time() - member.created_at.timestamp() < 7*24*3600:
+    await member.kick(reason = "new account")
+    dms = await member.create_dm()
+    await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast 1 week old__.")
+
 @bot.event
 async def on_member_join(member):
   if member.guild.id == 1099306183426326589:
     await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.', embed=welcome_embed(member))
+  elif member.guild.id == 1049987508559167580:
+    await autokick(member)
 
 """
 @bot.listen()
