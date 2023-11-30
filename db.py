@@ -1,4 +1,4 @@
-import mysql.connector, os, random
+import mysql.connector, os, random, json
 
 
 class database:
@@ -14,7 +14,17 @@ class database:
 
   def cursor(self):
     return self.sql
-  
+
+  def get_server_settings(self, serverid, type = None):
+    if not type:
+      self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE severid = %s;", (serverid,))
+      data = [(item[0], json.loads(item[1])) for item in self.sql.fetchall()]
+      return data
+    self.sql.execute("SELECT data FROM spikebot_server_settings WHERE severid = %s AND type = %s;", (serverid, type))
+    data = self.sql.fetchone()
+    data = json.loads(data[0])
+    return data
+
   def get_player_tag(self, discordid):
     self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
     tag = self.sql.fetchone()
