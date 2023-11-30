@@ -3,6 +3,8 @@ from discord.commands import SlashCommandGroup
 from main import guild_ids
 from db import db
 from components.buttons import GiveawayJoin, ConfirmWinners
+
+
 class generalcommands(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
@@ -12,6 +14,7 @@ class generalcommands(discord.Cog):
   @discord.slash_command(name="servers", description ="list out servers I'm in", guild_ids=guild_ids)
   async def serverscommand(self, ctx):
     await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
+    
   @giveaway.command(name="create", description = "Host a giveaway")
   async def giveaway_maker(self, ctx, message : str, winners : int):
     await ctx.defer(ephemeral=True)

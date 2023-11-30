@@ -1,7 +1,7 @@
-import discord, json, requests, os, asyncio
-from db import db, sql
+import discord, requests, os, asyncio
+from db import db
 from main import guild_ids
-
+from discord.commands import SlashCommandGroup
 
 headers = {
   "Authorization": f"Bearer {os.environ['bs_token']}"
@@ -69,7 +69,7 @@ def get_battledata(player_tag, player=None):
 def TagNotFoundEmbed(mode="save", player_tag=""):
   embed = discord.Embed(colour = discord.Colour.magenta())
   if mode == "save":
-    embed.add_field(name= "Tag not saved", value="Save your tag first by using `/save` command with the `player_tag` parameter")
+    embed.add_field(name= "Tag not saved", value="Save your tag first by using `/tag save` command.")
   elif mode == "404":
     embed.add_field(name="User not found", value = f"No such player exists with tag {player_tag}. Check the tag again.")
   embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
@@ -102,6 +102,8 @@ def embed_player(data, battle_data):
 class brawl(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
+
+  tagcommands = SlashCommandGroup("tag", "Handle playertags")
   
   @discord.slash_command(name="playerstats", description ="GET a player's stats")
   async def playerstats(self, ctx, player_tag: str = ""):
@@ -156,20 +158,9 @@ class brawl(discord.Cog):
       await ctx.followup.send("error")
 
 
-  @discord.slash_command(name="save", description ="save or check your player tag")
-  async def save_tag(self, ctx, player_tag: str = ""):
+  @tagcommands.command(name="save", description ="Save your player tag")
+  async def save_tag(self, ctx, player_tag: str):
     embed = discord.Embed(colour = discord.Colour.yellow())
-    if not player_tag:
-      data = db.get_player_tag(ctx.author.id)
-      if not data:
-        await ctx.respond(embed=TagNotFoundEmbed(mode = "save"))
-        return
-      else:
-        embed.colour = discord.Colour.green()
-        embed.add_field(name= "Your tag:", value = data.replace('%23', '#'))
-        embed.set_footer(text= "If the tag is not yours, either replace it with `/save` by filling `player_tag` parameter Or completely remove it by using `/removetag` command. ")
-        await ctx.respond(embed = embed)
-        return
     
     player_tag = fix_playertag(player_tag)
     #currently no verification system on tags. so duplicate checking is waste.
@@ -180,7 +171,7 @@ class brawl(discord.Cog):
       data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
+      embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2 mins to do so.")
       bot_msg = await ctx.respond(embed = embed)
       def check(reaction, user):
         return user==ctx.author and str(reaction.emoji) in ("👍","👎")
@@ -216,19 +207,33 @@ class brawl(discord.Cog):
 
     embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
-    embed.set_footer(text= "To check your tag, use this command without filling the `player_tag` parameter.")
+    embed.set_footer(text= "To check your tag, use `/tag show`")
     await ctx.respond(embed = embed)
 
-  @discord.slash_command(name="removetag", description ="delete your player tag")
+  @tagcommands.command(name="remove", description ="Delete your player tag")
   async def delete_tag(self, ctx):
     player_tag = db.get_player_tag(ctx.author.id)
     if not player_tag:
-      await ctx.respond("You haven't saved a tag yet. If you want to save your tag instead,  use `/save` command.")
+      await ctx.respond("You haven't saved a tag yet. If you want to save your tag instead,  use `/tag save` command.")
       return
     db.update_tag(ctx.author.id, None)
-    await ctx.respond("Removed tag successfully.\n To save your tag again, use `/save` command.")
+    await ctx.respond("Removed tag successfully.\n To save your tag again, use `/tag save` command.")
   
-
+  @tagcommands.command(name="show", description ="Check your player tag")
+  async def show_tag(self, ctx):
+    embed = discord.Embed(colour = discord.Colour.yellow())
+  
+    data = db.get_player_tag(ctx.author.id)
+    if not data:
+      await ctx.respond(embed=TagNotFoundEmbed(mode = "save"))
+      return
+    else:
+      embed.colour = discord.Colour.green()
+      embed.add_field(name= "Your tag:", value = data.replace('%23', '#'))
+      embed.set_footer(text= "If the tag is not yours, either replace it with `/tag save` Or completely remove it by using `/tag remove` command. ")
+      await ctx.respond(embed = embed)
+      return
+  
         
 def setup(bot):
   bot.add_cog(brawl(bot))

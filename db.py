@@ -39,6 +39,12 @@ class database:
     """
     Only `discordid` is required. All others are optional params. default = None
     """
+    self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
+    tag = self.sql.fetchone()
+    print(tag, type(tag))
+    if type(tag) is tuple:
+      self.update_tag(discordid, player_tag)
+      return
     self.sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (discordid, player_tag))
 
 
