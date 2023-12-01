@@ -35,9 +35,9 @@ def welcome_embed(user):
   temp =int(str(user.guild.member_count)[-1])
   suffix_num = suffix_num[temp]
   embed = discord.Embed(
-    title = f"Welcome to Juuzou's Server {user.display_name}",
+    title = f"Welcome to {user.guild.name}, {user.display_name}",
     color = discord.Colour.blurple(),
-    description = f"""🎉You are the {user.guild.member_count}{suffix_num} member of Juuzou Gaming Server!🎉
+    description = f"""🎉You are the {user.guild.member_count}{suffix_num} member of {user.guild.name}!🎉
 ----------------------------------------------
 Read the <#1114076581804126228>! 
 Check out <#1114076810901209088> to look for giveaways and announcements
@@ -49,7 +49,6 @@ Or go to <#1099306183979970661> to chat with other users
   return embed
 
 async def autokick(member):
-  print(member.created_at.timestamp() - time.time())
   if time.time() - member.created_at.timestamp() < 7*24*3600:
     await member.kick(reason = "new account")
     dms = await member.create_dm()

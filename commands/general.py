@@ -10,6 +10,7 @@ class generalcommands(discord.Cog):
     self.bot = bot
 
   giveaway = SlashCommandGroup("giveaway", "Handle giveaways.", guild_ids=guild_ids)
+  utility = SlashCommandGroup("utility", "Server enhancers", guild_ids=guild_ids)
     
   @discord.slash_command(name="servers", description ="list out servers I'm in", guild_ids=guild_ids)
   async def serverscommand(self, ctx):
@@ -38,6 +39,10 @@ class generalcommands(discord.Cog):
       view.message = message # to pass context
     else:
       await ctx.send("who to are you??", ephemeral = True)
+
+  @utility.command(name="welcome", description="Set welcome message channel")
+  async def welcomer(self, ctx, channel: discord.TextChannel, message: str):
+    await ctx.send(channel.id)
 
 def setup(bot):
   bot.add_cog(generalcommands(bot))

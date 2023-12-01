@@ -25,6 +25,12 @@ class database:
     data = json.loads(data[0])
     return data
 
+  def save_server_settings(self, serverid, type, data):
+    if self.get_server_settings(serverid, type) is None:
+      self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s)", (serverid, type, json.dumps(data)))
+      return
+    self.sql.execute("UPDATE spikebot_server_settings ")
+    
   def get_player_tag(self, discordid):
     self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
     tag = self.sql.fetchone()

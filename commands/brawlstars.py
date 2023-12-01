@@ -69,7 +69,7 @@ def get_battledata(player_tag, player=None):
 def TagNotFoundEmbed(mode="save", player_tag=""):
   embed = discord.Embed(colour = discord.Colour.magenta())
   if mode == "save":
-    embed.add_field(name= "Tag not saved", value="Save your tag first by using `/tag save` command.")
+    embed.add_field(name= "Tag not saved", value="Save your tag first by using `/save` command with the `player_tag` parameter")
   elif mode == "404":
     embed.add_field(name="User not found", value = f"No such player exists with tag {player_tag}. Check the tag again.")
   embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
@@ -171,7 +171,7 @@ class brawl(discord.Cog):
       data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2 mins to do so.")
+      embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
       bot_msg = await ctx.respond(embed = embed)
       def check(reaction, user):
         return user==ctx.author and str(reaction.emoji) in ("👍","👎")
@@ -207,7 +207,7 @@ class brawl(discord.Cog):
 
     embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
-    embed.set_footer(text= "To check your tag, use `/tag show`")
+    embed.set_footer(text= "To check your tag, use `/tag `")
     await ctx.respond(embed = embed)
 
   @tagcommands.command(name="remove", description ="Delete your player tag")
