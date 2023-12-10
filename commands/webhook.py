@@ -1,6 +1,5 @@
-from discord_webhook import DiscordWebhook, DiscordEmbed 
 from logger import getlog, writelog
-import os, discord
+import os, discord, aiohttp
 import googleapiclient.discovery
 
 guild_ids = [1099306183426326589]
@@ -38,18 +37,15 @@ def yt_webhook(video=0, check_old = False):
       return "Repeated"
       
   print(video)
-  webhook = DiscordWebhook(url=os.environ["webhook_url"], content="<@&1149699372209164370> New video")
-  embed = DiscordEmbed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color='03b2f8', url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
+
+  webhook = discord.SyncWebhook.from_url(os.environ["webhook_url"])
+  embed = discord.Embed(title=video["snippet"]["title"], description=video["snippet"]["description"][:150]+"...", color=0x3b2f8, url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}")
   embed.set_author(name=channel["snippet"]["customUrl"], url=f'https://youtube.com/{channel["snippet"]["customUrl"]}', icon_url=channel["snippet"]["thumbnails"]["default"]["url"]) 
   embed.set_image(url=video["snippet"]["thumbnails"]["high"]["url"])
   ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb') 
   #embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
-  #embed.add_embed_field(name='Field 1', value='Lorem ipsum') 
-  #embed.add_embed_field(name='Field 2', value='dolor sit') 
-  webhook.add_embed(embed)
-  res = webhook.execute()
+  res = webhook.send("<@&1149699372209164370> New video", embed = embed)
   print(res)
-  print(res.json())
   writelog(f"notified: {video['contentDetails']['videoId']}")
 
 class yt_notify_webhook(discord.Cog):
@@ -67,10 +63,11 @@ class yt_notify_webhook(discord.Cog):
         playlistId= "UUyjy3LTL7AIV_Iwf4A9PeGw"
       )
       global_videolist = request.execute()["items"]
+      #print(global_videolist)
 
       async def select_callback(interaction): # the function called when the user is done selecting options
         #await interaction.delete_original_response() doesn't work
-        yt_webhook([item["snippet"]["title"] for item in global_videolist].index(interaction.data["values"][0]))
+        yt_webhook([item["snippet"]["title"] for item in global_videolist].index(interaction.data["values"][0][:-14]))#last 14 chars are " (11char video id)"
         await interaction.response.send_message("Done", ephemeral = True)
 
       
@@ -80,15 +77,15 @@ class yt_notify_webhook(discord.Cog):
       max_values = 1, # the maximum number of values that can be selected by the users
       options = [ # the list of options from which users can choose, a required field
           discord.SelectOption(
-              label = global_videolist[0]["snippet"]["title"],
+              label = global_videolist[0]["snippet"]["title"] +" ("+global_videolist[0]['contentDetails']['videoId']+")",
               description="Re-notify for last video"
           ),
           discord.SelectOption(
-              label = global_videolist[1]["snippet"]["title"],
+              label = global_videolist[1]["snippet"]["title"]+" ("+global_videolist[1]['contentDetails']['videoId']+")",
               description="Re-notify for 2nd last video"
           ),
           discord.SelectOption(
-              label = global_videolist[2]["snippet"]["title"],
+              label = global_videolist[2]["snippet"]["title"]+" ("+global_videolist[2]['contentDetails']['videoId']+")",
               description="Re-notify for 3rd last video"
           )
       ]
