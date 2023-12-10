@@ -17,19 +17,23 @@ class database:
 
   def get_server_settings(self, serverid, type = None):
     if not type:
-      self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE severid = %s;", (serverid,))
-      data = [(item[0], json.loads(item[1])) for item in self.sql.fetchall()]
-      return data
-    self.sql.execute("SELECT data FROM spikebot_server_settings WHERE severid = %s AND type = %s;", (serverid, type))
+      self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE serverid = %s;", (serverid,))
+      result = self.sql.fetchall()
+      data = [(item[0], json.loads(item[1])) for item in result]
+      return data if data else None
+    self.sql.execute("SELECT data FROM spikebot_server_settings WHERE serverid = %s AND type = %s;", (serverid, type))
     data = self.sql.fetchone()
-    data = json.loads(data[0])
+    if data:
+      data = json.loads(data[0])
+    else:
+      data = None
     return data
 
   def save_server_settings(self, serverid, type, data):
     if self.get_server_settings(serverid, type) is None:
-      self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s)", (serverid, type, json.dumps(data)))
+      self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s);", (serverid, type, json.dumps(data)))
       return
-    self.sql.execute("UPDATE spikebot_server_settings ")
+    self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
     
   def get_player_tag(self, discordid):
     self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
@@ -101,5 +105,31 @@ class database:
     winners = random.sample(participants, winnerscount)
     return {"winners": winners, "winners_count": winnerscount, "participants": participants, "participants_count": participants_count}
 
+
+class helper_funcs:
+  def __init__(self):
+    pass
+
+  def replace_placeholders(self, message, user, test = False):
+    suffix_num = ["th","st", "nd", "rd"]
+    suffix_num.extend(["th"]*6)
+    temp =int(str(user.guild.member_count)[-1])
+    suffix_num = suffix_num[temp]
+    placeholders = {
+      "user_mention": "@testuser" if test else user.mention,
+      "user": "testuser" if test else user.display_name,
+      "user_id": "testuserid" if test else user.id,
+      "server": user.guild.name,
+      "server_id": user.guild.id,
+      "member_count": user.guild.member_count,
+      "member_position": f"{user.guild.member_count}{suffix_num}"
+    }
+    for k, v in placeholders.items():
+      message = message.replace(f"[{k}]", str(v))
+    return message
+
+
+
 db = database()
 sql = db.cursor()
+funcs = helper_funcs()

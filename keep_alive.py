@@ -84,4 +84,6 @@ def run():
   app.run("0.0.0.0",port=8080)
 
 def keep_alive():
-  t1 = Thread(target=run).start()
+  t1 = Thread(target=run)
+  t1.start()
+  return t1

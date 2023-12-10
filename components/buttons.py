@@ -1,8 +1,9 @@
-import discord, random, string
-from db import db, sql
+import discord
+from db import db
 
 class ConfirmWinners(discord.ui.View):
-  def __init__(self):
+  def __init__(self, message):
+    self.gaw_msg = message
     super().__init__(timeout = 240)
     
   async def on_timeout(self):
@@ -16,6 +17,7 @@ class ConfirmWinners(discord.ui.View):
     button.style = discord.ButtonStyle.success
     await interaction.response.edit_message(view=self)
     await interaction.channel.send(interaction.message.content, embed=interaction.message.embeds[0])
+    await interaction.channel.send(f"{self.gaw_msg.id}")
     
   @discord.ui.button(label= "Cancel", style=discord.ButtonStyle.danger, emoji=None)
   async def cancel_callback(self, button, interaction):

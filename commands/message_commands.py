@@ -4,37 +4,21 @@ from components.buttons import ConfirmWinners
 from components.modals import GetWinnersCount
 from db import db
 
-""" USELESS. keeping for structure of message commands
+
 class message_commands(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
 
-  @discord.message_command(name="giveaway")
-  async def giveaway_winner(self, ctx, message):
-    #await ctx.defer()
-    #await ctx.defer(ephemeral=True)
-    if ctx.author.id in [638738610564235265,718830331356250202]:
-      await ctx.send_modal(GetWinnersCount(title="Set Winners", message =message))
-    else:
-      await ctx.send("who tf are you??", ephemeral=True)
-    #await ctx.followup.send()#, view=GetWinnersCount())
-
-  @discord.message_command(name="EndGiveaway")
-  async def giveaway_end(self, ctx, message):
-    await ctx.defer(ephemeral=True)
-    if ctx.author.id in [638738610564235265,718830331356250202]:
-      if not db.check_valid_giveaway(message.id):
-         await ctx.send("not valid giveaway")
-         return 
-      data = db.end_giveaway(message.id)
-      content = f":tada:<:juuzou_gaming:1125994304528187392>**Giveaway Winner Announcement!**<:juuzou_gaming:1125994304528187392>:tada:\nThe winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab[0]) for ab in data['winners']])}>**\n\n:partying_face:Congratulations!!:partying_face:\n\n`Participants: {data['participants_count']}`".replace("<ENTERCHR101>", "\n")
-      view = ConfirmWinners()
-      message = await ctx.followup.send(content, ephemeral = True, view = view)
-      view.message = message # to pass context
-    else:
-      await ctx.send("who to are you??", ephemeral = True)
+  @discord.message_command(name="purge_react")
+  async def purge_reacts(self, ctx, message):
+    await ctx.defer(ephemeral = True)
+    reacts = message.reactions[0]
+    users = ""
+    async for user in reacts.users():
+      if not (user.get_role(1172086259599032400) is not None or user.get_role(1147788479732920401) is not None or user.get_role(1147788523244617791) is not None or user.get_role(1149505311619678258) is not  None):
+        await message.remove_reaction(reacts, user)
+    await ctx.followup.send("op")
   
 
 def setup(bot):
   bot.add_cog(message_commands(bot))
-"""

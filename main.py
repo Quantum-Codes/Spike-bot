@@ -50,9 +50,13 @@ Or go to <#1099306183979970661> to chat with other users
 
 async def autokick(member):
   if time.time() - member.created_at.timestamp() < 7*24*3600:
-    await member.kick(reason = "new account")
     dms = await member.create_dm()
-    await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast 1 week old__.")
+    try:
+      await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast 1 week old__.")
+    except discord.errors.Forbidden:
+      print(f"Failed to message {member.name} {member.id}")
+
+    await member.kick(reason = "new account") #message before kick so member share server with bot
 
 @bot.event
 async def on_member_join(member):
@@ -87,8 +91,9 @@ bot.load_extension("commands.webhook")
 bot.load_extension("commands.brawlstars")
 #bot.load_extension("commands.message_commands")
 bot.load_extension("commands.rolestat")
-keep_alive()
+t1 = keep_alive()
 try:
   bot.run(os.environ["token"])
+  t1.join()
 except discord.errors.HTTPException:
   os.system("kill 1")
