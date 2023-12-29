@@ -16,6 +16,8 @@ class generalcommands(discord.Cog):
   async def serverscommand(self, ctx):
     await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
 
+
+  
   """
   @discord.slash_command(name="verify_ertiol", description ="Check for official ertiol gang leader", guild_ids=[1049987508559167580])
   async def ertiolcommand(self, ctx, user : discord.User):

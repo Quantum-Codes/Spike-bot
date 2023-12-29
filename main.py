@@ -2,7 +2,6 @@
 #For replit only:
 #make pycord work by making guessImports = false in .replit
 #also add pkgs.ffmpeg in replit.nix for voice
-
 import discord, os, time
 from keep_alive import keep_alive
 from components.buttons import GiveawayJoin
