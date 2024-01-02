@@ -34,7 +34,7 @@ class GiveawayLeave(discord.ui.View):
     
   async def on_timeout(self):
     self.disable_all_items()
-    await self.message.edit(":warning:You took longer than 1 minute. Buttons disabled.:warning:\n"+self.message.content, view=self)
+    await self.msg.edit(":warning:You took longer than 1 minute. Buttons disabled.:warning:\n"+self.msg.content, view=self)
   
   @discord.ui.button(style=discord.ButtonStyle.danger, label="Leave giveaway", emoji="⚠️")
   async def leave_callback(self, button, interaction):
@@ -54,7 +54,9 @@ class GiveawayJoin(discord.ui.View):
       await interaction.followup.send("Invalid giveaway...", ephemeral=True)
       return 
     if db.check_joined_giveaway(interaction.message.id, interaction.user.id):
-      await interaction.followup.send("You have already joined the giveaway.", ephemeral=True, view=GiveawayLeave(msgid=interaction.message.id))
+      msgview = GiveawayLeave(msgid=interaction.message.id)
+      m = await interaction.followup.send("You have already joined the giveaway.", ephemeral=True, view=msgview)
+      msgview.msg = m
       return
     
     db.join_leave_giveaway(interaction.message.id, interaction.user.id, mode="join")
