@@ -207,7 +207,7 @@ class brawl(discord.Cog):
 
     embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
-    embed.set_footer(text= "To check your tag, use `/tag `")
+    embed.set_footer(text= "To check your tag, use `/tag show`")
     await ctx.respond(embed = embed)
 
   @tagcommands.command(name="remove", description ="Delete your player tag")
@@ -220,10 +220,17 @@ class brawl(discord.Cog):
     await ctx.respond("Removed tag successfully.\n To save your tag again, use `/tag save` command.")
   
   @tagcommands.command(name="show", description ="Check your player tag")
-  async def show_tag(self, ctx):
+  async def show_tag(self, ctx): #, user: discord.User = None):
     embed = discord.Embed(colour = discord.Colour.yellow())
-  
     data = db.get_player_tag(ctx.author.id)
+    """
+    if user:
+        if ctx.author.get_role(1208026724399321120): # tournament manager role ID at juuzou server 
+            data = db.get_player_tag(user.id)
+        else:
+            await ctx.respond("Don't use this option", ephemeral=True)
+            return 
+    """
     if not data:
       await ctx.respond(embed=TagNotFoundEmbed(mode = "save"))
       return
