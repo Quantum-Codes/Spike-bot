@@ -1,6 +1,6 @@
-import mysql.connector, os, random, json
+import mysql.connector, os, random, json, supabase, dotenv
 
-
+dotenv.load_dotenv()
 class database:
   def __init__(self):
     self.db = mysql.connector.connect( 
@@ -11,6 +11,8 @@ class database:
       autocommit = True #no way I'm committing after every read
     )
     self.sql = self.db.cursor()
+    self.sup_db = supabase.create_client(os.environ["sup_url"], os.environ["sup_key"])
+
 
   def cursor(self):
     return self.sql
@@ -36,11 +38,11 @@ class database:
     self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
     
   def get_player_tag(self, discordid):
-    self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
-    tag = self.sql.fetchone()
-    if tag is None:
+    data = self.sup_db.table("users").select("player_tag").eq("user_id", discordid).execute()
+    if len(data.data) == 0:
       return None
-    return tag[0]
+    return data.data[0]["player_tag"]
+
 
   def update_tag(self, discordid, player_tag = None):
     self.sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, discordid))
