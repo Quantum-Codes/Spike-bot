@@ -5,15 +5,9 @@
 import discord, os, time
 from keep_alive import keep_alive
 from components.buttons import GiveawayJoin
+import dotenv
 
-
-
-
-if "REPL_SLUG" not in os.environ: #detect replit
-  import dotenv
-  dotenv.load_dotenv()
-  
-
+dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
 guild_ids = [1099306183426326589]#HARDCODED IN OTHER PLACES

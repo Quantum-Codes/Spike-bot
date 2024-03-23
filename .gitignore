@@ -6,3 +6,4 @@ replit.nix
 .breakpoints
 /.config
 .env
+/.idea
