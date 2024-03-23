@@ -62,7 +62,6 @@ class database:
     Only `discordid` is required. All others are optional params. default = None
     """
     tag = self.get_player_tag(discordid, check_deleted=True)
-    print(tag)
     if type(tag[0]) is str or tag[1]:
       self.update_tag(discordid, player_tag)
       return
