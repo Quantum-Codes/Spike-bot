@@ -1,7 +1,8 @@
 from logger import getlog, writelog
-import os, discord, aiohttp
+import os, discord, aiohttp, dotenv
 import googleapiclient.discovery
 
+dotenv.load_dotenv()
 guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 global_videolist =[] 
