@@ -37,27 +37,36 @@ class database:
       return
     self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
     
-  def get_player_tag(self, discordid):
+  def get_player_tag(self, discordid, check_deleted=False):
+    """
+    `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)
+    """
     data = self.sup_db.table("users").select("player_tag").eq("user_id", discordid).execute()
     if len(data.data) == 0:
-      return None
-    return data.data[0]["player_tag"]
+      if check_deleted:
+        return None, False
+      else:
+        return None
+    tag = data.data[0]["player_tag"]
+    if check_deleted:
+      return tag, bool(tag is None)
+    else:
+      return tag
 
 
   def update_tag(self, discordid, player_tag = None):
-    self.sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, discordid))
+    self.sup_db.table("users").update({"player_tag": player_tag}).eq("user_id", discordid).execute()
 
   def add_user(self, discordid, player_tag = None):
     """
     Only `discordid` is required. All others are optional params. default = None
     """
-    self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
-    tag = self.sql.fetchone()
-    print(tag, type(tag))
-    if type(tag) is tuple:
+    tag = self.get_player_tag(discordid, check_deleted=True)
+    print(tag)
+    if type(tag[0]) is str or tag[1]:
       self.update_tag(discordid, player_tag)
       return
-    self.sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (discordid, player_tag))
+    self.sup_db.table("users").insert({"user_id": discordid, "player_tag": player_tag}).execute()
 
 
   def create_giveaway(self, messageid, winners):

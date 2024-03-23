@@ -199,11 +199,8 @@ class brawl(discord.Cog):
       embed.colour = discord.Colour.red()
       await ctx.respond(embed = embed)
       return 
-    data2 = db.get_player_tag(ctx.author.id)
-    if data2 is None:
-      db.add_user(ctx.author.id, player_tag = player_tag)
-    else:
-      db.update_tag(ctx.author.id, player_tag)
+
+    db.add_user(ctx.author.id, player_tag)
 
     embed.colour = discord.Colour.green()
     embed.add_field(name = "Saved tag:", value= player_tag.replace('%23', '#'))
