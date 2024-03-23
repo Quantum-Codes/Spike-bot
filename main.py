@@ -10,7 +10,7 @@ import dotenv
 dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
-guild_ids = [1099306183426326589]#HARDCODED IN OTHER PLACES
+guild_ids = [1099306183426326589] # HARDCODED IN OTHER PLACES
 
 @bot.event
 async def on_ready():
