@@ -5,25 +5,19 @@ from db import db, funcs
 from components.buttons import GiveawayJoin, ConfirmWinners
 
 
-class generalcommands(discord.Cog):
+class giveawaycommands(discord.Cog):
   def __init__(self, bot):
     self.bot = bot
 
   giveaway = SlashCommandGroup("giveaway", "Handle giveaways.", guild_ids=guild_ids)
-  utility = SlashCommandGroup("utility", "Server enhancers", guild_ids=guild_ids)
-    
-  @discord.slash_command(name="servers", description ="list out servers I'm in", guild_ids=guild_ids)
-  async def serverscommand(self, ctx):
-    await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
 
+  async def cog_command_error(self, ctx, error):
+    print(error, error.__cause__, type(error))
+    if isinstance(error, discord.ext.commands.MessageNotFound):
+      await ctx.respond('Message not found. Check the message ID and try again.', ephemeral = True)
+    else:
+      raise error
 
-  
-  """
-  @discord.slash_command(name="verify_ertiol", description ="Check for official ertiol gang leader", guild_ids=[1049987508559167580])
-  async def ertiolcommand(self, ctx, user : discord.User):
-    await ctx.respond("Real" if user.id == 1071716342840958996 else "impostor")
-  """
-  
   @giveaway.command(name="create", description = "Host a giveaway")
   async def giveaway_maker(self, ctx, message : str, winners : int):
     await ctx.defer(ephemeral=True)
@@ -47,8 +41,8 @@ class generalcommands(discord.Cog):
       return 
 
     data = db.end_giveaway(message.id)
-    title = f"The giveaway for **__{data['winners_count']}x {reward}__** has come to an end and"
-    content = f"## 🎊<:juuzou_gaming:1125994304528187392>Giveaway Winner Announcement!<:juuzou_gaming:1125994304528187392>🎊\n{title} \n\n🥳The winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab[0]) for ab in data['winners']])}>**!!🥳\n\n:tada:Congratulations!!:tada:\n\n`Participants: {data['participants_count']}`".replace("<ENTERCHR101>", "\n")
+    title = f"The giveaway for **__{reward}__** for {data['winners_count']} winners has come to an end and"
+    content = f"## 🎊<:juuzou_gaming:1125994304528187392>Giveaway Winner Announcement!<:juuzou_gaming:1125994304528187392>🎊\n{title} \n\n🥳The winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab['user_id']) for ab in data['winners']])}>**!!🥳\n\n:tada:Congratulations!!:tada:\n\n`Participants: {data['participants_count']}`".replace("<ENTERCHR101>", "\n")
     view = ConfirmWinners(message)
     message = await ctx.followup.send(embed=discord.Embed(colour= discord.Colour.green(), description=content), ephemeral = True, view = view)
     view.message = message # to pass context
@@ -70,6 +64,24 @@ class generalcommands(discord.Cog):
     db.cleanup_giveaway(message.id)
     await ctx.followup.send(f"Deleted all data related to the giveaway with **ID: {message.id}**")
   
+
+class utilitycommands(discord.Cog):
+  def __init__(self, bot):
+    self.bot = bot
+
+  utility = SlashCommandGroup("utility", "Server enhancers", guild_ids=guild_ids)
+
+  async def cog_command_error(self, ctx, error):
+    print(error, error.__cause__, type(error))
+    if isinstance(error, discord.ext.commands.MessageNotFound):
+      await ctx.respond('Message not found. Check the message ID and try again.', ephemeral = True)
+    else:
+      raise error
+
+  @discord.slash_command(name="servers", description ="list out servers I'm in", guild_ids=guild_ids)
+  async def serverscommand(self, ctx):
+    await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
+
   @utility.command(name="welcome", description="Set welcome message channel")
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, embed_title: str = "", ping_member: bool = True):
     await ctx.defer()
@@ -95,4 +107,5 @@ class generalcommands(discord.Cog):
 
 
 def setup(bot):
-  bot.add_cog(generalcommands(bot))
+  bot.add_cog(giveawaycommands(bot))
+  bot.add_cog(utilitycommands(bot))

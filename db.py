@@ -74,30 +74,30 @@ class database:
     `winners` = Number of winners
     `messageid`  = Message id of bot-posted giveaway 
     """
-    self.sql.execute("INSERT INTO spikebot_giveaway_list (messageid, winners) VALUES (%s, %s);", (messageid, winners))
+    self.sup_db.table("giveaway_list").insert({"message_id":messageid, "winners":winners}).execute()
 
   def check_joined_giveaway(self, messageid, userid):
-    self.sql.execute("SELECT * FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid, userid))
-    self.sql.fetchall()
-    return self.sql.rowcount # tests truth value 
+    data = self.sup_db.table("giveaway_joins").select("*").eq("message_id", messageid).eq("user_id", userid).execute()
+    return len(data.data) # tests truth value
 
   def check_valid_giveaway(self, messageid):
-    self.sql.execute("SELECT * FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
-    return len(self.sql.fetchall()) # tests truth value 
+    data = self.sup_db.table("giveaway_list").select("*").eq("message_id", messageid).execute()
+    return len(data.data) # tests truth value
 
   def join_leave_giveaway(self, messageid, userid, mode="join"):
     if mode == "leave":
-      self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid,  userid))
+      self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).eq("user_id", userid).execute()
     else:
-      self.sql.execute("INSERT INTO spikebot_giveaway_joins (messageid, userid) VALUES (%s, %s);", (messageid, userid))
+      self.sup_db.table("giveaway_joins").insert({"message_id": messageid, "user_id": userid}).execute()
 
   def cleanup_giveaway(self, messageid): 
     """
     run after all rerolling and winner choosing done AND all prizes claimed.
     deletes all joins and giveaway data from db.
     """
-    self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
-    self.sql.execute("DELETE FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
+    self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).execute()
+    self.sup_db.table("giveaway_list").delete().eq("message_id", messageid).execute()
+
 
   def end_giveaway(self, messageid):
     """
@@ -105,11 +105,10 @@ class database:
     Return value: dict. (keys: winners, winners_count, participants, participants_count)
     participants, winners -> list of single item tuples with discord ID (int) inside them.
     """
-    self.sql.execute("SELECT DISTINCT userid FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
-    participants = self.sql.fetchall()
-    participants_count = self.sql.rowcount
-    self.sql.execute("SELECT winners FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
-    winnerscount = self.sql.fetchone()[0]
+    participants = self.sup_db.table("giveaway_joins").select("user_id").eq("message_id", messageid).execute().data # had to be select distinct???
+    print(participants)
+    participants_count = len(participants)
+    winnerscount = self.sup_db.table("giveaway_list").select("winners").eq("message_id", messageid).execute().data[0]["winners"]
     if winnerscount > participants_count:
       winnerscount = participants_count
     winners = random.sample(participants, winnerscount)
