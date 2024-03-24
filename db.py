@@ -4,19 +4,8 @@ import mysql.connector, os, random, json, supabase, dotenv
 dotenv.load_dotenv()
 class database:
   def __init__(self):
-    """self.db = mysql.connector.connect(
-      host = os.environ["db_host"],
-      user = os.environ["db_user"],
-      password = os.environ["db_pass"],
-      database = os.environ["db_name"],
-      autocommit = True #no way I'm committing after every read
-    )
-    self.sql = self.db.cursor()"""
+    # connects to db
     self.sup_db = supabase.create_client(os.environ["sup_url"], os.environ["sup_key"])
-
-
-  def cursor(self):
-    return self.sql
 
   def db(self):
     return self.sup_db
@@ -157,6 +146,5 @@ class helper_funcs:
 
 
 db = database()
-#sql = db.cursor()
 sup_db = db.db()
 funcs = helper_funcs()
