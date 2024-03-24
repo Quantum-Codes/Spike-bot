@@ -1,42 +1,51 @@
+import discord.ui
 import mysql.connector, os, random, json, supabase, dotenv
 
 dotenv.load_dotenv()
 class database:
   def __init__(self):
-    self.db = mysql.connector.connect( 
+    """self.db = mysql.connector.connect(
       host = os.environ["db_host"],
       user = os.environ["db_user"],
       password = os.environ["db_pass"],
-      database = os.environ["db_name"], 
+      database = os.environ["db_name"],
       autocommit = True #no way I'm committing after every read
     )
-    self.sql = self.db.cursor()
+    self.sql = self.db.cursor()"""
     self.sup_db = supabase.create_client(os.environ["sup_url"], os.environ["sup_key"])
 
 
   def cursor(self):
     return self.sql
 
+  def db(self):
+    return self.sup_db
+
   def get_server_settings(self, serverid, type = None):
     if not type:
-      self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE serverid = %s;", (serverid,))
-      result = self.sql.fetchall()
-      data = [(item[0], json.loads(item[1])) for item in result]
+      #self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE serverid = %s;", (serverid,))
+      result = self.sup_db.table("server_settings").select("type, data").eq("server_id", serverid).execute().data
+      #result = self.sql.fetchall()
+      data = [(item["type"], json.loads(item["data"])) for item in result]
       return data if data else None
-    self.sql.execute("SELECT data FROM spikebot_server_settings WHERE serverid = %s AND type = %s;", (serverid, type))
-    data = self.sql.fetchone()
+    #self.sql.execute("SELECT data FROM spikebot_server_settings WHERE serverid = %s AND type = %s;", (serverid, type))
+    data = self.sup_db.table("server_settings").select("data").eq("server_id", serverid).eq("type", type).execute().data[0]
+    #data = self.sql.fetchone()
     if data:
-      data = json.loads(data[0])
+      print(type(data["data"]))
+      data = json.loads(data["data"])
     else:
       data = None
     return data
 
   def save_server_settings(self, serverid, type, data):
     if self.get_server_settings(serverid, type) is None:
-      self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s);", (serverid, type, json.dumps(data)))
+      #self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s);", (serverid, type, json.dumps(data)))
+      self.sup_db.table("server_settings").insert({"server_id": serverid, "type": type, "data": json.dumps(data)})
       return
-    self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
-    
+    #self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
+    self.sup_db.table("server_settings").update({"data": json.dumps(data)}).eq("server_id", serverid).eq("type", type).execute()
+
   def get_player_tag(self, discordid, check_deleted=False):
     """
     `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)
@@ -68,13 +77,14 @@ class database:
     self.sup_db.table("users").insert({"user_id": discordid, "player_tag": player_tag}).execute()
 
 
-  def create_giveaway(self, messageid, winners):
+  def create_giveaway(self, messageid, channelid, winners):
     """
     All params required.
     `winners` = Number of winners
-    `messageid`  = Message id of bot-posted giveaway 
+    `messageid` = Message id of bot-posted giveaway
+    `channelid` = Channel id of giveaway message
     """
-    self.sup_db.table("giveaway_list").insert({"message_id":messageid, "winners":winners}).execute()
+    self.sup_db.table("giveaway_list").insert({"message_id":messageid, "winners":winners, "channel_id": channelid}).execute()
 
   def check_joined_giveaway(self, messageid, userid):
     data = self.sup_db.table("giveaway_joins").select("*").eq("message_id", messageid).eq("user_id", userid).execute()
@@ -90,13 +100,20 @@ class database:
     else:
       self.sup_db.table("giveaway_joins").insert({"message_id": messageid, "user_id": userid}).execute()
 
-  def cleanup_giveaway(self, messageid): 
+  async def cleanup_giveaway(self, ctx, messageid):
     """
+    AWAIT THIS
     run after all rerolling and winner choosing done AND all prizes claimed.
     deletes all joins and giveaway data from db.
     """
     self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).execute()
-    self.sup_db.table("giveaway_list").delete().eq("message_id", messageid).execute()
+    channelid = self.sup_db.table("giveaway_list").delete().eq("message_id", messageid).execute().data[0]["channel_id"]
+    channel = ctx.guild.get_channel(channelid)
+    message = await channel.fetch_message(messageid)
+    view = discord.ui.View.from_message(message)
+    view.disable_all_items()
+    await message.edit(view=view)
+
 
 
   def end_giveaway(self, messageid):
@@ -140,5 +157,6 @@ class helper_funcs:
 
 
 db = database()
-sql = db.cursor()
+#sql = db.cursor()
+sup_db = db.db()
 funcs = helper_funcs()

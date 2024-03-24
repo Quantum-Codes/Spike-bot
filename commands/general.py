@@ -26,7 +26,7 @@ class giveawaycommands(discord.Cog):
       return
 
     msg = await ctx.send("`@everyone`",embed=discord.Embed(description = message), view=GiveawayJoin())
-    db.create_giveaway(msg.id, winners)
+    db.create_giveaway(msg.id, ctx.channel.id, winners)
     await ctx.followup.send("Success", ephemeral=True)
 
   @giveaway.command(name="end", description = "Ends a giveaway")
@@ -61,7 +61,7 @@ class giveawaycommands(discord.Cog):
       await ctx.followup.send("Cancelled cleanup.", ephemeral=True)
       return
 
-    db.cleanup_giveaway(message.id)
+    await db.cleanup_giveaway(ctx, message.id)
     await ctx.followup.send(f"Deleted all data related to the giveaway with **ID: {message.id}**")
   
 

@@ -17,7 +17,7 @@ class ConfirmWinners(discord.ui.View):
     button.style = discord.ButtonStyle.success
     await interaction.response.edit_message(view=self)
     await interaction.channel.send(interaction.message.content, embed=interaction.message.embeds[0])
-    await interaction.channel.send(f"{self.gaw_msg.id}")
+    await interaction.followup.send(f"{self.gaw_msg.id} Use giveaway cleanup command to delete data about the giveaway. Only use if no more rerolls required.\nData is autmatically cleared after 30 days of ending.", ephemeral=True)
     
   @discord.ui.button(label= "Cancel", style=discord.ButtonStyle.danger, emoji=None)
   async def cancel_callback(self, button, interaction):
@@ -25,7 +25,7 @@ class ConfirmWinners(discord.ui.View):
     button.label = "Cancelled."
     button.style = discord.ButtonStyle.gray
     await interaction.response.edit_message(view=self)
-    await interaction.followup.send("Trigger giveaway command again to choose new winners.", ephemeral = True)
+    await interaction.followup.send("Trigger giveaway end command again to choose new winners.", ephemeral = True)
 
 class GiveawayLeave(discord.ui.View):
   def __init__(self, msgid):
@@ -51,7 +51,7 @@ class GiveawayJoin(discord.ui.View):
     await interaction.response.defer(ephemeral=True)
     
     if not db.check_valid_giveaway(interaction.message.id):
-      await interaction.followup.send("Invalid giveaway...", ephemeral=True)
+      await interaction.followup.send("Giveaway already ended or is invalid.", ephemeral=True)
       return 
     if db.check_joined_giveaway(interaction.message.id, interaction.user.id):
       msgview = GiveawayLeave(msgid=interaction.message.id)
