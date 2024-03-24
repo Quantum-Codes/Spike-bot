@@ -4,7 +4,7 @@ import os, random, json, supabase, dotenv
 dotenv.load_dotenv()
 class database:
   def __init__(self):
-    # connects to the db
+    # connects to the database
     self.sup_db = supabase.create_client(os.environ["sup_url"], os.environ["sup_key"])
 
   def db(self):
