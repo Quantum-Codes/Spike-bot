@@ -10,30 +10,25 @@ class database:
   def db(self):
     return self.sup_db
 
-  def get_server_settings(self, serverid, type = None):
-    if not type:
-      #self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE serverid = %s;", (serverid,))
+  def get_server_settings(self, serverid, setting_type = None):
+    if setting_type is None:
       result = self.sup_db.table("server_settings").select("type, data").eq("server_id", serverid).execute().data
-      #result = self.sql.fetchall()
-      data = [(item["type"], json.loads(item["data"])) for item in result]
+      print(setting_type(result), result, setting_type(result[0]["data"]))
+      data = [(item["type"], item["data"]) for item in result]
+      print(data)
       return data if data else None
-    #self.sql.execute("SELECT data FROM spikebot_server_settings WHERE serverid = %s AND type = %s;", (serverid, type))
-    data = self.sup_db.table("server_settings").select("data").eq("server_id", serverid).eq("type", type).execute().data[0]
-    #data = self.sql.fetchone()
-    if data:
-      print(type(data["data"]))
-      data = json.loads(data["data"])
+    data = self.sup_db.table("server_settings").select("data").eq("server_id", serverid).eq("type", setting_type).execute().data
+    if data: # non empty list= True
+      data = data[0]["data"] # guaranteed to be list of 1 element, so take just the 1st one
     else:
       data = None
     return data
 
-  def save_server_settings(self, serverid, type, data):
-    if self.get_server_settings(serverid, type) is None:
-      #self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s);", (serverid, type, json.dumps(data)))
-      self.sup_db.table("server_settings").insert({"server_id": serverid, "type": type, "data": json.dumps(data)})
+  def save_server_settings(self, serverid, setting_type, data):
+    if self.get_server_settings(serverid, setting_type) is None:
+      self.sup_db.table("server_settings").insert({"server_id": serverid, "type": setting_type, "data": data}).execute()
       return
-    #self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
-    self.sup_db.table("server_settings").update({"data": json.dumps(data)}).eq("server_id", serverid).eq("type", type).execute()
+    self.sup_db.table("server_settings").update({"data": data}).eq("server_id", serverid).eq("type", setting_type).execute()
 
   def get_player_tag(self, discordid, check_deleted=False):
     """

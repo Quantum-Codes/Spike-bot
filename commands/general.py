@@ -84,26 +84,24 @@ class utilitycommands(discord.Cog):
 
   @utility.command(name="welcome", description="Set welcome message channel")
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, embed_title: str = "", ping_member: bool = True):
-    await ctx.defer()
     embed = discord.Embed(colour = discord.Colour.green(), title="Saved welcome message", description = message)
     embed.add_field(name="channel", value=f"<#{channel.id}>")
     embed.add_field(name="title", value=embed_title)
     embed.add_field(name="ping new member", value = ping_member)
     embed.set_footer(text="Use `/utility welcometest` to preview the message")
     db.save_server_settings(ctx.guild.id, "welcomer", {"message": message, "channel": channel.id, "title": embed_title, "ping": ping_member})
-    await ctx.followup.send(embed=embed)
+    await ctx.respond(embed=embed)
 
   @utility.command(name="welcometest", description ="Test the welcome message")
   async def welcometest(self, ctx):
-    await ctx.defer()
     data = db.get_server_settings(ctx.guild.id, "welcomer")
     if data is None:
       embed = discord.Embed(colour = discord.Colour.red(), description="No welcome message set for this server.\nSet it up using `/utility welcome` command.")
-      await ctx.followup.send(embed = embed)
+      await ctx.respond(embed = embed)
       return
     embed = discord.Embed(colour = discord.Colour.green(), title=funcs.replace_placeholders (data["title"], ctx, test=True), description =funcs.replace_placeholders(data["message"], ctx, test= True))
-    embed.add_field(name="channel", value=f"<#{data['channel']}>")
-    await ctx.followup.send('@testuser' if data['ping'] else None, embed=embed)
+    embed.add_field(name="would have been posted in:", value=f"<#{data['channel']}>")
+    await ctx.respond('@testuser' if data['ping'] else None, embed=embed)
 
 
 def setup(bot):
