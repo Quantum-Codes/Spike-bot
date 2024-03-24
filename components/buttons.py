@@ -17,7 +17,7 @@ class ConfirmWinners(discord.ui.View):
     button.style = discord.ButtonStyle.success
     await interaction.response.edit_message(view=self)
     await interaction.channel.send(interaction.message.content, embed=interaction.message.embeds[0])
-    await interaction.followup.send(f"{self.gaw_msg.id} Use giveaway cleanup command to delete data about the giveaway. Only use if no more rerolls required.\nData is autmatically cleared after 30 days of ending.", ephemeral=True)
+    await interaction.followup.send(f"Use giveaway cleanup command to delete data about the giveaway. Only use if no more rerolls required.\nData is autmatically cleared after 30 days of ending.", ephemeral=True)
     
   @discord.ui.button(label= "Cancel", style=discord.ButtonStyle.danger, emoji=None)
   async def cancel_callback(self, button, interaction):
