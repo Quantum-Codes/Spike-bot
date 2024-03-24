@@ -3,7 +3,7 @@ import os, discord, aiohttp, dotenv
 import googleapiclient.discovery
 
 dotenv.load_dotenv()
-guild_ids = [1017417232952852550]
+guild_ids = [1099306183426326589]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 global_videolist =[] 
 #setup Google api
