@@ -2,6 +2,8 @@
 #For replit only:
 #make pycord work by making guessImports = false in .replit
 #also add pkgs.ffmpeg in replit.nix for voice
+
+## Remove 1099306183426326589 from guildids finally
 import discord, os, time
 from keep_alive import keep_alive
 from components.buttons import GiveawayJoin
@@ -10,7 +12,7 @@ import dotenv
 dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
-guild_ids = [1099306183426326589] # HARDCODED IN OTHER PLACES
+guild_ids = [1017417232952852550] # HARDCODED IN OTHER PLACES
 
 @bot.event
 async def on_ready():
@@ -78,6 +80,7 @@ async def on_member_update(before, after):
     channel = bot.get_channel(1149749715840274585)
     message = await channel.fetch_message(1156230990402965616)
     await message.edit(embed=embed)
+
 
 bot.load_extension("commands.general")
 bot.load_extension("commands.webhook")
