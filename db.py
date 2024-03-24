@@ -1,5 +1,5 @@
 import discord.ui
-import mysql.connector, os, random, json, supabase, dotenv
+import os, random, json, supabase, dotenv
 
 dotenv.load_dotenv()
 class database:
