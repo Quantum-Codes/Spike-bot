@@ -1,8 +1,11 @@
 import time, pickle
 
-def writelog(txt, obj = None):
+def writelog(txt, obj = None, mode = "normal"):
   print(txt)
-  with open("logs/log.json", "a") as file:
+  filename = "logs/log.json"
+  if mode == "community":
+    filename = "logs/community_log.json"
+  with open(filename, "a") as file:
     file.write(time.strftime("[%d/%m/%y--%H:%M:%S]  ",time.gmtime())+txt+"\n")
 
   if obj:
@@ -10,6 +13,9 @@ def writelog(txt, obj = None):
       print(obj)
       pickle.dump(obj, file)
     
-def getlog():
-  with open("logs/log.json", "r") as file:
+def getlog(mode = "normal"):
+  filename = "logs/log.json"
+  if mode == "community":
+    filename = "logs/community_log.json"
+  with open(filename, "r") as file:
     return file.read()

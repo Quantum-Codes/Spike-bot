@@ -1,93 +1,104 @@
-import mysql.connector, os, random, json
+import discord.ui
+import os, random, json, supabase, dotenv
 
-
+dotenv.load_dotenv()
 class database:
   def __init__(self):
-    self.db = mysql.connector.connect( 
-      host = os.environ["db_host"],
-      user = os.environ["db_user"],
-      password = os.environ["db_pass"],
-      database = os.environ["db_name"], 
-      autocommit = True #no way I'm committing after every read
-    )
-    self.sql = self.db.cursor()
+    # connects to the database
+    self.sup_db = supabase.create_client(os.environ["sup_url"], os.environ["sup_key"])
 
-  def cursor(self):
-    return self.sql
+  def db(self):
+    return self.sup_db
 
-  def get_server_settings(self, serverid, type = None):
-    if not type:
-      self.sql.execute("SELECT type, data FROM spikebot_server_settings WHERE serverid = %s;", (serverid,))
-      result = self.sql.fetchall()
-      data = [(item[0], json.loads(item[1])) for item in result]
+  def get_server_settings(self, serverid, setting_type = None):
+    if setting_type is None:
+      result = self.sup_db.table("server_settings").select("type, data").eq("server_id", serverid).execute().data
+      print(setting_type(result), result, setting_type(result[0]["data"]))
+      data = [(item["type"], item["data"]) for item in result]
+      print(data)
       return data if data else None
-    self.sql.execute("SELECT data FROM spikebot_server_settings WHERE serverid = %s AND type = %s;", (serverid, type))
-    data = self.sql.fetchone()
-    if data:
-      data = json.loads(data[0])
+    data = self.sup_db.table("server_settings").select("data").eq("server_id", serverid).eq("type", setting_type).execute().data
+    if data: # non empty list= True
+      data = data[0]["data"] # guaranteed to be list of 1 element, so take just the 1st one
     else:
       data = None
     return data
 
-  def save_server_settings(self, serverid, type, data):
-    if self.get_server_settings(serverid, type) is None:
-      self.sql.execute("INSERT INTO spikebot_server_settings (serverid, type, data) VALUES (%s, %s, %s);", (serverid, type, json.dumps(data)))
+  def save_server_settings(self, serverid, setting_type, data):
+    if self.get_server_settings(serverid, setting_type) is None:
+      self.sup_db.table("server_settings").insert({"server_id": serverid, "type": setting_type, "data": data}).execute()
       return
-    self.sql.execute("UPDATE spikebot_server_settings SET data = %s WHERE serverid = %s AND type = %s;",(json.dumps(data), serverid, type))
-    
-  def get_player_tag(self, discordid):
-    self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
-    tag = self.sql.fetchone()
-    if tag is None:
-      return None
-    return tag[0]
+    self.sup_db.table("server_settings").update({"data": data}).eq("server_id", serverid).eq("type", setting_type).execute()
+
+  def get_player_tag(self, discordid, check_deleted=False):
+    """
+    `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)
+    """
+    data = self.sup_db.table("users").select("player_tag").eq("user_id", discordid).execute()
+    if len(data.data) == 0:
+      if check_deleted:
+        return None, False
+      else:
+        return None
+    tag = data.data[0]["player_tag"]
+    if check_deleted:
+      return tag, bool(tag is None)
+    else:
+      return tag
+
 
   def update_tag(self, discordid, player_tag = None):
-    self.sql.execute("UPDATE spikebot_users SET player_tag = %s WHERE user_id = %s;", (player_tag, discordid))
+    self.sup_db.table("users").update({"player_tag": player_tag}).eq("user_id", discordid).execute()
 
   def add_user(self, discordid, player_tag = None):
     """
     Only `discordid` is required. All others are optional params. default = None
     """
-    self.sql.execute("SELECT player_tag FROM spikebot_users WHERE user_id = %s;", (discordid,))
-    tag = self.sql.fetchone()
-    print(tag, type(tag))
-    if type(tag) is tuple:
+    tag = self.get_player_tag(discordid, check_deleted=True)
+    if type(tag[0]) is str or tag[1]:
       self.update_tag(discordid, player_tag)
       return
-    self.sql.execute("INSERT INTO spikebot_users (user_id, player_tag) VALUES (%s, %s);", (discordid, player_tag))
+    self.sup_db.table("users").insert({"user_id": discordid, "player_tag": player_tag}).execute()
 
 
-  def create_giveaway(self, messageid, winners):
+  def create_giveaway(self, messageid, channelid, winners):
     """
     All params required.
     `winners` = Number of winners
-    `messageid`  = Message id of bot-posted giveaway 
+    `messageid` = Message id of bot-posted giveaway
+    `channelid` = Channel id of giveaway message
     """
-    self.sql.execute("INSERT INTO spikebot_giveaway_list (messageid, winners) VALUES (%s, %s);", (messageid, winners))
+    self.sup_db.table("giveaway_list").insert({"message_id":messageid, "winners":winners, "channel_id": channelid}).execute()
 
   def check_joined_giveaway(self, messageid, userid):
-    self.sql.execute("SELECT * FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid, userid))
-    self.sql.fetchall()
-    return self.sql.rowcount # tests truth value 
+    data = self.sup_db.table("giveaway_joins").select("*").eq("message_id", messageid).eq("user_id", userid).execute()
+    return len(data.data) # tests truth value
 
   def check_valid_giveaway(self, messageid):
-    self.sql.execute("SELECT * FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
-    return len(self.sql.fetchall()) # tests truth value 
+    data = self.sup_db.table("giveaway_list").select("*").eq("message_id", messageid).execute()
+    return len(data.data) # tests truth value
 
   def join_leave_giveaway(self, messageid, userid, mode="join"):
     if mode == "leave":
-      self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s AND userid = %s;", (messageid,  userid))
+      self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).eq("user_id", userid).execute()
     else:
-      self.sql.execute("INSERT INTO spikebot_giveaway_joins (messageid, userid) VALUES (%s, %s);", (messageid, userid))
+      self.sup_db.table("giveaway_joins").insert({"message_id": messageid, "user_id": userid}).execute()
 
-  def cleanup_giveaway(self, messageid): 
+  async def cleanup_giveaway(self, ctx, messageid):
     """
+    AWAIT THIS
     run after all rerolling and winner choosing done AND all prizes claimed.
     deletes all joins and giveaway data from db.
     """
-    self.sql.execute("DELETE FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
-    self.sql.execute("DELETE FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
+    self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).execute()
+    channelid = self.sup_db.table("giveaway_list").delete().eq("message_id", messageid).execute().data[0]["channel_id"]
+    channel = ctx.guild.get_channel(channelid)
+    message = await channel.fetch_message(messageid)
+    view = discord.ui.View.from_message(message)
+    view.disable_all_items()
+    await message.edit(view=view)
+
+
 
   def end_giveaway(self, messageid):
     """
@@ -95,11 +106,10 @@ class database:
     Return value: dict. (keys: winners, winners_count, participants, participants_count)
     participants, winners -> list of single item tuples with discord ID (int) inside them.
     """
-    self.sql.execute("SELECT DISTINCT userid FROM spikebot_giveaway_joins WHERE messageid = %s;", (messageid,))
-    participants = self.sql.fetchall()
-    participants_count = self.sql.rowcount
-    self.sql.execute("SELECT winners FROM spikebot_giveaway_list WHERE messageid = %s;", (messageid,))
-    winnerscount = self.sql.fetchone()[0]
+    participants = self.sup_db.table("giveaway_joins").select("user_id").eq("message_id", messageid).execute().data # had to be select distinct???
+    print(participants)
+    participants_count = len(participants)
+    winnerscount = self.sup_db.table("giveaway_list").select("winners").eq("message_id", messageid).execute().data[0]["winners"]
     if winnerscount > participants_count:
       winnerscount = participants_count
     winners = random.sample(participants, winnerscount)
@@ -131,5 +141,5 @@ class helper_funcs:
 
 
 db = database()
-sql = db.cursor()
+sup_db = db.db()
 funcs = helper_funcs()
