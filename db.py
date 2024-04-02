@@ -13,9 +13,7 @@ class database:
   def get_server_settings(self, serverid, setting_type = None):
     if setting_type is None:
       result = self.sup_db.table("server_settings").select("type, data").eq("server_id", serverid).execute().data
-      print(setting_type(result), result, setting_type(result[0]["data"]))
       data = [(item["type"], item["data"]) for item in result]
-      print(data)
       return data if data else None
     data = self.sup_db.table("server_settings").select("data").eq("server_id", serverid).eq("type", setting_type).execute().data
     if data: # non empty list= True
@@ -107,7 +105,6 @@ class database:
     participants, winners -> list of single item tuples with discord ID (int) inside them.
     """
     participants = self.sup_db.table("giveaway_joins").select("user_id").eq("message_id", messageid).execute().data # had to be select distinct???
-    print(participants)
     participants_count = len(participants)
     winnerscount = self.sup_db.table("giveaway_list").select("winners").eq("message_id", messageid).execute().data[0]["winners"]
     if winnerscount > participants_count:
@@ -143,7 +140,6 @@ class helper_funcs:
     suffix_num.extend(["th"]*6)
     temp =int(str(guild.member_count)[-1])
     suffix_num = suffix_num[temp]
-    print(guild.icon, guild.icon.url if guild.icon else None)
     placeholders = {
       "user_mention": user.mention,
       "n": "\n",

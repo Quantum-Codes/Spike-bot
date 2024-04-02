@@ -86,7 +86,6 @@ class utilitycommands(discord.Cog):
   @discord.ext.commands.has_permissions(administrator=True)
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
     # add url validation, color option and validation
-    print(message)
     embed = discord.Embed(colour = discord.Colour.green(), title="Saved welcome message", description = message)
     embed.add_field(name="channel", value=f"<#{channel.id}>")
     embed.add_field(name="title", value=embed_title)
