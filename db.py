@@ -1,4 +1,4 @@
-import discord.ui
+import discord.ui, discord.ext, discord
 import os, random, json, supabase, dotenv
 
 dotenv.load_dotenv()
@@ -120,24 +120,41 @@ class helper_funcs:
   def __init__(self):
     pass
 
-  def replace_placeholders(self, message, user, test = False):
+  def replace_placeholders(self, message, ctx, image_url=False, bot=None): # worst function ever..
+    if isinstance(ctx, discord.commands.context.ApplicationContext):
+      userid = ctx.user.id
+      guild = ctx.user.guild
+    else: # member object
+      userid = ctx.id
+      guild = ctx.guild
+    if bot is None:
+      user = ctx.bot.get_user(userid) #call and not use ctx.user as it doesnt have ctx.user.banner
+    else:
+      user = bot.get_user(userid)
+    if image_url and message.strip().lower() == "[user_banner]":
+      message = user.banner.url if user.banner else None
+      return message
     suffix_num = ["th","st", "nd", "rd"]
     suffix_num.extend(["th"]*6)
-    temp =int(str(user.guild.member_count)[-1])
+    temp =int(str(guild.member_count)[-1])
     suffix_num = suffix_num[temp]
+    print(user.display_avatar.url)
     placeholders = {
-      "user_mention": "@testuser" if test else user.mention,
-      "user": "testuser" if test else user.display_name,
-      "user_id": "testuserid" if test else user.id,
-      "server": user.guild.name,
-      "server_id": user.guild.id,
-      "member_count": user.guild.member_count,
-      "member_position": f"{user.guild.member_count}{suffix_num}"
+      "user_mention": user.mention,
+      "n": "\n",
+      "user": user.display_name,
+      "user_id": user.id,
+      "server": guild.name,
+      "server_id": guild.id,
+      "server_avatar": guild.icon.url if guild.icon else None,
+      "member_count": guild.member_count,
+      "member_position": f"{guild.member_count}{suffix_num}",
+      "user_avatar": user.display_avatar.url,
+      "user_banner": user.banner.url if user.banner else None
     }
     for k, v in placeholders.items():
       message = message.replace(f"[{k}]", str(v))
     return message
-
 
 
 db = database()

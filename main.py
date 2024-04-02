@@ -2,16 +2,20 @@
 #For replit only:
 #make pycord work by making guessImports = false in .replit
 #also add pkgs.ffmpeg in replit.nix for voice
+#https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
+
+# ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
 
 import discord, os, time
 from keep_alive import keep_alive
 from components.buttons import GiveawayJoin
 import dotenv
+from db import db, funcs
 
 dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
-guild_ids = [1099306183426326589] # HARDCODED IN OTHER PLACES
+guild_ids = [1017417232952852550, 1099306183426326589] # HARDCODED IN OTHER PLACES
 
 @bot.event
 async def on_ready():
@@ -23,23 +27,18 @@ async def on_message(message):
   if bot.user.mentioned_in(message) and bot.user in message.mentions: #message.mentions empty when everyone ping
     await message.reply("Why u pinged me? I was sleeping :(")
 
-def welcome_embed(user):
+def welcome_embed(user, settings):
   suffix_num = ["th","st", "nd", "rd"]
   suffix_num.extend(["th"]*6)
   temp =int(str(user.guild.member_count)[-1])
   suffix_num = suffix_num[temp]
   embed = discord.Embed(
-    title = f"Welcome to {user.guild.name}, {user.display_name}",
+    title = funcs.replace_placeholders(settings["title"], user, bot=bot),
     color = discord.Colour.blurple(),
-    description = f"""🎉You are the {user.guild.member_count}{suffix_num} member of {user.guild.name}!🎉
-----------------------------------------------
-Read the <#1114076581804126228>! 
-Check out <#1114076810901209088> to look for giveaways and announcements
-Or go to <#1099306183979970661> to chat with other users
-----------------------------------------------"""
+    description = funcs.replace_placeholders(settings["message"], user, bot=bot)
   )
-  embed.set_thumbnail(url=user.display_avatar)
-  embed.set_image(url="https://media.tenor.com/4GQvhQ5ISmUAAAAC/discord-server.gif")
+  embed.set_thumbnail(url=funcs.replace_placeholders(settings["thumb_url"], user, bot=bot))
+  embed.set_image(url=funcs.replace_placeholders(settings["image_url"], user, bot=bot))
   return embed
 
 async def autokick(member):
@@ -54,8 +53,13 @@ async def autokick(member):
 
 @bot.event
 async def on_member_join(member):
-  if member.guild.id == 1099306183426326589:
-    await bot.get_channel(1116003307694067772).send(f'Welcome to the server, {member.mention}! Enjoy your stay here.', embed=welcome_embed(member))
+  settings = db.get_server_settings(member.guild.id, "welcomer")
+  print(settings)
+  if settings:
+    print("entered")
+    welcomechannel = bot.get_channel(settings["channel"])
+    print(welcomechannel)
+    await welcomechannel.send(f'Welcome to the server, {member.mention if settings["ping"] else None}!', embed=welcome_embed(member, settings))
   elif member.guild.id == 1049987508559167580:
     await autokick(member)
 
@@ -66,7 +70,7 @@ async def on_interaction(interaction):
   print(interaction.id)
 """
 
-@bot.event
+"""@bot.event
 async def on_member_update(before, after):
   if before.roles != after.roles:
     embed = discord.Embed(
@@ -79,13 +83,13 @@ async def on_member_update(before, after):
     channel = bot.get_channel(1149749715840274585)
     message = await channel.fetch_message(1156230990402965616)
     await message.edit(embed=embed)
-
+"""
 
 bot.load_extension("commands.general")
-bot.load_extension("commands.webhook")
-bot.load_extension("commands.brawlstars")
-#bot.load_extension("commands.message_commands")
-bot.load_extension("commands.rolestat")
+#bot.load_extension("commands.webhook")
+#bot.load_extension("commands.brawlstars")
+####bot.load_extension("commands.message_commands")
+#bot.load_extension("commands.rolestat")
 t1 = keep_alive()
 try:
   bot.run(os.environ["token"])
