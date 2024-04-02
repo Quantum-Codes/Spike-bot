@@ -131,14 +131,19 @@ class helper_funcs:
       user = ctx.bot.get_user(userid) #call and not use ctx.user as it doesnt have ctx.user.banner
     else:
       user = bot.get_user(userid)
-    if image_url and message.strip().lower() == "[user_banner]":
-      message = user.banner.url if user.banner else None
+    if image_url:
+      if message.lower().strip() == "[user_banner]":
+        message = user.banner.url if user.banner else None
+      elif message.lower().strip() == "[server_icon]":
+        message = guild.icon.url if guild.icon else None
+      elif message.lower().strip() == "[user_avatar]":
+        message = user.display_avatar.url
       return message
     suffix_num = ["th","st", "nd", "rd"]
     suffix_num.extend(["th"]*6)
     temp =int(str(guild.member_count)[-1])
     suffix_num = suffix_num[temp]
-    print(user.display_avatar.url)
+    print(guild.icon, guild.icon.url if guild.icon else None)
     placeholders = {
       "user_mention": user.mention,
       "n": "\n",
@@ -146,7 +151,7 @@ class helper_funcs:
       "user_id": user.id,
       "server": guild.name,
       "server_id": guild.id,
-      "server_avatar": guild.icon.url if guild.icon else None,
+      "server_icon": guild.icon.url if guild.icon else None,
       "member_count": guild.member_count,
       "member_position": f"{guild.member_count}{suffix_num}",
       "user_avatar": user.display_avatar.url,

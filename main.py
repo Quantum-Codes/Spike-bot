@@ -37,8 +37,8 @@ def welcome_embed(user, settings):
     color = discord.Colour.blurple(),
     description = funcs.replace_placeholders(settings["message"], user, bot=bot)
   )
-  embed.set_thumbnail(url=funcs.replace_placeholders(settings["thumb_url"], user, bot=bot))
-  embed.set_image(url=funcs.replace_placeholders(settings["image_url"], user, bot=bot))
+  embed.set_thumbnail(url=funcs.replace_placeholders(settings["thumb_url"], user, bot=bot, image_url=True))
+  embed.set_image(url=funcs.replace_placeholders(settings["image_url"], user, bot=bot, image_url=True))
   return embed
 
 async def autokick(member):
