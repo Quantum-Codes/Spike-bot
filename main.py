@@ -34,7 +34,7 @@ def welcome_embed(user, settings):
   suffix_num = suffix_num[temp]
   embed = discord.Embed(
     title = funcs.replace_placeholders(settings["title"], user, bot=bot),
-    color = discord.Colour.blurple(),
+    color = discord.Colour(settings["colour"]),
     description = funcs.replace_placeholders(settings["message"], user, bot=bot)
   )
   embed.set_thumbnail(url=funcs.replace_placeholders(settings["thumb_url"], user, bot=bot, image_url=True))
@@ -54,11 +54,8 @@ async def autokick(member):
 @bot.event
 async def on_member_join(member):
   settings = db.get_server_settings(member.guild.id, "welcomer")
-  print(settings)
   if settings:
-    print("entered")
     welcomechannel = bot.get_channel(settings["channel"])
-    print(welcomechannel)
     await welcomechannel.send(f'Welcome to the server, {member.mention if settings["ping"] else None}!', embed=welcome_embed(member, settings))
   elif member.guild.id == 1049987508559167580:
     await autokick(member)
@@ -86,10 +83,10 @@ async def on_member_update(before, after):
 """
 
 bot.load_extension("commands.general")
-#bot.load_extension("commands.webhook")
-#bot.load_extension("commands.brawlstars")
+bot.load_extension("commands.webhook")
+bot.load_extension("commands.brawlstars")
 ####bot.load_extension("commands.message_commands")
-#bot.load_extension("commands.rolestat")
+bot.load_extension("commands.rolestat")
 t1 = keep_alive()
 try:
   bot.run(os.environ["token"])

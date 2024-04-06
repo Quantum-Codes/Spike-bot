@@ -1,7 +1,7 @@
 import discord, discord.ext
 from discord.commands import SlashCommandGroup
 from main import guild_ids
-from db import db, funcs
+from db import db, funcs, Colour
 from components.buttons import GiveawayJoin, ConfirmWinners
 
 
@@ -84,14 +84,14 @@ class utilitycommands(discord.Cog):
 
   @utility.command(name="welcome", description="Set welcome message channel")
   @discord.ext.commands.has_permissions(administrator=True)
-  async def welcomer(self, ctx, channel: discord.TextChannel, message: str, embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
+  async def welcomer(self, ctx, channel: discord.TextChannel, message: str, colour: Colour = int("0x2ecc71",16), embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
     # add url validation, color option and validation
-    embed = discord.Embed(colour = discord.Colour.green(), title="Saved welcome message", description = message)
+    embed = discord.Embed(colour = discord.Colour(colour), title="Saved welcome message", description = message)
     embed.add_field(name="channel", value=f"<#{channel.id}>")
-    embed.add_field(name="title", value=embed_title)
+    embed.add_field(name="title", value=embed_title if embed_title else "not set")
     embed.add_field(name="ping new member", value = "True" if ping_member else "False")
-    embed.add_field(name="image", value=image_url)
-    embed.add_field(name="thumbnail", value=thumb_url)
+    embed.add_field(name="image", value=image_url if image_url else "not set")
+    embed.add_field(name="thumbnail", value=thumb_url if thumb_url else "not set")
     embed.set_footer(text="Use `/utility welcometest` to preview the message")
     db.save_server_settings(ctx.guild.id, "welcomer", {
       "message": message,
@@ -99,7 +99,8 @@ class utilitycommands(discord.Cog):
       "title": embed_title,
       "ping": ping_member,
       "image_url": image_url,
-      "thumb_url": thumb_url
+      "thumb_url": thumb_url,
+      "colour": colour
     })
     await ctx.respond(embed=embed)
 
@@ -107,6 +108,8 @@ class utilitycommands(discord.Cog):
   async def welcomer_error(self, ctx, error):
     if isinstance(error, discord.ext.commands.CheckFailure):
       await ctx.respond(f"Missing permissions: `{', '.join(error.missing_permissions)}`", ephemeral = True)
+    if isinstance(error, discord.ext.commands.BadArgument):
+      await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
 
   @utility.command(name="welcometest", description ="Test the welcome message")
   async def welcometest(self, ctx):
@@ -115,7 +118,7 @@ class utilitycommands(discord.Cog):
       embed = discord.Embed(colour = discord.Colour.red(), description="No welcome message set for this server.\nSet it up using `/utility welcome` command.")
       await ctx.respond(embed = embed)
       return
-    embed = discord.Embed(colour = discord.Colour.green(), title=funcs.replace_placeholders(data["title"], ctx), description =funcs.replace_placeholders(data["message"], ctx))
+    embed = discord.Embed(colour = discord.Colour(data["colour"]), title=funcs.replace_placeholders(data["title"], ctx), description =funcs.replace_placeholders(data["message"], ctx))
     embed.add_field(name="would have been posted in:", value=f"<#{data['channel']}>")
     embed.set_image(url=funcs.replace_placeholders(data["image_url"], ctx, image_url=True))
     embed.set_thumbnail(url=funcs.replace_placeholders(data["thumb_url"], ctx, image_url=True))

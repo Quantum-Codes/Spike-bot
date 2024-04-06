@@ -1,4 +1,4 @@
-import discord.ui, discord.ext, discord
+import discord.ui, discord.ext, discord, re
 import os, random, json, supabase, dotenv
 
 dotenv.load_dotenv()
@@ -112,6 +112,18 @@ class database:
     winners = random.sample(participants, winnerscount)
     return {"winners": winners, "winners_count": winnerscount, "participants": participants, "participants_count": participants_count}
 
+
+# CUSTOM CONVERTER
+class Colour(discord.ext.commands.Converter):
+  async def convert(self, ctx, arg: str):
+    arg = arg.strip().lower()
+    if arg.startswith("#"):
+      arg = arg[1:]
+    if not re.fullmatch("^[a-f0-9]{6}$", arg):
+      raise discord.ext.commands.BadArgument()
+    arg = int("0x"+arg, 16)
+    print(arg, type(arg))
+    return arg
 
 class helper_funcs:
   def __init__(self):
