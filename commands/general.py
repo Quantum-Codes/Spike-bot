@@ -77,11 +77,11 @@ class utilitycommands(discord.Cog):
       await ctx.respond('Message not found. Check the message ID and try again.', ephemeral = True)
     else:
       raise error
-"""
+  """
   @discord.slash_command(name="servers", description ="list out servers I'm in", guild_ids=guild_ids)
   async def serverscommand(self, ctx):
     await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
-"""
+  """
   @utility.command(name="welcome", description="Set welcome message channel")
   @discord.ext.commands.has_permissions(administrator=True)
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, colour: Colour = int("0x2ecc71",16), embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
