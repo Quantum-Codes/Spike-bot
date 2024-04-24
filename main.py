@@ -54,11 +54,11 @@ async def autokick(member):
 @bot.event
 async def on_member_join(member):
   settings = db.get_server_settings(member.guild.id, "welcomer")
-  if settings:
+  if member.guild.id == 949272833979219988: #autokick first
+    await autokick(member)
+  elif settings: #if autokick, dont welcome. so elif clause
     welcomechannel = bot.get_channel(settings["channel"])
     await welcomechannel.send(f'Welcome to the server, {member.mention if settings["ping"] else None}!', embed=welcome_embed(member, settings))
-  elif member.guild.id == 1049987508559167580:
-    await autokick(member)
 
 """
 @bot.listen()
