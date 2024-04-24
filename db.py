@@ -28,6 +28,10 @@ class database:
       return
     self.sup_db.table("server_settings").update({"data": data}).eq("server_id", serverid).eq("type", setting_type).execute()
 
+  def delete_server_settings(self, serverid, setting_type):
+    if self.get_server_settings(serverid, setting_type) is not None:
+      self.sup_db.table("server_settings").delete().eq("server_id", serverid).eq("type", setting_type).execute()
+
   def get_player_tag(self, discordid, check_deleted=False):
     """
     `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)

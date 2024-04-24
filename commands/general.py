@@ -70,6 +70,7 @@ class utilitycommands(discord.Cog):
     self.bot = bot
 
   utility = SlashCommandGroup("utility", "Server enhancers")
+  welcome = utility.create_subgroup("welcome", "Welcomer commands")
 
   async def cog_command_error(self, ctx, error):
     print(error, error.__cause__, type(error))
@@ -82,7 +83,7 @@ class utilitycommands(discord.Cog):
   async def serverscommand(self, ctx):
     await ctx.send('\n'.join(guild.name for guild in self.bot.guilds))
   """
-  @utility.command(name="welcome", description="Set welcome message channel")
+  @welcome.command(name="setup", description="Set welcome message channel")
   @discord.ext.commands.has_permissions(administrator=True)
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, colour: Colour = int("0x2ecc71",16), embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
     # add url validation, color option and validation
@@ -92,7 +93,7 @@ class utilitycommands(discord.Cog):
     embed.add_field(name="ping new member", value = "True" if ping_member else "False")
     embed.add_field(name="image", value=image_url if image_url else "not set")
     embed.add_field(name="thumbnail", value=thumb_url if thumb_url else "not set")
-    embed.set_footer(text="Use `/utility welcometest` to preview the message")
+    embed.set_footer(text="Use `/utility welcome test_message` to preview the message")
     db.save_server_settings(ctx.guild.id, "welcomer", {
       "message": message,
       "channel": channel.id,
@@ -111,11 +112,11 @@ class utilitycommands(discord.Cog):
     if isinstance(error, discord.ext.commands.BadArgument):
       await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
 
-  @utility.command(name="welcometest", description ="Test the welcome message")
+  @welcome.command(name="test_message", description ="Test the welcome message")
   async def welcometest(self, ctx):
     data = db.get_server_settings(ctx.guild.id, "welcomer")
     if data is None:
-      embed = discord.Embed(colour = discord.Colour.red(), description="No welcome message set for this server.\nSet it up using `/utility welcome` command.")
+      embed = discord.Embed(colour = discord.Colour.red(), description="No welcome message set for this server.\nSet it up using `/utility welcome setup` command.")
       await ctx.respond(embed = embed)
       return
     embed = discord.Embed(colour = discord.Colour(data["colour"]), title=funcs.replace_placeholders(data["title"], ctx), description =funcs.replace_placeholders(data["message"], ctx))
@@ -123,6 +124,23 @@ class utilitycommands(discord.Cog):
     embed.set_image(url=funcs.replace_placeholders(data["image_url"], ctx, image_url=True))
     embed.set_thumbnail(url=funcs.replace_placeholders(data["thumb_url"], ctx, image_url=True))
     await ctx.respond(f'{ctx.user.mention}' if data['ping'] else None, embed=embed)
+
+  @welcome.command(name="remove", description = "Disable and delete welcome message")
+  async def removewelcome(self, ctx):
+    data = db.get_server_settings(ctx.guild.id, "welcomer")
+    if data is None:
+      embed = discord.Embed(colour=discord.Colour.red(),
+                            description="No welcome message set for this server.\nSet it up using `/utility welcome setup` command."
+                            )
+      await ctx.respond(embed=embed)
+      return
+
+    db.delete_server_settings(ctx.guild.id, "welcomer")
+    embed = discord.Embed(colour = discord.Colour.red(), title="Deleted welcome message", description = data["message"])
+    embed.add_field(name="title", value=data["title"] if data["title"] else "not set")
+    embed.add_field(name="image", value=data["image_url"] if data["image_url"] else "not set")
+    embed.add_field(name="thumbnail", value=data["thumb_url"] if data["thumb_url"] else "not set")
+    await ctx.respond(embed=embed)
 
 
 def setup(bot):
