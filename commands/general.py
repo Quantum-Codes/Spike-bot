@@ -105,14 +105,8 @@ class utilitycommands(discord.Cog):
     })
     await ctx.respond(embed=embed)
 
-  @welcomer.error
-  async def welcomer_error(self, ctx, error):
-    if isinstance(error, discord.ext.commands.CheckFailure):
-      await ctx.respond(f"Missing permissions: `{', '.join(error.missing_permissions)}`", ephemeral = True)
-    if isinstance(error, discord.ext.commands.BadArgument):
-      await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
-
   @welcome.command(name="test_message", description ="Test the welcome message")
+  @discord.ext.commands.has_permissions(administrator=True)
   async def welcometest(self, ctx):
     data = db.get_server_settings(ctx.guild.id, "welcomer")
     if data is None:
@@ -126,6 +120,7 @@ class utilitycommands(discord.Cog):
     await ctx.respond(f'{ctx.user.mention}' if data['ping'] else None, embed=embed)
 
   @welcome.command(name="remove", description = "Disable and delete welcome message")
+  @discord.ext.commands.has_permissions(administrator=True)
   async def removewelcome(self, ctx):
     data = db.get_server_settings(ctx.guild.id, "welcomer")
     if data is None:
@@ -142,6 +137,14 @@ class utilitycommands(discord.Cog):
     embed.add_field(name="thumbnail", value=data["thumb_url"] if data["thumb_url"] else "not set")
     await ctx.respond(embed=embed)
 
+  @welcomer.error
+  @removewelcome.error
+  @welcometest.error
+  async def welcomer_error(self, ctx, error):
+    if isinstance(error, discord.ext.commands.CheckFailure):
+      await ctx.respond(f"Missing permissions: `{', '.join(error.missing_permissions)}`", ephemeral = True)
+    if isinstance(error, discord.ext.commands.BadArgument):
+      await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
 
 def setup(bot):
   bot.add_cog(giveawaycommands(bot))
