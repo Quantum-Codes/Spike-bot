@@ -86,6 +86,7 @@ class utilitycommands(discord.Cog):
   @welcome.command(name="setup", description="Set welcome message channel")
   @discord.ext.commands.has_permissions(administrator=True)
   async def welcomer(self, ctx, channel: discord.TextChannel, message: str, colour: Colour = int("0x2ecc71",16), embed_title: str = "", ping_member: bool = True, image_url: str = "", thumb_url: str = ""):
+    await ctx.defer()
     # add url validation, color option and validation
     embed = discord.Embed(colour = discord.Colour(colour), title="Saved welcome message", description = message)
     embed.add_field(name="channel", value=f"<#{channel.id}>")
@@ -103,7 +104,7 @@ class utilitycommands(discord.Cog):
       "thumb_url": thumb_url,
       "colour": colour
     })
-    await ctx.respond(embed=embed)
+    await ctx.followup.send(embed=embed)
 
   @welcome.command(name="test_message", description ="Test the welcome message")
   @discord.ext.commands.has_permissions(administrator=True)
