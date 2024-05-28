@@ -122,12 +122,13 @@ class utilitycommands(discord.Cog):
   @welcome.command(name="remove", description = "Disable and delete welcome message")
   @discord.ext.commands.has_permissions(administrator=True)
   async def removewelcome(self, ctx):
+    await ctx.defer()
     data = db.get_server_settings(ctx.guild.id, "welcomer")
     if data is None:
       embed = discord.Embed(colour=discord.Colour.red(),
                             description="No welcome message set for this server.\nSet it up using `/utility welcome setup` command."
                             )
-      await ctx.respond(embed=embed)
+      await ctx.followup.send(embed=embed)
       return
 
     db.delete_server_settings(ctx.guild.id, "welcomer")
@@ -135,7 +136,7 @@ class utilitycommands(discord.Cog):
     embed.add_field(name="title", value=data["title"] if data["title"] else "not set")
     embed.add_field(name="image", value=data["image_url"] if data["image_url"] else "not set")
     embed.add_field(name="thumbnail", value=data["thumb_url"] if data["thumb_url"] else "not set")
-    await ctx.respond(embed=embed)
+    await ctx.followup.send(embed=embed)
 
   @welcomer.error
   @removewelcome.error
