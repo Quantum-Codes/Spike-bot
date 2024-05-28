@@ -124,7 +124,7 @@ class Colour(discord.ext.commands.Converter):
     if arg.startswith("#"):
       arg = arg[1:]
     if not re.fullmatch("^[a-f0-9]{6}$", arg):
-      raise discord.ext.commands.BadArgument()
+      raise discord.ext.commands.BadArgument("Bad hex")
     arg = int("0x"+arg, 16)
     print(arg, type(arg))
     return arg

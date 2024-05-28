@@ -146,7 +146,8 @@ class utilitycommands(discord.Cog):
     if isinstance(error, discord.ext.commands.CheckFailure):
       await ctx.respond(f"Missing permissions: `{', '.join(error.missing_permissions)}`", ephemeral = True)
     if isinstance(error, discord.ext.commands.BadArgument):
-      await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
+      if "Bad hex" in error.args:
+        await ctx.respond("Must be a hex code(6 character code). eg `#ffffff`. Use a color picker: https://g.co/kgs/s8Wsnxt")
 
 def setup(bot):
   bot.add_cog(giveawaycommands(bot))
