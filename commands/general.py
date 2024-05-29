@@ -71,6 +71,7 @@ class utilitycommands(discord.Cog):
 
   utility = SlashCommandGroup("utility", "Server enhancers")
   welcome = utility.create_subgroup("welcome", "Welcomer commands")
+  autokick = utility.create_subgroup("autokick", "Autokick module commands")
 
   async def cog_command_error(self, ctx, error):
     print(error, error.__cause__, type(error))
@@ -139,10 +140,33 @@ class utilitycommands(discord.Cog):
     embed.add_field(name="thumbnail", value=data["thumb_url"] if data["thumb_url"] else "not set")
     await ctx.followup.send(embed=embed)
 
+  @autokick.command(name="setup", description="Kick newly created accounts")
+  @discord.ext.commands.has_permissions(administrator=True)
+  async def autokick_setup(self, ctx, age_in_seconds: int = 7*24*3600):
+    await ctx.defer()
+    embed = discord.Embed(colour=discord.Colour.green(), title="Autokick enabled",
+                          description=f"Any account younger than {age_in_seconds} seconds will be kicked when they join.\nTo disable, use `/utility autokick disable`")
+    db.save_server_settings(ctx.guild.id, "autokick", {"age": age_in_seconds})
+    await ctx.followup.send(embed=embed)
+
+  @autokick.command(name="disable", description="Disable autokick")
+  @discord.ext.commands.has_permissions(administrator=True)
+  async def autokick_disable(self, ctx):
+    await ctx.defer()
+    if db.get_server_settings(ctx.guild.id, "autokick") is None:
+      embed = discord.Embed(colour=discord.Colour.red(), title="Autokick was not setup",
+                            description="Autokick was not setup for this server.\nEnable it using `/utility autokick setup`")
+      await ctx.followup.send(embed=embed)
+      return
+
+    db.delete_server_settings(ctx.guild.id, "autokick")
+    embed = discord.Embed(colour=discord.Colour.green(), title="Autokick is disabled",
+                          description="Autokick is now disabled for this server.\nYou may enable autokick again using `/utility autokick setup`")
+    await ctx.followup.send(embed = embed)
   @welcomer.error
   @removewelcome.error
   @welcometest.error
-  async def welcomer_error(self, ctx, error):
+  async def errorhandler(self, ctx, error):
     if isinstance(error, discord.ext.commands.CheckFailure):
       await ctx.respond(f"Missing permissions: `{', '.join(error.missing_permissions)}`", ephemeral = True)
     if isinstance(error, discord.ext.commands.BadArgument):

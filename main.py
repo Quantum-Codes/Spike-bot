@@ -5,6 +5,8 @@
 #https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
 
 # ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
+# poetry export --without-hashes --format=requirements.txt > requirements.txt
+# DOING LINE 143 commadns/general.py  AUTOKICK feature
 
 import discord, os, time
 from keep_alive import keep_alive
@@ -41,24 +43,28 @@ def welcome_embed(user, settings):
   embed.set_image(url=funcs.replace_placeholders(settings["image_url"], user, bot=bot, image_url=True))
   return embed
 
-async def autokick(member):
-  if time.time() - member.created_at.timestamp() < 7*24*3600:
+async def autokick(member, acc_time):
+  if time.time() - member.created_at.timestamp() < acc_time:
     dms = await member.create_dm()
     try:
-      await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast 1 week old__.")
+      await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast {acc_time} seconds old__.")
     except discord.errors.Forbidden:
       print(f"Failed to message {member.name} {member.id}")
 
     await member.kick(reason = "new account") #message before kick so member share server with bot
+    return 1
+  return 0
 
 @bot.event
 async def on_member_join(member):
-  settings = db.get_server_settings(member.guild.id, "welcomer")
-  if member.guild.id == 949272833979219988: #autokick first
-    await autokick(member)
-  elif settings: #if autokick, dont welcome. so elif clause
-    welcomechannel = bot.get_channel(settings["channel"])
-    await welcomechannel.send(f'Welcome to the server, {member.mention if settings["ping"] else None}!', embed=welcome_embed(member, settings))
+  settings_welcome = db.get_server_settings(member.guild.id, "welcomer")
+  settings_autokick = db.get_server_settings(member.guild.id, "autokick")
+  kicked = 0
+  if settings_autokick is not None: #autokick first
+    kicked = await autokick(member, settings_autokick["age"])
+  if settings_welcome is not None and kicked == 0: # if autokick, dont welcome. so elif clause
+    welcomechannel = bot.get_channel(settings_welcome["channel"])
+    await welcomechannel.send(f'Welcome to the server, {member.mention if settings_welcome["ping"] else None}!', embed=welcome_embed(member, settings_welcome))
 
 """
 @bot.listen()
