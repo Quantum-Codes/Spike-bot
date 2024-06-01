@@ -25,7 +25,7 @@ class giveawaycommands(discord.Cog):
       await ctx.followup.send("Who tf are you??", ephemeral = True)
       return
 
-    msg = await ctx.send(embed=discord.Embed(description = message), view=GiveawayJoin())
+    msg = await ctx.send(embed=discord.Embed(description = funcs.replace_placeholders(message,ctx)), view=GiveawayJoin())
     db.create_giveaway(msg.id, ctx.channel.id, winners)
     await ctx.followup.send("Success", ephemeral=True)
 

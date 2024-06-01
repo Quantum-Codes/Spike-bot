@@ -118,7 +118,6 @@ class brawl(discord.Cog):
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      print(player_tag)
       battle_data = get_battledata(player_tag, data)[1]
       await ctx.followup.send(embed=embed_player(data, battle_data))
     elif data.status_code == 404:
@@ -128,6 +127,32 @@ class brawl(discord.Cog):
     else:
       await ctx.followup.send("error")
 
+  """
+  @discord.slash_command(name="clubstats", description="GET a club's stats")
+  async def clubstats(self, ctx, club_tag: str = "#Y999JCG0"):
+    await ctx.defer()
+    if not club_tag:
+      # get player's club here
+      data = db.get_player_tag(ctx.author.id)
+      if data is None:
+        await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+        return
+      player_tag = data
+      #
+      pass
+    club_tag = fix_playertag(club_tag)
+    data = requests.get(f"https://bsproxy.royaleapi.dev/v1/clubs/{club_tag}", headers=headers)
+    if data.status_code == 200:
+      data = data.json()
+      print(data)
+      await ctx.followup.send(embed=embed_club(data))
+    elif data.status_code == 404:
+      if data.json().get("reason"):
+        if data.json()["reason"] == "notFound":
+          await ctx.followup.send("No such player exists")
+    else:
+      await ctx.followup.send("error")
+  """
 
   @discord.slash_command(name="battlestats", description ="GET a player's battle stats") 
   async def battlestats(self, ctx, player_tag: str = ""):

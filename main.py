@@ -6,7 +6,6 @@
 
 # ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
 # poetry export --without-hashes --format=requirements.txt > requirements.txt
-# DOING LINE 143 commadns/general.py  AUTOKICK feature
 
 import discord, os, time
 from keep_alive import keep_alive
