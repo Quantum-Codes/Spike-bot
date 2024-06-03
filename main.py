@@ -62,7 +62,7 @@ async def on_member_join(member):
   if settings_autokick is not None: #autokick first
     kicked = await autokick(member, settings_autokick["age"])
   if settings_welcome is not None and kicked == 0: # if autokick, dont welcome. so elif clause
-    welcomechannel = bot.get_channel(settings_welcome["channel"])
+    welcomechannel = bot.get_channel(int(settings_welcome["channel"]))
     await welcomechannel.send(f'Welcome to the server, {member.mention if settings_welcome["ping"] else None}!', embed=welcome_embed(member, settings_welcome))
 
 """

@@ -1,4 +1,4 @@
-import discord, discord.ext
+import discord, discord.ext, time
 from discord.commands import SlashCommandGroup
 from main import guild_ids
 from db import db, funcs, Colour
@@ -98,7 +98,7 @@ class utilitycommands(discord.Cog):
     embed.set_footer(text="Use `/utility welcome test_message` to preview the message")
     db.save_server_settings(ctx.guild.id, "welcomer", {
       "message": message,
-      "channel": channel.id,
+      "channel": str(channel.id), # json cant hangle bigints. so store as str
       "title": embed_title,
       "ping": ping_member,
       "image_url": image_url,
@@ -107,6 +107,13 @@ class utilitycommands(discord.Cog):
     })
     await ctx.followup.send(embed=embed)
 
+  @discord.slash_command(name="ping", description="bot latency including a db query")
+  async def ping_time(self, ctx):
+    t= time.time()
+    await ctx.defer()
+    db.get_server_settings(ctx.guild.id) #just run a query
+    t = time.time() - t
+    await ctx.followup.send(f"Ping: {self.bot.latency}s\nQuery: {t}s")
   @welcome.command(name="test_message", description ="Test the welcome message")
   @discord.ext.commands.has_permissions(administrator=True)
   async def welcometest(self, ctx):
