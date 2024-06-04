@@ -76,6 +76,7 @@ def TagNotFoundEmbed(mode="save", player_tag=""):
   return embed
 
 def embed_player(data, battle_data):
+  print(data, battle_data, sep="\n")
   embed = discord.Embed(
         title=f"{data['name']}",
         color= int(data['nameColor'][4:], base=16),
@@ -87,13 +88,22 @@ def embed_player(data, battle_data):
   embed.add_field(name="3v3 wins", value=data['3vs3Victories'])
   embed.add_field(name="solo wins", value=data['soloVictories'], inline=True)
   embed.add_field(name="duo wins", value=data['duoVictories'],  inline=True)
-
-  embed.add_field(name="Recent Win rate", value=str(battle_data["victory_rate"])+"%")
-  embed.add_field(name = "Recent starplayer rate", value=str(battle_data["starplayer_rate"])+"%", inline=True)
-  embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed 
   
+  if battle_data is not None:
+    embed.add_field(name="Recent Win rate", value=str(battle_data["victory_rate"])+"%")
+    embed.add_field(name = "Recent starplayer rate", value=str(battle_data["starplayer_rate"])+"%", inline=True)
+    embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed 
+  else:
+    embed.add_field(name="Recent Win rate", value="Error")
+    embed.add_field(name = "Recent starplayer rate", value="Error")
+    embed.add_field(name = "Recent loss rate", value="Error")
+
   embed.add_field(name="Champtionship Challenge", value="Qualified" if data["isQualifiedFromChampionshipChallenge"] else "Not Qualified")
-  embed.add_field(name="Club name", value=data['club']['name'], inline=True)
+  
+  if data["club"].get("name") is not None: # check if joined club
+    embed.add_field(name="Club name", value=data['club']['name'], inline=True)
+  else:
+    embed.add_field(name="Club name", value="No club joined", inline=True)
 
   embed.set_thumbnail(url=f"https://cdn.brawlify.com/profile/{data['icon']['id']}.png")
   return embed
@@ -146,7 +156,11 @@ class brawl(discord.Cog):
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
     if data.status_code == 200:
       data = data.json()
-      battle_data = get_battledata(player_tag, data)[1]
+      battle_data = get_battledata(player_tag, data)
+      if type(battle_data) is int:
+        battle_data = None
+      else:
+        battle_data = battle_data[1]
       await ctx.followup.send(embed=embed_player(data, battle_data))
     elif data.status_code == 404:
         if data.json().get("reason"):
