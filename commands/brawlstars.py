@@ -92,12 +92,40 @@ def embed_player(data, battle_data):
   embed.add_field(name = "Recent starplayer rate", value=str(battle_data["starplayer_rate"])+"%", inline=True)
   embed.add_field(name = "Recent loss rate", value=str(battle_data["defeat_rate"])+"%", inline=True) #replace this if space needed 
   
-  embed.add_field(name="Club tag", value=data['club']['tag'])
+  embed.add_field(name="Champtionship Challenge", value="Qualified" if data["isQualifiedFromChampionshipChallenge"] else "Not Qualified")
   embed.add_field(name="Club name", value=data['club']['name'], inline=True)
 
   embed.set_thumbnail(url=f"https://cdn.brawlify.com/profile/{data['icon']['id']}.png")
   return embed
 
+def embed_club(data):
+  embed = discord.Embed(
+        title=f"{data['name']}",
+        color= discord.Color.brand_green(),
+        description = data["description"]
+ )
+  embed.add_field(name="Trophies", value=data['trophies'])
+  embed.add_field(name="Type", value=data['type'], inline=True)
+  embed.add_field(name="Required Trophies", value=data['requiredTrophies'], inline=True)
+  
+  roles = {"senior":0, "member":0, "vicePresident":0}
+  president = None
+  for item in data["members"]:
+    if item["role"] == "president":
+      president = item["name"]
+      continue
+    roles[item["role"]] += 1
+  
+  embed.add_field(name="President", value=president)
+  embed.add_field(name="Average Trophies", value= round(data['trophies']/len(data["members"]), 2) , inline=True)
+  embed.add_field(name="Something", value="aaaa", inline=True)
+
+  embed.add_field(name="Vice Presidents", value=roles["vicePresident"])
+  embed.add_field(name="Seniors", value=roles["senior"], inline=True)
+  embed.add_field(name="Members", value=roles["member"], inline=True)
+
+  embed.set_thumbnail(url=f"https://cdn.brawlify.com/club/{data['badgeId']}.png")
+  return embed
 
 class brawl(discord.Cog):
   def __init__(self, bot):
@@ -127,18 +155,19 @@ class brawl(discord.Cog):
     else:
       await ctx.followup.send("error")
 
-  """
+  
   @discord.slash_command(name="clubstats", description="GET a club's stats")
   async def clubstats(self, ctx, club_tag: str = "#Y999JCG0"):
     await ctx.defer()
     if not club_tag:
+      """
       # get player's club here
       data = db.get_player_tag(ctx.author.id)
       if data is None:
         await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
         return
       player_tag = data
-      #
+      """
       pass
     club_tag = fix_playertag(club_tag)
     data = requests.get(f"https://bsproxy.royaleapi.dev/v1/clubs/{club_tag}", headers=headers)
@@ -149,10 +178,10 @@ class brawl(discord.Cog):
     elif data.status_code == 404:
       if data.json().get("reason"):
         if data.json()["reason"] == "notFound":
-          await ctx.followup.send("No such player exists")
+          await ctx.followup.send("No such club exists")
     else:
       await ctx.followup.send("error")
-  """
+
 
   @discord.slash_command(name="battlestats", description ="GET a player's battle stats") 
   async def battlestats(self, ctx, player_tag: str = ""):
