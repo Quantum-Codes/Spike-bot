@@ -220,8 +220,8 @@ class brawl(discord.Cog):
       embed.set_footer(text="Data from last 25 matches")
   
       await ctx.followup.send(embed=embed)
-    elif data_raw == 404:
-      await ctx.followup.send("No such player exists")
+    elif data_raw == 404: # also 404 with modded accs
+      await ctx.followup.send("No such player exists OR this player hasn't played any battles...")
     else:
       await ctx.followup.send("error")
 
