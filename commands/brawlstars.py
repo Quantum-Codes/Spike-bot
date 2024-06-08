@@ -3,9 +3,24 @@ from db import db
 from main import guild_ids
 from discord.commands import SlashCommandGroup
 
-headers = {
-  "Authorization": f"Bearer {os.environ['bs_token']}"
-}
+
+class bs_api:
+  def __init__(self) -> None:
+    self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
+    self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+
+  def get_player(self, tag):
+    data = requests.get(f"{self.bsapi_url}/players/{tag}", headers=self.headers)
+    return data
+  
+  def get_battlelog(self, tag):
+    data = requests.get(f"{self.bsapi_url}/players/{tag}/battlelog", headers=self.headers)
+    return data
+  
+  def get_club(self, tag):
+    data = requests.get(f"{self.bsapi_url}/clubs/{tag}", headers=self.headers)
+    return data
+
 
 def fix_playertag(player_tag):
   if not player_tag.startswith("#") and not player_tag.startswith("%23"):
@@ -14,12 +29,13 @@ def fix_playertag(player_tag):
   return player_tag 
 
 def get_battledata(player_tag, player=None):
+  api = bs_api()
   player_tag = fix_playertag(player_tag)
-  data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}/battlelog", headers=headers)
+  data = api.get_battlelog(player_tag)
   if data.status_code == 200: 
     data = data.json()
-    if not player:
-      player = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers).json()
+    if not player: # if we already have player object, then no need to request again
+      player = api.get_player(player_tag).json()
     raw_stats = {"victory": 0, "defeat": 0, "draw": 0, "starplayer": 0}
    # print(data['items'][0]['battle'].keys())
     for item in data["items"]:
@@ -145,6 +161,7 @@ class brawl(discord.Cog):
   
   @discord.slash_command(name="playerstats", description ="GET a player's stats")
   async def playerstats(self, ctx, player_tag: str = ""):
+    api = bs_api()
     await ctx.defer()
     if not player_tag:
       data = db.get_player_tag(ctx.author.id)
@@ -153,7 +170,7 @@ class brawl(discord.Cog):
         return 
       player_tag = data
     player_tag = fix_playertag(player_tag)
-    data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
+    data = api.get_player(player_tag)
     if data.status_code == 200:
       data = data.json()
       battle_data = get_battledata(player_tag, data)
@@ -171,20 +188,19 @@ class brawl(discord.Cog):
 
   
   @discord.slash_command(name="clubstats", description="GET a club's stats")
-  async def clubstats(self, ctx, club_tag: str = "#Y999JCG0"):
+  async def clubstats(self, ctx, club_tag: str = None):
+    api = bs_api()
     await ctx.defer()
-    if not club_tag:
-      """
+    if club_tag is None:
       # get player's club here
       data = db.get_player_tag(ctx.author.id)
       if data is None:
         await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
         return
       player_tag = data
-      """
       pass
     club_tag = fix_playertag(club_tag)
-    data = requests.get(f"https://bsproxy.royaleapi.dev/v1/clubs/{club_tag}", headers=headers)
+    data = api.get_club(club_tag)
     if data.status_code == 200:
       data = data.json()
       print(data)
@@ -229,14 +245,14 @@ class brawl(discord.Cog):
   @tagcommands.command(name="save", description ="Save your player tag")
   async def save_tag(self, ctx, player_tag: str):
     embed = discord.Embed(colour = discord.Colour.yellow())
-    
+    api = bs_api
     player_tag = fix_playertag(player_tag)
     #currently no verification system on tags. so duplicate checking is waste.
     #sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker. 
     #if sql.rowcount != 0:
     #  await ctx.respond("Duplicate")
     with ctx.channel.typing():
-      data = requests.get(f"https://bsproxy.royaleapi.dev/v1/players/{player_tag}", headers=headers)
+      data = api.get_player(player_tag)
     if data.status_code == 200:
       data = data.json()
       embed.add_field(name = "Confirmation:", value= f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.")
