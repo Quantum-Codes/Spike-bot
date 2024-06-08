@@ -45,7 +45,6 @@ def get_battledata(player_tag, player=None):
         battleresult = item["battle"].get("rank")
 
         if battleresult is None:
-          print("AHAHAHHAAH(!*@&*@")
           print(item)
           continue
         battleresult = "victory" if battleresult <= (2 if item["battle"]["mode"] == "duoShowdown" else 4) else "defeat" #since lonestar, takedown also has 4 winners. so on else clause
@@ -198,7 +197,11 @@ class brawl(discord.Cog):
         await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
         return
       player_tag = data
-      pass
+      playerdata = api.get_player(player_tag).json() # assumed if tag saved in db then its valid
+      club_tag = playerdata["club"].get("tag")
+      if club_tag is None:
+        await ctx.respond("You are not part of a club... Use the `club_tag` parameter to see stats of a specific club.")
+        return
     club_tag = fix_playertag(club_tag)
     data = api.get_club(club_tag)
     if data.status_code == 200:
