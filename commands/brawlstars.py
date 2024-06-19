@@ -120,7 +120,7 @@ def embed_player(data, battle_data):
   else:
     embed.add_field(name="Club name", value="No club joined", inline=True)
 
-  embed.set_thumbnail(url=f"https://cdn.brawlify.com/profile/{data['icon']['id']}.png")
+  embed.set_thumbnail(url=f"https://cdn-old.brawlify.com/profile/{data['icon']['id']}.png")
   return embed
 
 def embed_club(data):
@@ -143,13 +143,12 @@ def embed_club(data):
   
   embed.add_field(name="President", value=president)
   embed.add_field(name="Average Trophies", value= round(data['trophies']/len(data["members"]), 2) , inline=True)
-  embed.add_field(name="Something", value="aaaa", inline=True)
 
   embed.add_field(name="Vice Presidents", value=roles["vicePresident"])
   embed.add_field(name="Seniors", value=roles["senior"], inline=True)
   embed.add_field(name="Members", value=roles["member"], inline=True)
 
-  embed.set_thumbnail(url=f"https://cdn.brawlify.com/club/{data['badgeId']}.png")
+  embed.set_thumbnail(url=f"https://cdn-old.brawlify.com/club/{data['badgeId']}.png")
   return embed
 
 class brawl(discord.Cog):
