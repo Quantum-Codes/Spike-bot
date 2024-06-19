@@ -1,8 +1,8 @@
-#ONLY ADDED VIDEO PARAM IN LINE 8 WEBHOOK.PY. code doesnt use it. make it use
-#For replit only:
-#make pycord work by making guessImports = false in .replit
-#also add pkgs.ffmpeg in replit.nix for voice
-#https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
+# ONLY ADDED VIDEO PARAM IN LINE 8 WEBHOOK.PY. code doesnt use it. make it use
+# For replit only:
+# make pycord work by making guessImports = false in .replit
+# also add pkgs.ffmpeg in replit.nix for voice
+# https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
 
 # ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
 # poetry export --without-hashes --format=requirements.txt > requirements.txt
@@ -16,54 +16,79 @@ from db import db, funcs
 dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
-guild_ids = [1017417232952852550, 1099306183426326589] # HARDCODED IN OTHER PLACES
+guild_ids = [1017417232952852550, 1099306183426326589]  # HARDCODED IN OTHER PLACES
+
 
 @bot.event
 async def on_ready():
-  print(f"{bot.user} is ready and online!")
-  bot.add_view(GiveawayJoin())
+    print(f"{bot.user} is ready and online!")
+    bot.add_view(GiveawayJoin())
+
 
 @bot.event
 async def on_message(message):
-  if bot.user.mentioned_in(message) and bot.user in message.mentions: #message.mentions empty when everyone ping
-    await message.reply("Why u pinged me? I was sleeping :(")
+    if (
+        bot.user.mentioned_in(message) and bot.user in message.mentions
+    ):  # message.mentions empty when everyone ping
+        await message.reply("Why u pinged me? I was sleeping :(")
+
 
 def welcome_embed(user, settings):
-  suffix_num = ["th","st", "nd", "rd"]
-  suffix_num.extend(["th"]*6)
-  temp =int(str(user.guild.member_count)[-1])
-  suffix_num = suffix_num[temp]
-  embed = discord.Embed(
-    title = funcs.replace_placeholders(settings["title"], user, bot=bot),
-    color = discord.Colour(settings["colour"]),
-    description = funcs.replace_placeholders(settings["message"], user, bot=bot)
-  )
-  embed.set_thumbnail(url=funcs.replace_placeholders(settings["thumb_url"], user, bot=bot, image_url=True))
-  embed.set_image(url=funcs.replace_placeholders(settings["image_url"], user, bot=bot, image_url=True))
-  return embed
+    suffix_num = ["th", "st", "nd", "rd"]
+    suffix_num.extend(["th"] * 6)
+    temp = int(str(user.guild.member_count)[-1])
+    suffix_num = suffix_num[temp]
+    embed = discord.Embed(
+        title=funcs.replace_placeholders(settings["title"], user, bot=bot),
+        color=discord.Colour(settings["colour"]),
+        description=funcs.replace_placeholders(settings["message"], user, bot=bot),
+    )
+    embed.set_thumbnail(
+        url=funcs.replace_placeholders(
+            settings["thumb_url"], user, bot=bot, image_url=True
+        )
+    )
+    embed.set_image(
+        url=funcs.replace_placeholders(
+            settings["image_url"], user, bot=bot, image_url=True
+        )
+    )
+    return embed
+
 
 async def autokick(member, acc_time):
-  if time.time() - member.created_at.timestamp() < acc_time:
-    dms = await member.create_dm()
-    try:
-      await dms.send(f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast {acc_time} seconds old__.")
-    except discord.errors.Forbidden:
-      print(f"Failed to message {member.name} {member.id}")
+    if time.time() - member.created_at.timestamp() < acc_time:
+        dms = await member.create_dm()
+        try:
+            await dms.send(
+                f"You are autokicked from **{member.guild.name}** due to being a new account...\nJoin back when your account is __atleast {acc_time} seconds old__."
+            )
+        except discord.errors.Forbidden:
+            print(f"Failed to message {member.name} {member.id}")
 
-    await member.kick(reason = "new account") #message before kick so member share server with bot
-    return 1
-  return 0
+        await member.kick(
+            reason="new account"
+        )  # message before kick so member share server with bot
+        return 1
+    return 0
+
 
 @bot.event
 async def on_member_join(member):
-  settings_welcome = db.get_server_settings(member.guild.id, "welcomer")
-  settings_autokick = db.get_server_settings(member.guild.id, "autokick")
-  kicked = 0
-  if settings_autokick is not None: #autokick first
-    kicked = await autokick(member, settings_autokick["age"])
-  if settings_welcome is not None and kicked == 0: # if autokick, dont welcome. so elif clause
-    welcomechannel = bot.get_channel(int(settings_welcome["channel"]))
-    await welcomechannel.send(f'Welcome to the server, {member.mention if settings_welcome["ping"] else None}!', embed=welcome_embed(member, settings_welcome))
+    settings_welcome = db.get_server_settings(member.guild.id, "welcomer")
+    settings_autokick = db.get_server_settings(member.guild.id, "autokick")
+    kicked = 0
+    if settings_autokick is not None:  # autokick first
+        kicked = await autokick(member, settings_autokick["age"])
+    if (
+        settings_welcome is not None and kicked == 0
+    ):  # if autokick, dont welcome. so elif clause
+        welcomechannel = bot.get_channel(int(settings_welcome["channel"]))
+        await welcomechannel.send(
+            f'Welcome to the server, {member.mention if settings_welcome["ping"] else None}!',
+            embed=welcome_embed(member, settings_welcome),
+        )
+
 
 """
 @bot.listen()
@@ -94,7 +119,7 @@ bot.load_extension("commands.brawlstars")
 bot.load_extension("commands.rolestat")
 t1 = keep_alive()
 try:
-  bot.run(os.environ["token"])
-  t1.join()
+    bot.run(os.environ["token"])
+    t1.join()
 except discord.errors.HTTPException:
-  os.system("kill 1")
+    os.system("kill 1")

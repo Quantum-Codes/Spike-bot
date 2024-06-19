@@ -1,6 +1,6 @@
 from flask import Flask, request
 from threading import Thread
-from commands.webhook import yt_webhook 
+from commands.webhook import yt_webhook
 import xmltodict
 from xml.parsers.expat import ExpatError
 from logger import getlog, writelog
@@ -8,9 +8,11 @@ from logger import getlog, writelog
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def lol():
-  return "Hello..."
+    return "Hello..."
+
 
 """ 
 yt-to-discord - YouTube push notifications to Discord webhooks
@@ -42,7 +44,7 @@ def feed():
     """Accept and parse requests from YT's pubsubhubbub.
     https://developers.google.com/youtube/v3/guides/push_notifications
     """
-    
+
     writelog("entry")
     challenge = request.args.get("hub.challenge")
     if challenge:
@@ -64,8 +66,8 @@ def feed():
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
         if video_url not in getlog():
-          yt_webhook(check_old = True)
-          writelog(f"New video URL: {video_url}")
+            yt_webhook(check_old=True)
+            writelog(f"New video URL: {video_url}")
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook
         # message = config["message_prefix"] + "\n" + video_url
@@ -73,17 +75,19 @@ def feed():
         # response = webhook.execute()
 
     except (ExpatError, LookupError):
-        writelog("malformed/no data", obj = xml_dict)
+        writelog("malformed/no data", obj=xml_dict)
         # request.data contains malformed XML or no XML at all, return FORBIDDEN.
         return "", 403
 
     # Everything is good, return NO CONTENT.
     return "", 204
 
+
 def run():
-  app.run("0.0.0.0",port=20548)
+    app.run("0.0.0.0", port=20548)
+
 
 def keep_alive():
-  t1 = Thread(target=run)
-  t1.start()
-  return t1
+    t1 = Thread(target=run)
+    t1.start()
+    return t1
