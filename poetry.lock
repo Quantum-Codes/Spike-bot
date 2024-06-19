@@ -494,13 +494,13 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0.dev0)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.131.0"
+version = "2.133.0"
 description = "Google API Client Library for Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-api-python-client-2.131.0.tar.gz", hash = "sha256:1c03e24af62238a8817ecc24e9d4c32ddd4cb1f323b08413652d9a9a592fc00d"},
-    {file = "google_api_python_client-2.131.0-py2.py3-none-any.whl", hash = "sha256:e325409bdcef4604d505d9246ce7199960a010a0569ac503b9f319db8dbdc217"},
+    {file = "google-api-python-client-2.133.0.tar.gz", hash = "sha256:293092905b66a046d3187a99ac454e12b00cc2c70444f26eb2f1f9c1a82720b4"},
+    {file = "google_api_python_client-2.133.0-py2.py3-none-any.whl", hash = "sha256:396fe676ea0dfed066654dcf9f8dea77a1342f9d9bb23bb88e45b7b81e773926"},
 ]
 
 [package.dependencies]
@@ -512,13 +512,13 @@ uritemplate = ">=3.0.1,<5"
 
 [[package]]
 name = "google-auth"
-version = "2.29.0"
+version = "2.30.0"
 description = "Google Authentication Library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google-auth-2.29.0.tar.gz", hash = "sha256:672dff332d073227550ffc7457868ac4218d6c500b155fe6cc17d2b13602c360"},
-    {file = "google_auth-2.29.0-py2.py3-none-any.whl", hash = "sha256:d452ad095688cd52bae0ad6fafe027f6a6d6f560e810fec20914e17a09526415"},
+    {file = "google-auth-2.30.0.tar.gz", hash = "sha256:ab630a1320f6720909ad76a7dbdb6841cdf5c66b328d690027e4867bdfb16688"},
+    {file = "google_auth-2.30.0-py2.py3-none-any.whl", hash = "sha256:8df7da660f62757388b8a7f249df13549b3373f24388cb5d2f1dd91cc18180b5"},
 ]
 
 [package.dependencies]
@@ -567,13 +567,13 @@ grpc = ["grpcio (>=1.44.0,<2.0.0.dev0)"]
 
 [[package]]
 name = "gotrue"
-version = "2.4.3"
+version = "2.4.4"
 description = "Python Client Library for Supabase Auth"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "gotrue-2.4.3-py3-none-any.whl", hash = "sha256:1e1679890c6a7bbfb10999b817e134d593dec4f7ff2ea05d48a78c2f384355ed"},
-    {file = "gotrue-2.4.3.tar.gz", hash = "sha256:f93953654408aa35230317c1670ae1435e01ee5a461f2bfbc541fafd59b99c6b"},
+    {file = "gotrue-2.4.4-py3-none-any.whl", hash = "sha256:2eef9c962820b114d355cd0690ec6aaeb03374efe8c6c75d2265d34483e9a67e"},
+    {file = "gotrue-2.4.4.tar.gz", hash = "sha256:ba4652e3adb39c341a3a4f6a93ebe56b54e25b0959c66d1b38fd40fe4d75bff5"},
 ]
 
 [package.dependencies]
@@ -942,13 +942,13 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "24.0"
+version = "24.1"
 description = "Core utilities for Python packages"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "packaging-24.0-py3-none-any.whl", hash = "sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5"},
-    {file = "packaging-24.0.tar.gz", hash = "sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"},
+    {file = "packaging-24.1-py3-none-any.whl", hash = "sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"},
+    {file = "packaging-24.1.tar.gz", hash = "sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"},
 ]
 
 [[package]]
@@ -999,13 +999,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "postgrest"
-version = "0.16.7"
+version = "0.16.8"
 description = "PostgREST client for Python. This library provides an ORM interface to PostgREST."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "postgrest-0.16.7-py3-none-any.whl", hash = "sha256:0727dbdbc4e00fd98244596812e7dba6261019f3ec09138be291479a76d9fe99"},
-    {file = "postgrest-0.16.7.tar.gz", hash = "sha256:779e20bd34f3c14e1e99129407612f85d7bb1d80b5cee2f54e50194b4488c658"},
+    {file = "postgrest-0.16.8-py3-none-any.whl", hash = "sha256:c353a24452f51ab9760cf2b884c4b7457a2653ff36444e66b12615bc4cc8e23e"},
+    {file = "postgrest-0.16.8.tar.gz", hash = "sha256:7b3802a514dc1e0fc8b5bbdeb2c99af35a0bd910e4ddb17855ca4e3422350c84"},
 ]
 
 [package.dependencies]
@@ -1097,13 +1097,13 @@ pyasn1 = ">=0.4.6,<0.7.0"
 
 [[package]]
 name = "pydantic"
-version = "2.7.3"
+version = "2.7.4"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.7.3-py3-none-any.whl", hash = "sha256:ea91b002777bf643bb20dd717c028ec43216b24a6001a280f83877fd2655d0b4"},
-    {file = "pydantic-2.7.3.tar.gz", hash = "sha256:c46c76a40bb1296728d7a8b99aa73dd70a48c3510111ff290034f860c99c419e"},
+    {file = "pydantic-2.7.4-py3-none-any.whl", hash = "sha256:ee8538d41ccb9c0a9ad3e0e5f07bf15ed8015b481ced539a1759d8cc89ae90d0"},
+    {file = "pydantic-2.7.4.tar.gz", hash = "sha256:0c84efd9548d545f63ac0060c1e4d39bb9b14db8b3c0652338aecc07b5adec52"},
 ]
 
 [package.dependencies]
@@ -1298,18 +1298,18 @@ validation = ["pydantic (>=2.5.3)"]
 
 [[package]]
 name = "realtime"
-version = "1.0.5"
+version = "1.0.6"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "realtime-1.0.5-py3-none-any.whl", hash = "sha256:93342fbcb8812ed8d81733f2782c1199376f0471e78014675420c7d31f2f327d"},
-    {file = "realtime-1.0.5.tar.gz", hash = "sha256:4abbb3218b6ce8bd8d9d3b1112661d325e36ceab67a0e918673d0fd8fca04fb1"},
+    {file = "realtime-1.0.6-py3-none-any.whl", hash = "sha256:c66918a106d8ef348d1821f2dbf6683d8833825580d95b2fdea9995406b42838"},
+    {file = "realtime-1.0.6.tar.gz", hash = "sha256:2be0d8a6305513d423604ee319216108fc20105cb7438922d5c8958c48f40a47"},
 ]
 
 [package.dependencies]
 python-dateutil = ">=2.8.1,<3.0.0"
-typing-extensions = ">=4.11.0,<5.0.0"
+typing-extensions = ">=4.12.2,<5.0.0"
 websockets = ">=11,<13"
 
 [[package]]
@@ -1442,13 +1442,13 @@ files = [
 
 [[package]]
 name = "storage3"
-version = "0.7.4"
+version = "0.7.6"
 description = "Supabase Storage client for Python."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "storage3-0.7.4-py3-none-any.whl", hash = "sha256:0b8e8839b10a64063796ce55a41462c7ffd6842e0ada74f25f5dcf37e1d1bade"},
-    {file = "storage3-0.7.4.tar.gz", hash = "sha256:61fcbf836f566405981722abb7d56caa57025b261e7a316e73316701abf0c040"},
+    {file = "storage3-0.7.6-py3-none-any.whl", hash = "sha256:d8c23bf87b3a88cafb03761b7f936e4e49daca67741d571513edf746e0f8ba72"},
+    {file = "storage3-0.7.6.tar.gz", hash = "sha256:0b7781cea7fe6382e6b9349b84395808c5f4203dfcac31478304eedc2f81acf6"},
 ]
 
 [package.dependencies]
@@ -1474,13 +1474,13 @@ test = ["pylint", "pytest", "pytest-black", "pytest-cov", "pytest-pylint"]
 
 [[package]]
 name = "supabase"
-version = "2.5.0"
+version = "2.5.1"
 description = "Supabase client for Python."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "supabase-2.5.0-py3-none-any.whl", hash = "sha256:13e5ed9e9377a1a69e70ad18ed7b82997cf13ffcd28173952f7503e4d5067771"},
-    {file = "supabase-2.5.0.tar.gz", hash = "sha256:133dc832dfdd617f2f90ac5b52664df96ac8a9302ac6656ee769dc3f545812f0"},
+    {file = "supabase-2.5.1-py3-none-any.whl", hash = "sha256:74a1f24f04fede1967ef084b50dea688228f7b10eb2f9d73350fe2251a865188"},
+    {file = "supabase-2.5.1.tar.gz", hash = "sha256:c50e0eba5b03de3abd5ac0f887957ca43558ba44c4d17bb44e73ec454b41734c"},
 ]
 
 [package.dependencies]
@@ -1493,13 +1493,13 @@ supafunc = ">=0.3.1,<0.5.0"
 
 [[package]]
 name = "supafunc"
-version = "0.4.5"
+version = "0.4.6"
 description = "Library for Supabase Functions"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "supafunc-0.4.5-py3-none-any.whl", hash = "sha256:2208045f8f5c797924666f6a332efad75ad368f8030b2e4ceb9d2bf63f329373"},
-    {file = "supafunc-0.4.5.tar.gz", hash = "sha256:a6466d78bdcaa58b7f0303793643103baae8106a87acd5d01e196179a9d0d024"},
+    {file = "supafunc-0.4.6-py3-none-any.whl", hash = "sha256:f7ca7b244365e171da7055a64edb462c2ec449cdaa210fc418cfccd132f4cf98"},
+    {file = "supafunc-0.4.6.tar.gz", hash = "sha256:92db51f8f8568d1430285219c9c0072e44207409c416622d7387f609e31928a6"},
 ]
 
 [package.dependencies]
@@ -1529,13 +1529,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.12.1"
+version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.12.1-py3-none-any.whl", hash = "sha256:6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a"},
-    {file = "typing_extensions-4.12.1.tar.gz", hash = "sha256:915f5e35ff76f56588223f15fdd5938f9a1cf9195c0de25130c627e4d597f6d1"},
+    {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
+    {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
 ]
 
 [[package]]
@@ -1638,13 +1638,13 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "1.26.18"
+version = "1.26.19"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 files = [
-    {file = "urllib3-1.26.18-py2.py3-none-any.whl", hash = "sha256:34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07"},
-    {file = "urllib3-1.26.18.tar.gz", hash = "sha256:f8ecc1bba5667413457c529ab955bf8c67b45db799d159066261719e328580a0"},
+    {file = "urllib3-1.26.19-py2.py3-none-any.whl", hash = "sha256:37a0344459b199fce0e80b0d3569837ec6b6937435c5244e7fd73fa6006830f3"},
+    {file = "urllib3-1.26.19.tar.gz", hash = "sha256:3e3d753a8618b86d7de333b4223005f68720bcd6a7d2bcb9fbd2229ec7c1e429"},
 ]
 
 [package.extras]
@@ -1893,18 +1893,18 @@ multidict = ">=4.0"
 
 [[package]]
 name = "zipp"
-version = "3.19.1"
+version = "3.19.2"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "zipp-3.19.1-py3-none-any.whl", hash = "sha256:2828e64edb5386ea6a52e7ba7cdb17bb30a73a858f5eb6eb93d8d36f5ea26091"},
-    {file = "zipp-3.19.1.tar.gz", hash = "sha256:35427f6d5594f4acf82d25541438348c26736fa9b3afa2754bcd63cdb99d8e8f"},
+    {file = "zipp-3.19.2-py3-none-any.whl", hash = "sha256:f091755f667055f2d02b32c53771a7a6c8b47e1fdbc4b72a8b9072b3eef8015c"},
+    {file = "zipp-3.19.2.tar.gz", hash = "sha256:bf1dcf6450f873a13e952a29504887c89e6de7506209e5b1bcc3460135d4de19"},
 ]
 
 [package.extras]
 doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
+test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [metadata]
 lock-version = "2.0"
