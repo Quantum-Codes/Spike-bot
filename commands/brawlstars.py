@@ -303,7 +303,7 @@ class brawl(discord.Cog):
     @tagcommands.command(name="save", description="Save your player tag")
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
-        api = bs_api
+        api = bs_api()
         player_tag = fix_playertag(player_tag)
         # currently no verification system on tags. so duplicate checking is waste.
         # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
