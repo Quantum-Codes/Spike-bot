@@ -20,10 +20,10 @@ class database:
     def db(self):
         return self.sup_db
 
-    def get_server_settings(self, serverid, setting_type=None):
+    async def get_server_settings(self, serverid, setting_type=None):
         if setting_type is None:
             result = (
-                self.sup_db.table("server_settings")
+                await self.sup_db.table("server_settings")
                 .select("type, data")
                 .eq("server_id", serverid)
                 .execute()
@@ -32,7 +32,7 @@ class database:
             data = [(item["type"], item["data"]) for item in result]
             return data if data else None
         data = (
-            self.sup_db.table("server_settings")
+            await self.sup_db.table("server_settings")
             .select("data")
             .eq("server_id", serverid)
             .eq("type", setting_type)
@@ -47,28 +47,28 @@ class database:
             data = None
         return data
 
-    def save_server_settings(self, serverid, setting_type, data):
-        if self.get_server_settings(serverid, setting_type) is None:
-            self.sup_db.table("server_settings").insert(
+    async def save_server_settings(self, serverid, setting_type, data):
+        if await self.get_server_settings(serverid, setting_type) is None:
+            await self.sup_db.table("server_settings").insert(
                 {"server_id": serverid, "type": setting_type, "data": data}
             ).execute()
             return
-        self.sup_db.table("server_settings").update({"data": data}).eq(
+        await self.sup_db.table("server_settings").update({"data": data}).eq(
             "server_id", serverid
         ).eq("type", setting_type).execute()
 
-    def delete_server_settings(self, serverid, setting_type):
-        if self.get_server_settings(serverid, setting_type) is not None:
-            self.sup_db.table("server_settings").delete().eq("server_id", serverid).eq(
+    async def delete_server_settings(self, serverid, setting_type):
+        if await self.get_server_settings(serverid, setting_type) is not None:
+            await self.sup_db.table("server_settings").delete().eq("server_id", serverid).eq(
                 "type", setting_type
             ).execute()
 
-    def get_player_tag(self, discordid, check_deleted=False):
+    async def get_player_tag(self, discordid, check_deleted=False):
         """
         `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)
         """
         data = (
-            self.sup_db.table("users")
+            await self.sup_db.table("users")
             .select("player_tag")
             .eq("user_id", discordid)
             .execute()
@@ -84,37 +84,37 @@ class database:
         else:
             return tag
 
-    def update_tag(self, discordid, player_tag=None):
-        self.sup_db.table("users").update({"player_tag": player_tag}).eq(
+    async def update_tag(self, discordid, player_tag=None):
+        await self.sup_db.table("users").update({"player_tag": player_tag}).eq(
             "user_id", discordid
         ).execute()
 
-    def add_user(self, discordid, player_tag=None):
+    async def add_user(self, discordid, player_tag=None):
         """
         Only `discordid` is required. All others are optional params. default = None
         """
-        tag = self.get_player_tag(discordid, check_deleted=True)
+        tag = await self.get_player_tag(discordid, check_deleted=True)
         if type(tag[0]) is str or tag[1]:
-            self.update_tag(discordid, player_tag)
+            await self.update_tag(discordid, player_tag)
             return
-        self.sup_db.table("users").insert(
+        await self.sup_db.table("users").insert(
             {"user_id": discordid, "player_tag": player_tag}
         ).execute()
 
-    def create_giveaway(self, messageid, channelid, winners):
+    async def create_giveaway(self, messageid, channelid, winners):
         """
         All params required.
         `winners` = Number of winners
         `messageid` = Message id of bot-posted giveaway
         `channelid` = Channel id of giveaway message
         """
-        self.sup_db.table("giveaway_list").insert(
+        await self.sup_db.table("giveaway_list").insert(
             {"message_id": messageid, "winners": winners, "channel_id": channelid}
         ).execute()
 
-    def check_joined_giveaway(self, messageid, userid):
+    async def check_joined_giveaway(self, messageid, userid):
         data = (
-            self.sup_db.table("giveaway_joins")
+            await self.sup_db.table("giveaway_joins")
             .select("*")
             .eq("message_id", messageid)
             .eq("user_id", userid)
@@ -122,22 +122,22 @@ class database:
         )
         return len(data.data)  # tests truth value
 
-    def check_valid_giveaway(self, messageid):
+    async def check_valid_giveaway(self, messageid):
         data = (
-            self.sup_db.table("giveaway_list")
+            await self.sup_db.table("giveaway_list")
             .select("*")
             .eq("message_id", messageid)
             .execute()
         )
         return len(data.data)  # tests truth value
 
-    def join_leave_giveaway(self, messageid, userid, mode="join"):
+    async def join_leave_giveaway(self, messageid, userid, mode="join"):
         if mode == "leave":
-            self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).eq(
+            await self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).eq(
                 "user_id", userid
             ).execute()
         else:
-            self.sup_db.table("giveaway_joins").insert(
+            await self.sup_db.table("giveaway_joins").insert(
                 {"message_id": messageid, "user_id": userid}
             ).execute()
 
@@ -147,11 +147,11 @@ class database:
         run after all rerolling and winner choosing done AND all prizes claimed.
         deletes all joins and giveaway data from db.
         """
-        self.sup_db.table("giveaway_joins").delete().eq(
+        await self.sup_db.table("giveaway_joins").delete().eq(
             "message_id", messageid
         ).execute()
         channelid = (
-            self.sup_db.table("giveaway_list")
+            await self.sup_db.table("giveaway_list")
             .delete()
             .eq("message_id", messageid)
             .execute()
@@ -163,14 +163,14 @@ class database:
         view.disable_all_items()
         await message.edit(view=view)
 
-    def end_giveaway(self, messageid):
+    async def end_giveaway(self, messageid):
         """
         Does not edit/delete db. Only reads to db
         Return value: dict. (keys: winners, winners_count, participants, participants_count)
         participants, winners -> list of single item tuples with discord ID (int) inside them.
         """
         participants = (
-            self.sup_db.table("giveaway_joins")
+            await self.sup_db.table("giveaway_joins")
             .select("user_id")
             .eq("message_id", messageid)
             .execute()
@@ -178,7 +178,7 @@ class database:
         )  # had to be select distinct???
         participants_count = len(participants)
         winnerscount = (
-            self.sup_db.table("giveaway_list")
+            await self.sup_db.table("giveaway_list")
             .select("winners")
             .eq("message_id", messageid)
             .execute()

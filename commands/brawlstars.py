@@ -214,7 +214,7 @@ class brawl(discord.Cog):
         api = bs_api()
         await ctx.defer()
         if not player_tag:
-            data = db.get_player_tag(ctx.author.id)
+            data = await db.get_player_tag(ctx.author.id)
             if data is None:
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
@@ -242,7 +242,7 @@ class brawl(discord.Cog):
         await ctx.defer()
         if club_tag is None:
             # get player's club here
-            data = db.get_player_tag(ctx.author.id)
+            data = await db.get_player_tag(ctx.author.id)
             if data is None:
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
@@ -275,7 +275,7 @@ class brawl(discord.Cog):
     async def battlestats(self, ctx, player_tag: str = ""):
         await ctx.defer()
         if not player_tag:
-            data = db.get_player_tag(ctx.author.id)
+            data = await db.get_player_tag(ctx.author.id)
             if data is None:
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
@@ -303,7 +303,7 @@ class brawl(discord.Cog):
     @tagcommands.command(name="save", description="Save your player tag")
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
-        api = bs_api
+        api = bs_api()
         player_tag = fix_playertag(player_tag)
         # currently no verification system on tags. so duplicate checking is waste.
         # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
@@ -352,7 +352,7 @@ class brawl(discord.Cog):
             await ctx.respond(embed=embed)
             return
 
-        db.add_user(ctx.author.id, player_tag)
+        await db.add_user(ctx.author.id, player_tag)
 
         embed.colour = discord.Colour.green()
         embed.add_field(name="Saved tag:", value=player_tag.replace("%23", "#"))
@@ -361,13 +361,13 @@ class brawl(discord.Cog):
 
     @tagcommands.command(name="remove", description="Delete your player tag")
     async def delete_tag(self, ctx):
-        player_tag = db.get_player_tag(ctx.author.id)
+        player_tag = await db.get_player_tag(ctx.author.id)
         if not player_tag:
             await ctx.respond(
                 "You haven't saved a tag yet. If you want to save your tag instead,  use `/tag save` command."
             )
             return
-        db.update_tag(ctx.author.id, None)
+        await db.update_tag(ctx.author.id, None)
         await ctx.respond(
             "Removed tag successfully.\n To save your tag again, use `/tag save` command."
         )
@@ -375,7 +375,7 @@ class brawl(discord.Cog):
     @tagcommands.command(name="show", description="Check your player tag")
     async def show_tag(self, ctx):  # , user: discord.User = None):
         embed = discord.Embed(colour=discord.Colour.yellow())
-        data = db.get_player_tag(ctx.author.id)
+        data = await db.get_player_tag(ctx.author.id)
         """
     if user:
         if ctx.author.get_role(1208026724399321120): # tournament manager role ID at juuzou server 
