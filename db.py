@@ -1,5 +1,5 @@
-import discord.ui, discord.ext, discord, re
-import os, random, json, supabase, dotenv
+import discord.ui, discord.ext, discord
+import os, random, json, supabase, dotenv, re, asyncio
 
 dotenv.load_dotenv()
 
@@ -7,9 +7,15 @@ dotenv.load_dotenv()
 class database:
     def __init__(self):
         # connects to the database
-        self.sup_db = supabase.create_client(
+        pass
+
+    @classmethod
+    async def create(cls):
+        self = cls()
+        self.sup_db = await supabase.acreate_client(
             os.environ["sup_url"], os.environ["sup_key"]
         )
+        return self
 
     def db(self):
         return self.sup_db
@@ -251,6 +257,8 @@ class helper_funcs:
         return message
 
 
-db = database()
+
+loop = asyncio.get_event_loop()
+db = loop.run_until_complete(database.create())
 sup_db = db.db()
 funcs = helper_funcs()
