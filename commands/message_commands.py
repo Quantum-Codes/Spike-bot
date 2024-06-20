@@ -2,7 +2,6 @@ import discord, random, json
 from main import guild_ids
 from components.buttons import ConfirmWinners
 from components.modals import GetWinnersCount
-from db import db
 
 
 class message_commands(discord.Cog):

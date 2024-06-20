@@ -58,7 +58,7 @@ class GiveawayLeave(discord.ui.View):
     )
     async def leave_callback(self, button, interaction):
         self.disable_all_items()
-        db.join_leave_giveaway(self.msgid, interaction.user.id, mode="leave")
+        await db.join_leave_giveaway(self.msgid, interaction.user.id, mode="leave")
         await interaction.response.edit_message(
             content="Successfully left giveaway.", view=self
         )
@@ -77,12 +77,12 @@ class GiveawayJoin(discord.ui.View):
     async def join_callback(self, button, interaction):
         await interaction.response.defer(ephemeral=True)
 
-        if not db.check_valid_giveaway(interaction.message.id):
+        if not await db.check_valid_giveaway(interaction.message.id):
             await interaction.followup.send(
                 "Giveaway already ended or is invalid.", ephemeral=True
             )
             return
-        if db.check_joined_giveaway(interaction.message.id, interaction.user.id):
+        if await db.check_joined_giveaway(interaction.message.id, interaction.user.id):
             msgview = GiveawayLeave(msgid=interaction.message.id)
             m = await interaction.followup.send(
                 "You have already joined the giveaway.", ephemeral=True, view=msgview
@@ -90,5 +90,5 @@ class GiveawayJoin(discord.ui.View):
             msgview.msg = m
             return
 
-        db.join_leave_giveaway(interaction.message.id, interaction.user.id, mode="join")
+        await db.join_leave_giveaway(interaction.message.id, interaction.user.id, mode="join")
         await interaction.followup.send("Joined the giveaway!", ephemeral=True)

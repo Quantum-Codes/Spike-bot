@@ -31,7 +31,7 @@ class giveawaycommands(discord.Cog):
             embed=discord.Embed(description=funcs.replace_placeholders(message, ctx)),
             view=GiveawayJoin(),
         )
-        db.create_giveaway(msg.id, ctx.channel.id, winners)
+        await db.create_giveaway(msg.id, ctx.channel.id, winners)
         await ctx.followup.send("Success", ephemeral=True)
 
     @giveaway.command(name="end", description="Ends a giveaway")
@@ -41,11 +41,11 @@ class giveawaycommands(discord.Cog):
         if ctx.author.id not in [638738610564235265, 718830331356250202]:
             await ctx.followup.send("Who tf are you??", ephemeral=True)
             return
-        if not db.check_valid_giveaway(message.id):
+        if not await db.check_valid_giveaway(message.id):
             await ctx.followup.send("not valid giveaway", ephemeral=True)
             return
 
-        data = db.end_giveaway(message.id)
+        data = await db.end_giveaway(message.id)
         title = f"The giveaway for **__{reward}__** for {data['winners_count']} winners has come to an end and"
         content = f"## 🎊<:juuzou_gaming:1125994304528187392>Giveaway Winner Announcement!<:juuzou_gaming:1125994304528187392>🎊\n{title} \n\n🥳The winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab['user_id']) for ab in data['winners']])}>**!!🥳\n\n:tada:Congratulations!!:tada:\n\n`Participants: {data['participants_count']}`".replace(
             "<ENTERCHR101>", "\n"
@@ -68,7 +68,7 @@ class giveawaycommands(discord.Cog):
         if ctx.author.id not in [638738610564235265, 718830331356250202]:
             await ctx.followup.send("Who tf are you??", ephemeral=True)
             return
-        if not db.check_valid_giveaway(message.id):
+        if not await db.check_valid_giveaway(message.id):
             await ctx.followup.send("not valid giveaway", ephemeral=True)
             return
         if not confirm:
@@ -139,7 +139,7 @@ class utilitycommands(discord.Cog):
         embed.set_footer(
             text="Use `/utility welcome test_message` to preview the message"
         )
-        db.save_server_settings(
+        await db.save_server_settings(
             ctx.guild.id,
             "welcomer",
             {
@@ -158,14 +158,14 @@ class utilitycommands(discord.Cog):
     async def ping_time(self, ctx):
         t = time.time()
         await ctx.defer()
-        db.get_server_settings(ctx.guild.id)  # just run a query
+        await db.get_server_settings(ctx.guild.id)  # just run a query
         t = time.time() - t
         await ctx.followup.send(f"Ping: {self.bot.latency}s\nQuery: {t}s")
 
     @welcome.command(name="test_message", description="Test the welcome message")
     @discord.ext.commands.has_permissions(administrator=True)
     async def welcometest(self, ctx):
-        data = db.get_server_settings(ctx.guild.id, "welcomer")
+        data = await db.get_server_settings(ctx.guild.id, "welcomer")
         if data is None:
             embed = discord.Embed(
                 colour=discord.Colour.red(),
@@ -193,7 +193,7 @@ class utilitycommands(discord.Cog):
     @discord.ext.commands.has_permissions(administrator=True)
     async def removewelcome(self, ctx):
         await ctx.defer()
-        data = db.get_server_settings(ctx.guild.id, "welcomer")
+        data = await db.get_server_settings(ctx.guild.id, "welcomer")
         if data is None:
             embed = discord.Embed(
                 colour=discord.Colour.red(),
@@ -202,7 +202,7 @@ class utilitycommands(discord.Cog):
             await ctx.followup.send(embed=embed)
             return
 
-        db.delete_server_settings(ctx.guild.id, "welcomer")
+        await db.delete_server_settings(ctx.guild.id, "welcomer")
         embed = discord.Embed(
             colour=discord.Colour.red(),
             title="Deleted welcome message",
@@ -229,14 +229,14 @@ class utilitycommands(discord.Cog):
             title="Autokick enabled",
             description=f"Any account younger than {age_in_seconds} seconds will be kicked when they join.\nTo disable, use `/utility autokick disable`",
         )
-        db.save_server_settings(ctx.guild.id, "autokick", {"age": age_in_seconds})
+        await db.save_server_settings(ctx.guild.id, "autokick", {"age": age_in_seconds})
         await ctx.followup.send(embed=embed)
 
     @autokick.command(name="disable", description="Disable autokick")
     @discord.ext.commands.has_permissions(administrator=True)
     async def autokick_disable(self, ctx):
         await ctx.defer()
-        if db.get_server_settings(ctx.guild.id, "autokick") is None:
+        if await db.get_server_settings(ctx.guild.id, "autokick") is None:
             embed = discord.Embed(
                 colour=discord.Colour.red(),
                 title="Autokick was not setup",
@@ -245,7 +245,7 @@ class utilitycommands(discord.Cog):
             await ctx.followup.send(embed=embed)
             return
 
-        db.delete_server_settings(ctx.guild.id, "autokick")
+        await db.delete_server_settings(ctx.guild.id, "autokick")
         embed = discord.Embed(
             colour=discord.Colour.green(),
             title="Autokick is disabled",
