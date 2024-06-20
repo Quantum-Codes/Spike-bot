@@ -116,7 +116,6 @@ def TagNotFoundEmbed(mode="save", player_tag=""):
 
 
 def embed_player(data, battle_data):
-    print(data, battle_data, sep="\n")
     embed = discord.Embed(
         title=f"{data['name']}",
         color=int(data["nameColor"][4:], base=16),
@@ -260,7 +259,6 @@ class brawl(discord.Cog):
         data = api.get_club(club_tag)
         if data.status_code == 200:
             data = data.json()
-            print(data)
             await ctx.followup.send(embed=embed_club(data))
         elif data.status_code == 404:
             if data.json().get("reason"):
@@ -379,7 +377,7 @@ class brawl(discord.Cog):
         """
     if user:
         if ctx.author.get_role(1208026724399321120): # tournament manager role ID at juuzou server 
-            data = db.get_player_tag(user.id)
+            data = await db.get_player_tag(user.id)
         else:
             await ctx.respond("Don't use this option", ephemeral=True)
             return 

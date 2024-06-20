@@ -75,8 +75,8 @@ async def autokick(member, acc_time):
 
 @bot.event
 async def on_member_join(member):
-    settings_welcome = db.get_server_settings(member.guild.id, "welcomer")
-    settings_autokick = db.get_server_settings(member.guild.id, "autokick")
+    settings_welcome = await db.get_server_settings(member.guild.id, "welcomer")
+    settings_autokick = await db.get_server_settings(member.guild.id, "autokick")
     kicked = 0
     if settings_autokick is not None:  # autokick first
         kicked = await autokick(member, settings_autokick["age"])
