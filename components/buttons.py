@@ -90,5 +90,7 @@ class GiveawayJoin(discord.ui.View):
             msgview.msg = m
             return
 
-        await db.join_leave_giveaway(interaction.message.id, interaction.user.id, mode="join")
+        await db.join_leave_giveaway(
+            interaction.message.id, interaction.user.id, mode="join"
+        )
         await interaction.followup.send("Joined the giveaway!", ephemeral=True)

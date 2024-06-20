@@ -21,12 +21,9 @@ class giveawaycommands(discord.Cog):
             raise error
 
     @giveaway.command(name="create", description="Host a giveaway")
+    @discord.ext.commands.has_permissions(administrator=True)
     async def giveaway_maker(self, ctx, message: str, winners: int):
         await ctx.defer(ephemeral=True)
-        if ctx.author.id not in [638738610564235265, 718830331356250202]:
-            await ctx.followup.send("Who tf are you??", ephemeral=True)
-            return
-
         msg = await ctx.send(
             embed=discord.Embed(description=funcs.replace_placeholders(message, ctx)),
             view=GiveawayJoin(),
@@ -35,20 +32,22 @@ class giveawaycommands(discord.Cog):
         await ctx.followup.send("Success", ephemeral=True)
 
     @giveaway.command(name="end", description="Ends a giveaway")
+    @discord.ext.commands.has_permissions(administrator=True)
     async def giveaway_end(self, ctx, messageid: discord.Message, reward: str):
         await ctx.defer(ephemeral=True)
         message = messageid  # alias
-        if ctx.author.id not in [638738610564235265, 718830331356250202]:
-            await ctx.followup.send("Who tf are you??", ephemeral=True)
-            return
         if not await db.check_valid_giveaway(message.id):
             await ctx.followup.send("not valid giveaway", ephemeral=True)
             return
 
         data = await db.end_giveaway(message.id)
-        title = f"The giveaway for **__{reward}__** for {data['winners_count']} winners has come to an end and"
-        content = f"## 🎊<:juuzou_gaming:1125994304528187392>Giveaway Winner Announcement!<:juuzou_gaming:1125994304528187392>🎊\n{title} \n\n🥳The winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab['user_id']) for ab in data['winners']])}>**!!🥳\n\n:tada:Congratulations!!:tada:\n\n`Participants: {data['participants_count']}`".replace(
-            "<ENTERCHR101>", "\n"
+        title = f"The giveaway of **__{reward}__** for {data['winners_count']} winners has come to an end and"
+        content = (
+            f"## 🎊<:juuzou_gaming:1125994304528187392>Giveaway Winner Announcement!<:juuzou_gaming:1125994304528187392>🎊\n{title} \n\n🥳The winners are:\n**<@!{'> ,<ENTERCHR101><@!'.join([str(ab['user_id']) for ab in data['winners']])}>**!!🥳\n\n:tada:Congratulations!!:tada:\n\n`Participants: {data['participants_count']}`".replace(
+                "<ENTERCHR101>", "\n"
+            )
+            if data["winners_count"] != 0
+            else "Nobody won... 0 participants"
         )
         view = ConfirmWinners(message)
         message = await ctx.followup.send(
@@ -62,23 +61,33 @@ class giveawaycommands(discord.Cog):
         name="cleanup",
         description="⚠️Deletes all data related to giveaway⚠️ Don't use unless no further rerolls required",
     )
+    @discord.ext.commands.has_permissions(administrator=True)
     async def giveaway_cleanup(self, ctx, messageid: discord.Message, confirm: bool):
-        await ctx.defer(ephemeral=True)
-        message = messageid  # alias
-        if ctx.author.id not in [638738610564235265, 718830331356250202]:
-            await ctx.followup.send("Who tf are you??", ephemeral=True)
+        if not confirm:
+            await ctx.respond("Cancelled cleanup.", ephemeral=True)
             return
+
+        await ctx.defer(ephemeral=True)
+
+        message = messageid  # alias
         if not await db.check_valid_giveaway(message.id):
             await ctx.followup.send("not valid giveaway", ephemeral=True)
-            return
-        if not confirm:
-            await ctx.followup.send("Cancelled cleanup.", ephemeral=True)
             return
 
         await db.cleanup_giveaway(ctx, message.id)
         await ctx.followup.send(
             f"Deleted all data related to the giveaway with **ID: {message.id}**"
         )
+
+    @giveaway_cleanup.error
+    @giveaway_end.error
+    @giveaway_maker.error
+    async def giveaway_errorhandler(self, ctx, error):
+        if isinstance(error, discord.ext.commands.CheckFailure):
+            await ctx.respond(
+                f"Missing permissions: `{', '.join(error.missing_permissions)}`",
+                ephemeral=True,
+            )
 
 
 class utilitycommands(discord.Cog):

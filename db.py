@@ -27,8 +27,8 @@ class database:
                 .select("type, data")
                 .eq("server_id", serverid)
                 .execute()
-                .data
             )
+            result = result.data
             data = [(item["type"], item["data"]) for item in result]
             return data if data else None
         data = (
@@ -37,8 +37,8 @@ class database:
             .eq("server_id", serverid)
             .eq("type", setting_type)
             .execute()
-            .data
         )
+        data = data.data
         if data:  # non empty list= True
             data = data[0][
                 "data"
@@ -59,9 +59,9 @@ class database:
 
     async def delete_server_settings(self, serverid, setting_type):
         if await self.get_server_settings(serverid, setting_type) is not None:
-            await self.sup_db.table("server_settings").delete().eq("server_id", serverid).eq(
-                "type", setting_type
-            ).execute()
+            await self.sup_db.table("server_settings").delete().eq(
+                "server_id", serverid
+            ).eq("type", setting_type).execute()
 
     async def get_player_tag(self, discordid, check_deleted=False):
         """
@@ -133,9 +133,9 @@ class database:
 
     async def join_leave_giveaway(self, messageid, userid, mode="join"):
         if mode == "leave":
-            await self.sup_db.table("giveaway_joins").delete().eq("message_id", messageid).eq(
-                "user_id", userid
-            ).execute()
+            await self.sup_db.table("giveaway_joins").delete().eq(
+                "message_id", messageid
+            ).eq("user_id", userid).execute()
         else:
             await self.sup_db.table("giveaway_joins").insert(
                 {"message_id": messageid, "user_id": userid}
@@ -155,8 +155,8 @@ class database:
             .delete()
             .eq("message_id", messageid)
             .execute()
-            .data[0]["channel_id"]
         )
+        channelid = channelid.data[0]["channel_id"]
         channel = ctx.guild.get_channel(channelid)
         message = await channel.fetch_message(messageid)
         view = discord.ui.View.from_message(message)
@@ -174,16 +174,16 @@ class database:
             .select("user_id")
             .eq("message_id", messageid)
             .execute()
-            .data
         )  # had to be select distinct???
+        participants = participants.data
         participants_count = len(participants)
         winnerscount = (
             await self.sup_db.table("giveaway_list")
             .select("winners")
             .eq("message_id", messageid)
             .execute()
-            .data[0]["winners"]
         )
+        winnerscount = winnerscount.data[0]["winners"]
         if winnerscount > participants_count:
             winnerscount = participants_count
         winners = random.sample(participants, winnerscount)
@@ -255,7 +255,6 @@ class helper_funcs:
         for k, v in placeholders.items():
             message = message.replace(f"[{k}]", str(v))
         return message
-
 
 
 loop = asyncio.get_event_loop()
