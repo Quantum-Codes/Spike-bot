@@ -121,5 +121,7 @@ t1 = keep_alive()
 try:
     bot.run(os.environ["token"])
     t1.join()
-except discord.errors.HTTPException:
-    os.system("kill 1")
+except discord.errors.HTTPException  as e:
+    print("Login error")
+    print(e)
+    exit(1)
