@@ -1,4 +1,4 @@
-import discord, requests, os, asyncio
+import discord, requests, os, asyncio, aiohttp
 from db import db
 from main import guild_ids
 from discord.commands import SlashCommandGroup
@@ -8,39 +8,43 @@ class bs_api:
     def __init__(self) -> None:
         self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
         self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+        self.session = aiohttp.ClientSession()
+    
+    async def fetch(self, url):
+        async with self.session.get(url) as response:
+            return response
 
     def get_player(self, tag):
-        data = requests.get(f"{self.bsapi_url}/players/{tag}", headers=self.headers)
+        data = self.fetch(f"{self.bsapi_url}/players/{tag}", headers=self.headers)
         return data
 
     def get_battlelog(self, tag):
-        data = requests.get(
+        data = self.fetch(
             f"{self.bsapi_url}/players/{tag}/battlelog", headers=self.headers
         )
         return data
 
     def get_club(self, tag):
-        data = requests.get(f"{self.bsapi_url}/clubs/{tag}", headers=self.headers)
+        data = self.fetch(f"{self.bsapi_url}/clubs/{tag}", headers=self.headers)
         return data
 
 
-def fix_playertag(player_tag):
+async def fix_tag(player_tag):
     if not player_tag.startswith("#") and not player_tag.startswith("%23"):
         player_tag = "#" + player_tag
     player_tag = player_tag.replace("#", "%23").strip().upper()
     return player_tag
 
 
-def get_battledata(player_tag, player=None):
+async def get_battledata(player_tag, player=None):
     api = bs_api()
-    player_tag = fix_playertag(player_tag)
+    player_tag = await fix_tag(player_tag)
     data = api.get_battlelog(player_tag)
-    if data.status_code == 200:
-        data = data.json()
-        if (
-            not player
-        ):  # if we already have player object, then no need to request again
-            player = api.get_player(player_tag).json()
+    if data.status == 200:
+        data = await data.json()
+        if not player: 
+            # if we already have player object, then no need to request again
+            player = await api.get_player(player_tag).json()
         raw_stats = {"victory": 0, "defeat": 0, "draw": 0, "starplayer": 0}
         # print(data['items'][0]['battle'].keys())
         for item in data["items"]:
@@ -91,10 +95,11 @@ def get_battledata(player_tag, player=None):
 
         return (player, stats)
 
-    elif data.status_code == 404:
-        if data.json().get("reason"):
-            if data.json()["reason"] == "notFound":
-                return 404
+    elif data.status == 404:
+        data = await data.json()
+        reason = data.get("reason")
+        if reason == "notFound":
+            return 404
     else:
         return 500
 
@@ -218,20 +223,21 @@ class brawl(discord.Cog):
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
-        player_tag = fix_playertag(player_tag)
+        player_tag = await fix_tag(player_tag)
         data = api.get_player(player_tag)
-        if data.status_code == 200:
-            data = data.json()
+        if data.status == 200:
+            data = await data.json()
             battle_data = get_battledata(player_tag, data)
             if type(battle_data) is int:
                 battle_data = None
             else:
                 battle_data = battle_data[1]
             await ctx.followup.send(embed=embed_player(data, battle_data))
-        elif data.status_code == 404:
-            if data.json().get("reason"):
-                if data.json()["reason"] == "notFound":
-                    await ctx.followup.send("No such player exists")
+        elif data.status == 404:
+            data = await data.json()
+            reason = data.get("reason")
+            if reason == "notFound":
+                await ctx.followup.send("No such player exists")
         else:
             await ctx.followup.send("error")
 
@@ -246,24 +252,24 @@ class brawl(discord.Cog):
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
-            playerdata = api.get_player(
-                player_tag
-            ).json()  # assumed if tag saved in db then its valid
+            # assumed if tag saved in db then its valid
+            playerdata = await api.get_player(player_tag).json()
             club_tag = playerdata["club"].get("tag")
             if club_tag is None:
                 await ctx.respond(
                     "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
                 )
                 return
-        club_tag = fix_playertag(club_tag)
+        club_tag = await fix_tag(club_tag)
         data = api.get_club(club_tag)
-        if data.status_code == 200:
-            data = data.json()
+        if data.status == 200:
+            data = await data.json()
             await ctx.followup.send(embed=embed_club(data))
-        elif data.status_code == 404:
-            if data.json().get("reason"):
-                if data.json()["reason"] == "notFound":
-                    await ctx.followup.send("No such club exists")
+        elif data.status == 404:
+            data = await data.json()
+            reason = data.get("reason")
+            if reason == "notFound":
+                await ctx.followup.send("No such club exists")
         else:
             await ctx.followup.send("error")
 
@@ -302,15 +308,15 @@ class brawl(discord.Cog):
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
         api = bs_api()
-        player_tag = fix_playertag(player_tag)
+        player_tag = await fix_tag(player_tag)
         # currently no verification system on tags. so duplicate checking is waste.
         # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
         # if sql.rowcount != 0:
         #  await ctx.respond("Duplicate")
         with ctx.channel.typing():
             data = api.get_player(player_tag)
-        if data.status_code == 200:
-            data = data.json()
+        if data.status == 200:
+            data = await data.json()
             embed.add_field(
                 name="Confirmation:",
                 value=f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.",
@@ -337,11 +343,11 @@ class brawl(discord.Cog):
                 )
                 await ctx.send(embed=embed)
                 return
-        elif data.status_code == 404:
+        elif data.status == 404:
             await ctx.respond(embed=TagNotFoundEmbed(mode="404", player_tag=player_tag))
             return
         else:
-            await ctx.respond(f"error {data.status_code}")
+            await ctx.respond(f"error {data.status}")
             return
 
         if str(reaction.emoji) == "👎":
