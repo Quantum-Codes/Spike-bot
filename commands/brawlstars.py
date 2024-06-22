@@ -3,6 +3,22 @@ from db import db
 from main import guild_ids
 from discord.commands import SlashCommandGroup
 
+class api_response: # to avoid rewrite.. keep object similar to what requests lib did
+    def __init__(self) -> None:
+        pass
+    
+    @classmethod
+    async def create(cls, resp):
+        self = cls()
+        self.resp = resp
+        self.status = resp.status
+        self.json_obj = await resp.json()
+        return self
+    
+    async def json(self):
+        return self.json_obj
+    
+
 
 class bs_api:
     def __init__(self):
@@ -11,26 +27,24 @@ class bs_api:
 
     async def __aenter__(self):  # make async with loop work
         self.session = aiohttp.ClientSession(headers=self.headers)
-        return self.session
+        return self
 
-    async def __aexit__(self):
+    async def __aexit__(self, exc_type, exc, tb): # from python docs
         await self.session.close()
 
     async def fetch(self, url):
         async with self.session.get(url) as response:
-            return response
+            return await api_response.create(response)
 
     async def get_player(self, tag):
-        data = await self.fetch(f"{self.bsapi_url}/players/{tag}")
-        return data
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}")
 
     async def get_battlelog(self, tag):
-        data = await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
-        return data
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
 
     async def get_club(self, tag):
-        data = await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
-        return data
+        return await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
+
 
 
 async def fix_tag(player_tag):
@@ -43,12 +57,13 @@ async def fix_tag(player_tag):
 async def get_battledata(player_tag, player=None):
     async with bs_api() as api:
         player_tag = await fix_tag(player_tag)
-        data = api.get_battlelog(player_tag)
+        data = await api.get_battlelog(player_tag)
         if data.status == 200:
             data = await data.json()
             if not player:
                 # if we already have player object, then no need to request again
-                player = await api.get_player(player_tag).json()
+                player = await api.get_player(player_tag)
+                player = await player.json()
         elif data.status == 404:
             data = await data.json()
             reason = data.get("reason")
@@ -226,22 +241,22 @@ class brawl(discord.Cog):
                     return
                 player_tag = data
             player_tag = await fix_tag(player_tag)
-            data = api.get_player(player_tag)
-        if data.status == 200:
-            data = await data.json()
-            battle_data = get_battledata(player_tag, data)
-            if type(battle_data) is int:
-                battle_data = None
+            data = await api.get_player(player_tag)
+            if data.status == 200:
+                data = await data.json()
+                battle_data = await get_battledata(player_tag, data)
+                if type(battle_data) is int:
+                    battle_data = None
+                else:
+                    battle_data = battle_data[1]
+                await ctx.followup.send(embed=embed_player(data, battle_data))
+            elif data.status == 404:
+                data = await data.json()
+                reason = data.get("reason")
+                if reason == "notFound":
+                    await ctx.followup.send("No such player exists")
             else:
-                battle_data = battle_data[1]
-            await ctx.followup.send(embed=embed_player(data, battle_data))
-        elif data.status == 404:
-            data = await data.json()
-            reason = data.get("reason")
-            if reason == "notFound":
-                await ctx.followup.send("No such player exists")
-        else:
-            await ctx.followup.send("error")
+                await ctx.followup.send("error")
 
     @discord.slash_command(name="clubstats", description="GET a club's stats")
     async def clubstats(self, ctx, club_tag: str = None):
@@ -255,7 +270,8 @@ class brawl(discord.Cog):
                     return
                 player_tag = data
                 # assumed if tag saved in db then its valid
-                playerdata = await api.get_player(player_tag).json()
+                playerdata = await api.get_player(player_tag)
+                playerdata = await playerdata.json()
                 club_tag = playerdata["club"].get("tag")
                 if club_tag is None:
                     await ctx.respond(
@@ -263,17 +279,17 @@ class brawl(discord.Cog):
                     )
                     return
             club_tag = await fix_tag(club_tag)
-            data = api.get_club(club_tag)
-        if data.status == 200:
-            data = await data.json()
-            await ctx.followup.send(embed=embed_club(data))
-        elif data.status == 404:
-            data = await data.json()
-            reason = data.get("reason")
-            if reason == "notFound":
-                await ctx.followup.send("No such club exists")
-        else:
-            await ctx.followup.send("error")
+            data = await api.get_club(club_tag)
+            if data.status == 200:
+                data = await data.json()
+                await ctx.followup.send(embed=embed_club(data))
+            elif data.status == 404:
+                data = await data.json()
+                reason = data.get("reason")
+                if reason == "notFound":
+                    await ctx.followup.send("No such club exists")
+            else:
+                await ctx.followup.send("error")
 
     @discord.slash_command(
         name="battlestats", description="GET a player's battle stats"
@@ -286,7 +302,7 @@ class brawl(discord.Cog):
                 await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
-        data_raw = get_battledata(player_tag)
+        data_raw = await get_battledata(player_tag)
         if type(data_raw) is not int:
             player, data = data_raw
             message = f"# {player['name']}'s stats\n"
@@ -316,40 +332,40 @@ class brawl(discord.Cog):
             # if sql.rowcount != 0:
             #  await ctx.respond("Duplicate")
             with ctx.channel.typing():
-                data = api.get_player(player_tag)
-        if data.status == 200:
-            data = await data.json()
-            embed.add_field(
-                name="Confirmation:",
-                value=f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.",
-            )
-            bot_msg = await ctx.respond(embed=embed)
-
-            def check(reaction, user):
-                return user == ctx.author and str(reaction.emoji) in ("👍", "👎")
-
-            try:
-                m = await bot_msg.original_response()
-                await m.add_reaction("👍")
-                await m.add_reaction("👎")
-                embed.fields = []  # clear for future usage
-                reaction, user = await self.bot.wait_for(
-                    "reaction_add", timeout=120.0, check=check
-                )
-            except asyncio.TimeoutError:
-                embed.colour = discord.colour.red()
-                embed.fields = []  # just in case since in except loop
+                data = await api.get_player(player_tag)
+            if data.status == 200:
+                data = await data.json()
                 embed.add_field(
-                    name="Timeout",
-                    value="you took too long.. try using command again...",
+                    name="Confirmation:",
+                    value=f"Are you {data['name']}? React with 👍 or 👎.\n You have 2mins to do so.",
                 )
-                await ctx.send(embed=embed)
+                bot_msg = await ctx.respond(embed=embed)
+            elif data.status == 404:
+                await ctx.respond(embed=TagNotFoundEmbed(mode="404", player_tag=player_tag))
                 return
-        elif data.status == 404:
-            await ctx.respond(embed=TagNotFoundEmbed(mode="404", player_tag=player_tag))
-            return
-        else:
-            await ctx.respond(f"error {data.status}")
+            else:
+                await ctx.respond(f"error {data.status}")
+                return
+
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ("👍", "👎")
+
+        try:
+            m = await bot_msg.original_response()
+            await m.add_reaction("👍")
+            await m.add_reaction("👎")
+            embed.fields = []  # clear for future usage
+            reaction, user = await self.bot.wait_for(
+                "reaction_add", timeout=120.0, check=check
+            )
+        except asyncio.TimeoutError:
+            embed.colour = discord.colour.red()
+            embed.fields = []  # just in case since in except loop
+            embed.add_field(
+                name="Timeout",
+                value="you took too long.. try using command again...",
+            )
+            await ctx.send(embed=embed)
             return
 
         if str(reaction.emoji) == "👎":

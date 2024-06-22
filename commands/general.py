@@ -3,6 +3,7 @@ from discord.commands import SlashCommandGroup
 from main import guild_ids
 from db import db, funcs, Colour
 from components.buttons import GiveawayJoin, ConfirmWinners
+from commands.brawlstars import bs_api
 
 
 class giveawaycommands(discord.Cog):
@@ -165,11 +166,15 @@ class utilitycommands(discord.Cog):
 
     @discord.slash_command(name="ping", description="bot latency including a db query")
     async def ping_time(self, ctx):
-        t = time.time()
         await ctx.defer()
+        t1 = time.time()
         await db.get_server_settings(ctx.guild.id)  # just run a query
-        t = time.time() - t
-        await ctx.followup.send(f"Ping: {self.bot.latency}s\nQuery: {t}s")
+        t1 = time.time() - t1
+        t2 = time.time()
+        async with bs_api() as api:
+            await api.get_player("#28PUJ2VP9")
+        t2 = time.time() - t2
+        await ctx.followup.send(f"Ping: {self.bot.latency}s\nQuery: {t1}s\nAPI: {t2}s")
 
     @welcome.command(name="test_message", description="Test the welcome message")
     @discord.ext.commands.has_permissions(administrator=True)
