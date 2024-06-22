@@ -5,27 +5,31 @@ from discord.commands import SlashCommandGroup
 
 
 class bs_api:
-    def __init__(self) -> None:
+    def __init__(self):
         self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
         self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
-        self.session = aiohttp.ClientSession()
-    
+
+    async def __aenter__(self):  # make async with loop work
+        self.session = aiohttp.ClientSession(headers=self.headers)
+        return self.session
+
+    async def __aexit__(self):
+        await self.session.close()
+
     async def fetch(self, url):
         async with self.session.get(url) as response:
             return response
 
-    def get_player(self, tag):
-        data = self.fetch(f"{self.bsapi_url}/players/{tag}", headers=self.headers)
+    async def get_player(self, tag):
+        data = await self.fetch(f"{self.bsapi_url}/players/{tag}")
         return data
 
-    def get_battlelog(self, tag):
-        data = self.fetch(
-            f"{self.bsapi_url}/players/{tag}/battlelog", headers=self.headers
-        )
+    async def get_battlelog(self, tag):
+        data = await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
         return data
 
-    def get_club(self, tag):
-        data = self.fetch(f"{self.bsapi_url}/clubs/{tag}", headers=self.headers)
+    async def get_club(self, tag):
+        data = await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
         return data
 
 
@@ -37,71 +41,69 @@ async def fix_tag(player_tag):
 
 
 async def get_battledata(player_tag, player=None):
-    api = bs_api()
-    player_tag = await fix_tag(player_tag)
-    data = api.get_battlelog(player_tag)
-    if data.status == 200:
-        data = await data.json()
-        if not player: 
-            # if we already have player object, then no need to request again
-            player = await api.get_player(player_tag).json()
-        raw_stats = {"victory": 0, "defeat": 0, "draw": 0, "starplayer": 0}
-        # print(data['items'][0]['battle'].keys())
-        for item in data["items"]:
-            #  print(item)
-            battleresult = item["battle"].get("result")
-            if battleresult is None:  # showdown
-                battleresult = item["battle"].get("rank")
+    async with bs_api() as api:
+        player_tag = await fix_tag(player_tag)
+        data = api.get_battlelog(player_tag)
+        if data.status == 200:
+            data = await data.json()
+            if not player:
+                # if we already have player object, then no need to request again
+                player = await api.get_player(player_tag).json()
+        elif data.status == 404:
+            data = await data.json()
+            reason = data.get("reason")
+            if reason == "notFound":
+                return 404
+        else:
+            return 500
 
-                if battleresult is None:
-                    print(item)
-                    continue
-                battleresult = (
-                    "victory"
-                    if battleresult
-                    <= (2 if item["battle"]["mode"] == "duoShowdown" else 4)
-                    else "defeat"
-                )  # since lonestar, takedown also has 4 winners. so on else clause
-            if raw_stats.get(battleresult) is not None:
-                raw_stats[battleresult] += 1
-                if battleresult == "victory":
-                    starplayer = item["battle"].get("starPlayer")
-                    if starplayer is None:
-                        if "Showdown" in item["battle"]["mode"]:
-                            if item["battle"]["rank"] <= (
-                                1 if "duo" in item["battle"]["mode"] else 2
-                            ):
-                                raw_stats["starplayer"] += 1
-                    else:
-                        if (
-                            item["battle"]["starPlayer"]["tag"].upper()
-                            == player["tag"].upper()
+    raw_stats = {"victory": 0, "defeat": 0, "draw": 0, "starplayer": 0}
+    # print(data['items'][0]['battle'].keys())
+    for item in data["items"]:
+        #  print(item)
+        battleresult = item["battle"].get("result")
+        if battleresult is None:  # showdown
+            battleresult = item["battle"].get("rank")
+            if battleresult is None:
+                print(item)
+                continue
+            battleresult = (
+                "victory"
+                if battleresult <= (2 if item["battle"]["mode"] == "duoShowdown" else 4)
+                else "defeat"
+            )  # since lonestar, takedown also has 4 winners. so on else clause
+        if raw_stats.get(battleresult) is not None:
+            raw_stats[battleresult] += 1
+            if battleresult == "victory":
+                starplayer = item["battle"].get("starPlayer")
+                if starplayer is None:
+                    if "Showdown" in item["battle"]["mode"]:
+                        if item["battle"]["rank"] <= (
+                            1 if "duo" in item["battle"]["mode"] else 2
                         ):
                             raw_stats["starplayer"] += 1
-            else:
-                raw_stats.setdefault(battleresult, 1)
-        stats = {}
-        print(raw_stats)
-        raw_stats2 = raw_stats.copy()
-        raw_stats2.pop("starplayer")
-        total_matches = sum(raw_stats2.values())
-        for k, v in raw_stats.items():
-            if k == "starplayer":
-                stats[k + "_rate"] = (
-                    int(round(v / raw_stats["victory"], 4) * 10000) / 100
-                )  # round doesn't do its job properly
-            else:
-                stats[k + "_rate"] = int(round(v / total_matches, 4) * 10000) / 100
+                else:
+                    if (
+                        item["battle"]["starPlayer"]["tag"].upper()
+                        == player["tag"].upper()
+                    ):
+                        raw_stats["starplayer"] += 1
+        else:
+            raw_stats.setdefault(battleresult, 1)
+    stats = {}
+    print(raw_stats)
+    raw_stats2 = raw_stats.copy()
+    raw_stats2.pop("starplayer")
+    total_matches = sum(raw_stats2.values())
+    for k, v in raw_stats.items():
+        if k == "starplayer":
+            stats[k + "_rate"] = (
+                int(round(v / raw_stats["victory"], 4) * 10000) / 100
+            )  # round doesn't do its job properly
+        else:
+            stats[k + "_rate"] = int(round(v / total_matches, 4) * 10000) / 100
 
-        return (player, stats)
-
-    elif data.status == 404:
-        data = await data.json()
-        reason = data.get("reason")
-        if reason == "notFound":
-            return 404
-    else:
-        return 500
+    return (player, stats)
 
 
 def TagNotFoundEmbed(mode="save", player_tag=""):
@@ -215,16 +217,16 @@ class brawl(discord.Cog):
 
     @discord.slash_command(name="playerstats", description="GET a player's stats")
     async def playerstats(self, ctx, player_tag: str = ""):
-        api = bs_api()
         await ctx.defer()
-        if not player_tag:
-            data = await db.get_player_tag(ctx.author.id)
-            if data is None:
-                await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
-                return
-            player_tag = data
-        player_tag = await fix_tag(player_tag)
-        data = api.get_player(player_tag)
+        async with bs_api() as api:
+            if not player_tag:
+                data = await db.get_player_tag(ctx.author.id)
+                if data is None:
+                    await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+                    return
+                player_tag = data
+            player_tag = await fix_tag(player_tag)
+            data = api.get_player(player_tag)
         if data.status == 200:
             data = await data.json()
             battle_data = get_battledata(player_tag, data)
@@ -243,25 +245,25 @@ class brawl(discord.Cog):
 
     @discord.slash_command(name="clubstats", description="GET a club's stats")
     async def clubstats(self, ctx, club_tag: str = None):
-        api = bs_api()
         await ctx.defer()
-        if club_tag is None:
-            # get player's club here
-            data = await db.get_player_tag(ctx.author.id)
-            if data is None:
-                await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
-                return
-            player_tag = data
-            # assumed if tag saved in db then its valid
-            playerdata = await api.get_player(player_tag).json()
-            club_tag = playerdata["club"].get("tag")
+        async with bs_api() as api:
             if club_tag is None:
-                await ctx.respond(
-                    "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
-                )
-                return
-        club_tag = await fix_tag(club_tag)
-        data = api.get_club(club_tag)
+                # get player's club here
+                data = await db.get_player_tag(ctx.author.id)
+                if data is None:
+                    await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+                    return
+                player_tag = data
+                # assumed if tag saved in db then its valid
+                playerdata = await api.get_player(player_tag).json()
+                club_tag = playerdata["club"].get("tag")
+                if club_tag is None:
+                    await ctx.respond(
+                        "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
+                    )
+                    return
+            club_tag = await fix_tag(club_tag)
+            data = api.get_club(club_tag)
         if data.status == 200:
             data = await data.json()
             await ctx.followup.send(embed=embed_club(data))
@@ -307,14 +309,14 @@ class brawl(discord.Cog):
     @tagcommands.command(name="save", description="Save your player tag")
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
-        api = bs_api()
-        player_tag = await fix_tag(player_tag)
-        # currently no verification system on tags. so duplicate checking is waste.
-        # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
-        # if sql.rowcount != 0:
-        #  await ctx.respond("Duplicate")
-        with ctx.channel.typing():
-            data = api.get_player(player_tag)
+        async with bs_api() as api:
+            player_tag = await fix_tag(player_tag)
+            # currently no verification system on tags. so duplicate checking is waste.
+            # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
+            # if sql.rowcount != 0:
+            #  await ctx.respond("Duplicate")
+            with ctx.channel.typing():
+                data = api.get_player(player_tag)
         if data.status == 200:
             data = await data.json()
             embed.add_field(
