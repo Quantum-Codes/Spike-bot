@@ -26,7 +26,7 @@ class giveawaycommands(discord.Cog):
     async def giveaway_maker(self, ctx, message: str, winners: int):
         await ctx.defer(ephemeral=True)
         msg = await ctx.send(
-            embed=discord.Embed(description=funcs.replace_placeholders(message, ctx)),
+            embed=discord.Embed(description=await funcs.replace_placeholders(message, ctx)),
             view=GiveawayJoin(),
         )
         await db.create_giveaway(msg.id, ctx.channel.id, winners)
@@ -189,17 +189,17 @@ class utilitycommands(discord.Cog):
             return
         embed = discord.Embed(
             colour=discord.Colour(data["colour"]),
-            title=funcs.replace_placeholders(data["title"], ctx),
-            description=funcs.replace_placeholders(data["message"], ctx),
+            title=await funcs.replace_placeholders(data["title"], ctx),
+            description=await funcs.replace_placeholders(data["message"], ctx),
         )
         embed.add_field(
             name="would have been posted in:", value=f"<#{data['channel']}>"
         )
         embed.set_image(
-            url=funcs.replace_placeholders(data["image_url"], ctx, image_url=True)
+            url=await funcs.replace_placeholders(data["image_url"], ctx, image_url=True)
         )
         embed.set_thumbnail(
-            url=funcs.replace_placeholders(data["thumb_url"], ctx, image_url=True)
+            url=await funcs.replace_placeholders(data["thumb_url"], ctx, image_url=True)
         )
         await ctx.respond(f"{ctx.user.mention}" if data["ping"] else None, embed=embed)
 

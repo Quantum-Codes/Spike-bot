@@ -121,7 +121,7 @@ async def get_battledata(player_tag, player=None):
     return (player, stats)
 
 
-def TagNotFoundEmbed(mode="save", player_tag=""):
+async def TagNotFoundEmbed(mode="save", player_tag=""):
     embed = discord.Embed(colour=discord.Colour.magenta())
     if mode == "save":
         embed.add_field(
@@ -137,7 +137,7 @@ def TagNotFoundEmbed(mode="save", player_tag=""):
     return embed
 
 
-def embed_player(data, battle_data):
+async def embed_player(data, battle_data):
     embed = discord.Embed(
         title=f"{data['name']}",
         color=int(data["nameColor"][4:], base=16),
@@ -189,7 +189,7 @@ def embed_player(data, battle_data):
     return embed
 
 
-def embed_club(data):
+async def embed_club(data):
     embed = discord.Embed(
         title=f"{data['name']}",
         color=discord.Color.brand_green(),
@@ -237,7 +237,7 @@ class brawl(discord.Cog):
             if not player_tag:
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
             player_tag = await fix_tag(player_tag)
@@ -249,7 +249,7 @@ class brawl(discord.Cog):
                     battle_data = None
                 else:
                     battle_data = battle_data[1]
-                await ctx.followup.send(embed=embed_player(data, battle_data))
+                await ctx.followup.send(embed=await embed_player(data, battle_data))
             elif data.status == 404:
                 data = await data.json()
                 reason = data.get("reason")
@@ -266,7 +266,7 @@ class brawl(discord.Cog):
                 # get player's club here
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
                 # assumed if tag saved in db then its valid
@@ -282,7 +282,7 @@ class brawl(discord.Cog):
             data = await api.get_club(club_tag)
             if data.status == 200:
                 data = await data.json()
-                await ctx.followup.send(embed=embed_club(data))
+                await ctx.followup.send(embed=await embed_club(data))
             elif data.status == 404:
                 data = await data.json()
                 reason = data.get("reason")
@@ -299,7 +299,7 @@ class brawl(discord.Cog):
         if not player_tag:
             data = await db.get_player_tag(ctx.author.id)
             if data is None:
-                await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+                await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
         data_raw = await get_battledata(player_tag)
@@ -341,7 +341,7 @@ class brawl(discord.Cog):
                 )
                 bot_msg = await ctx.respond(embed=embed)
             elif data.status == 404:
-                await ctx.respond(embed=TagNotFoundEmbed(mode="404", player_tag=player_tag))
+                await ctx.respond(embed=await TagNotFoundEmbed(mode="404", player_tag=player_tag))
                 return
             else:
                 await ctx.respond(f"error {data.status}")
@@ -407,7 +407,7 @@ class brawl(discord.Cog):
             return 
     """
         if not data:
-            await ctx.respond(embed=TagNotFoundEmbed(mode="save"))
+            await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
             return
         else:
             embed.colour = discord.Colour.green()

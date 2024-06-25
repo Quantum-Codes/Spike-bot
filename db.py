@@ -17,7 +17,7 @@ class database:
         )
         return self
 
-    def db(self):
+    async def db(self):
         return self.sup_db
 
     async def get_server_settings(self, serverid, setting_type=None):
@@ -212,7 +212,7 @@ class helper_funcs:
     def __init__(self):
         pass
 
-    def replace_placeholders(
+    async def replace_placeholders(
         self, message, ctx, image_url=False, bot=None
     ):  # worst function ever..
         if isinstance(ctx, discord.commands.context.ApplicationContext):
@@ -259,5 +259,5 @@ class helper_funcs:
 
 loop = asyncio.get_event_loop()
 db = loop.run_until_complete(database.create())
-sup_db = db.db()
+# sup_db = await db.db()
 funcs = helper_funcs()
