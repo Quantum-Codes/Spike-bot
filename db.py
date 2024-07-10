@@ -13,9 +13,9 @@ class database:
     @classmethod
     async def create(cls):
         self = cls()
-        self.sup_db = await supabase.acreate_client(
+        """self.sup_db = await supabase.acreate_client(
             os.environ["sup_url"], os.environ["sup_key"]
-        )
+        )"""
         self.db = await aiomysql.connect(user="u43452_T8oykA1YfD", password="v+US70hg+xAKBB+2yAE6YJsY", host ="mysql.db.bot-hosting.net", port = 3306, db = "s43452_spikebot")
         self.sql = await self.db.cursor()
 
