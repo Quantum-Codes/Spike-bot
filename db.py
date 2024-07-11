@@ -16,13 +16,16 @@ class database:
         """self.sup_db = await supabase.acreate_client(
             os.environ["sup_url"], os.environ["sup_key"]
         )"""
-        self.db = await aiomysql.connect(user="u43452_T8oykA1YfD", password="v+US70hg+xAKBB+2yAE6YJsY", host ="mysql.db.bot-hosting.net", port = 3306, db = "s43452_spikebot")
+        self.db = await aiomysql.connect(user="u43452_T8oykA1YfD", password="UJAnbY=3RwBrbI+rl@N4O@Cn", host ="mysql.db.bot-hosting.net", port = 3306, db = "s43452_spikebot")
         self.sql = await self.db.cursor()
-
         return self
 
     async def db(self):
         return self.db
+    
+    async def close_db(self):
+        await self.sql.close()
+        self.db.close() #not a coro idk how
 
     async def get_server_settings(self, serverid, setting_type=None):
         if setting_type is None:
@@ -35,7 +38,7 @@ class database:
             result = result.data"""
             await self.sql.execute("SELECT type, data FROM server_settings WHERE server_id = %s;", (serverid,))
             result = await self.sql.fetchall()
-            
+            print(result)
             data = [(item[0], item[1]) for item in result]
             return data if data else None
         """data = (
@@ -59,22 +62,24 @@ class database:
             """await self.sup_db.table("server_settings").insert(
                 {"server_id": serverid, "type": setting_type, "data": data}
             ).execute()"""
-            await self.sql.execute("INSERT INTO server_settings (server_id, type, data) VALUES (%s, %s, %s);", (serverid, type, data))
+            await self.sql.execute("INSERT INTO server_settings (server_id, type, data) VALUES (%s, %s, %s);", (serverid, setting_type, json.dumps(data)))
             await self.db.commit()
             return
         """await self.sup_db.table("server_settings").update({"data": data}).eq(
             "server_id", serverid
         ).eq("type", setting_type).execute()"""
-        await self.sql.execute("UPDATE server_settings SET data = %s WHERE server_id = %s AND type = %s;", (serverid, setting_type))
+        await self.sql.execute("UPDATE server_settings SET data = %s WHERE server_id = %s AND type = %s;", (json.dumps(data), serverid, setting_type))
         await self.db.commit()
 
     async def delete_server_settings(self, serverid, setting_type):
-        if await self.get_server_settings(serverid, setting_type) is not None:
-            """await self.sup_db.table("server_settings").delete().eq(
-                "server_id", serverid
-            ).eq("type", setting_type).execute()"""
-            await self.sql.execute("DELETE FROM server_settings WHERE server_id = %s AND type = %s;")
-            await db.commit()
+        """Always check if record exists before deleting
+
+        Args:
+            serverid (int): ServerID
+            setting_type (str): Settingtype - may be autokick or welcomer
+        """
+        await self.sql.execute("DELETE FROM server_settings WHERE server_id = %s AND type = %s;", (serverid, setting_type))
+        await self.db.commit()
 
     async def get_player_tag(self, discordid, check_deleted=False):
         """

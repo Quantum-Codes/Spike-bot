@@ -1,9 +1,5 @@
-# ONLY ADDED VIDEO PARAM IN LINE 8 WEBHOOK.PY. code doesnt use it. make it use
-# For replit only:
-# make pycord work by making guessImports = false in .replit
-# also add pkgs.ffmpeg in replit.nix for voice
 # https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
-
+# if getting table lock error in mysql, then prob too many connections opened. close using script in killprocess.txt
 # ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
 # poetry export --without-hashes --format=requirements.txt > requirements.txt
 
