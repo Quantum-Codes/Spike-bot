@@ -1,6 +1,6 @@
 from flask import Flask, request
 from threading import Thread
-from commands.webhook import yt_webhook
+from commands.webhook import yt_auto_notify
 import xmltodict
 from xml.parsers.expat import ExpatError
 from logger import getlog, writelog
@@ -66,8 +66,8 @@ def feed():
         # Parse out the video URL.
         video_url = xml_dict["feed"]["entry"]["link"]["@href"]
         if video_url not in getlog():
-            yt_webhook(check_old=True)
-            writelog(f"New video URL: {video_url}")
+            yt_auto_notify(video_url)
+            writelog(f"New video URL: {video_url[:-11]}")
         # # Send the message to the webhook URL.
         # # https://discord.com/developers/docs/resources/webhook
         # message = config["message_prefix"] + "\n" + video_url

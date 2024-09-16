@@ -3,7 +3,7 @@ import os, discord, aiohttp, dotenv
 import googleapiclient.discovery
 
 dotenv.load_dotenv()
-guild_ids = [1099306183426326589]
+guild_ids = [1099306183426326589, 1017417232952852550]
 channelid = "UCyjy3LTL7AIV_Iwf4A9PeGw"
 global_videolist = []
 # setup Google api
@@ -16,8 +16,43 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=DEVELOPER_KEY, static_discovery=False
 )
 
+"""
+    if check_old:
+    if video["contentDetails"]["videoId"] in getlog():
+        writelog(f"Repeated video. Rejected. {video['contentDetails']['videoId']}")
+        return "Repeated"
+"""
 
-def yt_webhook(video=0, check_old=False):
+def send_webhook(video, channel, videoid = ""):
+    webhook = discord.SyncWebhook.from_url(os.environ["webhook_url"])
+    embed = discord.Embed(
+        title=video["snippet"]["title"],
+        description=(video["snippet"]["description"][:150] + "..."),
+        color=0x3B2F8,
+        url=f"https://youtube.com/watch?v={video['contentDetails']['videoId'] if not videoid else videoid}",
+    )
+    embed.set_author(
+        name=channel["snippet"]["customUrl"] if not videoid else channel["snippet"]["channelTitle"],
+        url=f'https://youtube.com/{channel["snippet"]["customUrl"] if not videoid else "/channel/"+channel["snippet"]["channelId"]}',
+        icon_url=channel["snippet"]["thumbnails"]["default"]["url"],
+    )
+    embed.set_image(url=video["snippet"]["thumbnails"]["high"]["url"])
+    ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb')
+    # embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
+    res = webhook.send("<@&1149699372209164370> New video", embed=embed)
+    print(res)
+    writelog(f"notified: {video['contentDetails']['videoId'] if not videoid else videoid}")
+
+def yt_auto_notify(videoid):
+    request = youtube.videos().list(
+        part="snippet,contentDetails",
+        id=videoid
+    )
+    response = request.execute()
+    print(response)
+    send_webhook(response["items"][0], response["items"][0], videoid)
+
+def yt_webhook_notifycommand(video=0):
     request = youtube.channels().list(part="snippet,contentDetails", id=channelid)
     response = request.execute()["items"][0]
 
@@ -30,31 +65,9 @@ def yt_webhook(video=0, check_old=False):
     channel, videos = response, response2
     video = videos["items"][video]
 
-    if check_old:
-        if video["contentDetails"]["videoId"] in getlog():
-            writelog(f"Repeated video. Rejected. {video['contentDetails']['videoId']}")
-            return "Repeated"
-
     print(video)
-
-    webhook = discord.SyncWebhook.from_url(os.environ["webhook_url"])
-    embed = discord.Embed(
-        title=video["snippet"]["title"],
-        description=video["snippet"]["description"][:150] + "...",
-        color=0x3B2F8,
-        url=f"https://youtube.com/watch?v={video['contentDetails']['videoId']}",
-    )
-    embed.set_author(
-        name=channel["snippet"]["customUrl"],
-        url=f'https://youtube.com/{channel["snippet"]["customUrl"]}',
-        icon_url=channel["snippet"]["thumbnails"]["default"]["url"],
-    )
-    embed.set_image(url=video["snippet"]["thumbnails"]["high"]["url"])
-    ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb')
-    # embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
-    res = webhook.send("<@&1149699372209164370> New video", embed=embed)
-    print(res)
-    writelog(f"notified: {video['contentDetails']['videoId']}")
+    
+    send_webhook(video, channel)
 
 
 class yt_notify_webhook(discord.Cog):
@@ -80,7 +93,7 @@ class yt_notify_webhook(discord.Cog):
                 interaction,
             ):  # the function called when the user is done selecting options
                 # await interaction.delete_original_response() doesn't work
-                yt_webhook(
+                yt_webhook_notifycommand(
                     [item["snippet"]["title"] for item in global_videolist].index(
                         interaction.data["values"][0][:-14]
                     )
