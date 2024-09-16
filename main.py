@@ -1,9 +1,5 @@
-# ONLY ADDED VIDEO PARAM IN LINE 8 WEBHOOK.PY. code doesnt use it. make it use
-# For replit only:
-# make pycord work by making guessImports = false in .replit
-# also add pkgs.ffmpeg in replit.nix for voice
 # https://docs.pycord.dev/en/stable/ext/commands/api.html#checks
-
+# if getting table lock error in mysql, then prob too many connections opened. close using script in killprocess.txt
 # ADD funcs.replace_placeholders IN WELCOME EMBED MAKER MAIN.PY
 # poetry export --without-hashes --format=requirements.txt > requirements.txt
 
@@ -16,7 +12,7 @@ from db import db, funcs
 dotenv.load_dotenv()
 
 bot = discord.Bot(intents=discord.Intents.all())
-guild_ids = [1017417232952852550, 1099306183426326589]  # HARDCODED IN OTHER PLACES
+guild_ids = [1017417232952852550, 1099306183426326589]
 
 
 @bot.event
@@ -33,23 +29,23 @@ async def on_message(message):
         await message.reply("Why u pinged me? I was sleeping :(")
 
 
-def welcome_embed(user, settings):
+async def welcome_embed(user, settings):
     suffix_num = ["th", "st", "nd", "rd"]
     suffix_num.extend(["th"] * 6)
     temp = int(str(user.guild.member_count)[-1])
     suffix_num = suffix_num[temp]
     embed = discord.Embed(
-        title=funcs.replace_placeholders(settings["title"], user, bot=bot),
+        title=await funcs.replace_placeholders(settings["title"], user, bot=bot),
         color=discord.Colour(settings["colour"]),
-        description=funcs.replace_placeholders(settings["message"], user, bot=bot),
+        description=await funcs.replace_placeholders(settings["message"], user, bot=bot),
     )
     embed.set_thumbnail(
-        url=funcs.replace_placeholders(
+        url=await funcs.replace_placeholders(
             settings["thumb_url"], user, bot=bot, image_url=True
         )
     )
     embed.set_image(
-        url=funcs.replace_placeholders(
+        url=await funcs.replace_placeholders(
             settings["image_url"], user, bot=bot, image_url=True
         )
     )
@@ -75,8 +71,8 @@ async def autokick(member, acc_time):
 
 @bot.event
 async def on_member_join(member):
-    settings_welcome = db.get_server_settings(member.guild.id, "welcomer")
-    settings_autokick = db.get_server_settings(member.guild.id, "autokick")
+    settings_welcome = await db.get_server_settings(member.guild.id, "welcomer")
+    settings_autokick = await db.get_server_settings(member.guild.id, "autokick")
     kicked = 0
     if settings_autokick is not None:  # autokick first
         kicked = await autokick(member, settings_autokick["age"])
@@ -86,7 +82,7 @@ async def on_member_join(member):
         welcomechannel = bot.get_channel(int(settings_welcome["channel"]))
         await welcomechannel.send(
             f'Welcome to the server, {member.mention if settings_welcome["ping"] else None}!',
-            embed=welcome_embed(member, settings_welcome),
+            embed=await welcome_embed(member, settings_welcome),
         )
 
 
@@ -121,5 +117,7 @@ t1 = keep_alive()
 try:
     bot.run(os.environ["token"])
     t1.join()
-except discord.errors.HTTPException:
-    os.system("kill 1")
+except discord.errors.HTTPException  as e:
+    print("Login error")
+    print(e)
+    exit(1)
