@@ -52,7 +52,7 @@ class database:
         await self.sql.execute("SELECT data FROM server_settings WHERE server_id = %s AND type = %s;", (serverid, setting_type))
         data = await self.sql.fetchall()
         if data:  # non empty list= True
-            data = data[0][0]  # guaranteed to be list of 1 element, so take just the 1st one
+            data = json.loads(data[0][0])  # guaranteed to be list of 1 element, so take just the 1st one
         else:
             data = None
         return data
