@@ -38,7 +38,6 @@ class database:
             result = result.data"""
             await self.sql.execute("SELECT type, data FROM server_settings WHERE server_id = %s;", (serverid,))
             result = await self.sql.fetchall()
-            print(result)
             data = [(item[0], item[1]) for item in result]
             return data if data else None
         """data = (
