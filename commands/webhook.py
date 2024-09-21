@@ -26,17 +26,17 @@ youtube = googleapiclient.discovery.build(
 def send_webhook(video, channel, videoid = ""):
     webhook = discord.SyncWebhook.from_url(os.environ["webhook_url"])
     embed = discord.Embed(
-        title=video["snippet"]["title"],
-        description=(video["snippet"]["description"][:150] + "..."),
-        color=0x3B2F8,
-        url=f"https://youtube.com/watch?v={video['contentDetails']['videoId'] if not videoid else videoid}",
+        title = video["snippet"]["title"],
+        description = (video["snippet"]["description"][:150] + "..."),
+        color = 0x3B2F8,
+        url = f"https://youtube.com/watch?v={video['contentDetails']['videoId'] if not videoid else videoid}",
     )
     embed.set_author(
-        name=channel["snippet"]["customUrl"] if not videoid else channel["snippet"]["channelTitle"],
-        url=f'https://youtube.com/{channel["snippet"]["customUrl"] if not videoid else "/channel/"+channel["snippet"]["channelId"]}',
-        icon_url=channel["snippet"]["thumbnails"]["default"]["url"],
+        name = channel["snippet"]["customUrl"],
+        url = f'https://youtube.com/{channel["snippet"]["customUrl"]}',
+        icon_url = channel["snippet"]["thumbnails"]["default"]["url"],
     )
-    embed.set_image(url=video["snippet"]["thumbnails"]["high"]["url"])
+    embed.set_image(url = video["snippet"]["thumbnails"]["high"]["url"])
     ##embed.set_thumbnail(url='https://dummyimage.com/480x300&text=thumb')
     # embed.set_footer(text='Embed Footer Text', icon_url="https://dummyimage.com/200x200&text=footer")
     res = webhook.send("<@&1149699372209164370> New video", embed=embed)
@@ -45,21 +45,23 @@ def send_webhook(video, channel, videoid = ""):
 
 def yt_auto_notify(videoid):
     request = youtube.videos().list(
-        part="snippet,contentDetails",
-        id=videoid
+        part = "snippet,contentDetails",
+        id = videoid
     )
-    response = request.execute()
-    print(response)
-    send_webhook(response["items"][0], response["items"][0], videoid)
+    video = request.execute()
+    requestchannel = youtube.channels().list(part="snippet,contentDetails", id=channelid)
+    channel = requestchannel.execute()["items"][0]
+    print(video)
+    send_webhook(video["items"][0], channel, videoid)
 
 def yt_webhook_notifycommand(video=0):
-    request = youtube.channels().list(part="snippet,contentDetails", id=channelid)
+    request = youtube.channels().list(part = "snippet,contentDetails", id = channelid)
     response = request.execute()["items"][0]
 
     request = youtube.playlistItems().list(
-        part="snippet,contentDetails",
-        maxResults=3,
-        playlistId=response["contentDetails"]["relatedPlaylists"]["uploads"],
+        part = "snippet,contentDetails",
+        maxResults = 3,
+        playlistId = response["contentDetails"]["relatedPlaylists"]["uploads"],
     )
     response2 = request.execute()
     channel, videos = response, response2
@@ -80,6 +82,7 @@ class yt_notify_webhook(discord.Cog):
     async def notify(self, ctx):
         global global_videolist
         await ctx.defer()
+        yt_auto_notify("vserezEabU4")
         if ctx.author.id in [638738610564235265, 718830331356250202]:
             request = youtube.playlistItems().list(
                 part="snippet,contentDetails",
