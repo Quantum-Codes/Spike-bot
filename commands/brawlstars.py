@@ -256,7 +256,8 @@ class brawl(discord.Cog):
                 if reason == "notFound":
                     await ctx.followup.send("No such player exists")
             else:
-                await ctx.followup.send("error")
+                await ctx.followup.send(f"error {data.status}")
+                print(vars(data), data)
 
     @discord.slash_command(name="clubstats", description="GET a club's stats")
     async def clubstats(self, ctx, club_tag: str = None):
@@ -289,7 +290,7 @@ class brawl(discord.Cog):
                 if reason == "notFound":
                     await ctx.followup.send("No such club exists")
             else:
-                await ctx.followup.send("error")
+                await ctx.followup.send(f"error {data.status}")
 
     @discord.slash_command(
         name="battlestats", description="GET a player's battle stats"
@@ -320,7 +321,7 @@ class brawl(discord.Cog):
                 "No such player exists OR this player hasn't played any battles..."
             )
         else:
-            await ctx.followup.send("error")
+            await ctx.followup.send(f"error {data.status}")
 
     @tagcommands.command(name="save", description="Save your player tag")
     async def save_tag(self, ctx, player_tag: str):

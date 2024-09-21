@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "python-template"
+name = "spikebot"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
@@ -14,8 +14,6 @@ py-cord = "^2.4.1"
 google-api-python-client = "^2.88.0"
 xmltodict = "^0.13.0"
 python-dotenv = "^1.0.1"
-supabase = "^2.4.0"
-mysql-connector-python = "^9.0.0"
 aiomysql = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
