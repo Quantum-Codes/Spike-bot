@@ -34,6 +34,7 @@ class database:
         self.db.close()  # not a coro idk how
 
     async def get_server_settings(self, serverid, setting_type=None):
+        serverid = str(serverid)
         if setting_type is None:
             """result = (
                 await self.sup_db.table("server_settings")
@@ -47,7 +48,7 @@ class database:
                 (serverid,),
             )
             result = await self.sql.fetchall()
-            data = [(item[0], item[1]) for item in result]
+            data = [(item[0], json.loads(item[1])) for item in result]
             return data if data else None
         """data = (
             await self.sup_db.table("server_settings")
