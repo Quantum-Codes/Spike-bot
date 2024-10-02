@@ -3,7 +3,7 @@ import requests
 x = requests.post(
                  "https://pubsubhubbub.appspot.com/subscribe",
                  data = {
-                    "hub.callback": "http://de1.bot-hosting.net:20548/feed",
+                    "hub.callback": "http://us3.bot-hosting.net:20033/feed",
                     "hub.topic": "https://www.youtube.com/xml/feeds/videos.xml?channel_id=UCyjy3LTL7AIV_Iwf4A9PeGw",
                     "hub.verify": "sync",
                     "hub.mode": "subscribe",
