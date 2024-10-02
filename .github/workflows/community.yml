@@ -4,8 +4,8 @@
 name: youtube community relay
 
 on:
-  schedule:
-    - cron: # 30 16 3/4 * *
+  #schedule:
+  #  - cron:  30 16 3/4 * *
   
   workflow_dispatch:
 
