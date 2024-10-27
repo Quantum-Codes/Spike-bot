@@ -32,7 +32,15 @@ class database:
     async def close_db(self):
         await self.sql.close()
         self.db.close()  # not a coro idk how
+    
+    def ensure_connection(func):
+        async def innerfunction(self, *args, **kwargs):
+            await self.db.ping(reconnect=True)
+            x = await func(self, *args, **kwargs)
+            return x
+        return innerfunction
 
+    @ensure_connection
     async def get_server_settings(self, serverid, setting_type=None):
         serverid = str(serverid)
         if setting_type is None:
@@ -71,6 +79,7 @@ class database:
             data = None
         return data
 
+    @ensure_connection
     async def save_server_settings(self, serverid, setting_type, data):
         if await self.get_server_settings(serverid, setting_type) is None:
             """await self.sup_db.table("server_settings").insert(
@@ -91,6 +100,7 @@ class database:
         )
         await self.db.commit()
 
+    @ensure_connection
     async def delete_server_settings(self, serverid, setting_type):
         """Always check if record exists before deleting
 
@@ -104,6 +114,7 @@ class database:
         )
         await self.db.commit()
 
+    @ensure_connection
     async def get_player_tag(self, discordid, check_deleted=False):
         """
         `check_deleted` is used internally to test if a player has his tag deleted (used in add_user func)
@@ -129,6 +140,7 @@ class database:
         else:
             return tag
 
+    @ensure_connection
     async def update_tag(self, discordid, player_tag=None):
         """await self.sup_db.table("users").update({"player_tag": player_tag}).eq(
             "user_id", discordid
@@ -139,6 +151,7 @@ class database:
         )
         await self.db.commit()
 
+    @ensure_connection
     async def add_user(self, discordid, player_tag=None):
         """
         Only `discordid` is required. All others are optional params. default = None
@@ -156,6 +169,7 @@ class database:
         )
         await self.db.commit()
 
+    @ensure_connection
     async def create_giveaway(self, messageid, channelid, winners):
         """
         All params required.
@@ -172,6 +186,7 @@ class database:
         )
         await self.db.commit()
 
+    @ensure_connection
     async def check_joined_giveaway(self, messageid, userid):
         """data = (
             await self.sup_db.table("giveaway_joins")
@@ -187,6 +202,7 @@ class database:
         await self.sql.fetchone()
         return self.sql.rowcount  # tests truth value
 
+    @ensure_connection
     async def check_valid_giveaway(self, messageid):
         """data = (
             await self.sup_db.table("giveaway_list")
@@ -200,6 +216,7 @@ class database:
         await self.sql.fetchone()
         return self.sql.rowcount  # tests truth value
 
+    @ensure_connection
     async def join_leave_giveaway(self, messageid, userid, mode="join"):
         if mode == "leave":
             """await self.sup_db.table("giveaway_joins").delete().eq(
@@ -220,6 +237,7 @@ class database:
             )
             await self.db.commit()
 
+    @ensure_connection
     async def cleanup_giveaway(self, ctx, messageid):
         """
         AWAIT THIS
@@ -250,6 +268,7 @@ class database:
         await message.edit(view=view)
         await self.db.commit()
 
+    @ensure_connection
     async def end_giveaway(self, messageid):
         """
         Does not edit/delete db. Only reads to db

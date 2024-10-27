@@ -1,4 +1,4 @@
-from discord_webhook import DiscordWebhook, DiscordEmbed 
+from discord_webhook import DiscordWebhook, DiscordEmbed # move to pycord webhook maybe
 import os, requests, json, string, time,  logger
 
 data = requests.get("https://yt.lemnoslife.com/channels?part=community&id=UCyjy3LTL7AIV_Iwf4A9PeGw")
