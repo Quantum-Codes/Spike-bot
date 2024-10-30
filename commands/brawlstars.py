@@ -126,14 +126,14 @@ async def TagNotFoundEmbed(mode="save", player_tag=""):
     if mode == "save":
         embed.add_field(
             name="Tag not saved",
-            value="Save your tag first by using `/save` command with the `player_tag` parameter",
+            value="Save your tag first by using `/tag save` command with the `player_tag` parameter",
         )
     elif mode == "404":
         embed.add_field(
             name="User not found",
             value=f"No such player exists with tag {player_tag}. Check the tag again.",
         )
-    embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
+    embed.set_image(url="https://imgur.com/a/yxu89nT")
     return embed
 
 

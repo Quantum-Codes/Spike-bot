@@ -232,7 +232,7 @@ class database:
                 {"message_id": messageid, "user_id": userid}
             ).execute()"""
             await self.sql.execute(
-                "INSERT INTO gievaway_joins (message_id, user_id) VALUES (%s, %s);",
+                "INSERT INTO giveaway_joins (message_id, user_id) VALUES (%s, %s);",
                 (messageid, userid),
             )
             await self.db.commit()
@@ -269,7 +269,7 @@ class database:
         await self.db.commit()
 
     @ensure_connection
-    async def end_giveaway(self, messageid):
+    async def end_giveaway(self, messageid: str) -> dict:
         """
         Does not edit/delete db. Only reads to db
         Return value: dict. (keys: winners, winners_count, participants, participants_count)
@@ -306,6 +306,43 @@ class database:
             "participants": participants,
             "participants_count": participants_count,
         }
+    
+    @ensure_connection
+    async def create_push_event(self, serverid: str, details: dict) -> None:
+        """
+        All params required.
+        `serverid` = Server id of the server hosting
+        `details` = all details: type of push - total trophies or brawler (and which brawler/what trophy level brawler)
+        """
+        await self.sql.execute(
+            "INSERT INTO push_event_list (server_id, details) VALUES (%s, %s);",
+            (serverid, json.dumps(details))
+        )
+        await self.db.commit()
+    
+    @ensure_connection
+    async def check_joined_push_event(self, messageid: str, userid: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_joins WHERE message_id = %s AND user_id = %s;",
+            (messageid, userid),
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+
+    @ensure_connection
+    async def join_leave_push_event(self, messageid: str, userid: str, mode: str = "join") -> None:
+        if mode == "leave":
+            await self.sql.execute(
+                "DELETE FROM push_event_joins WHERE message_id = %s AND user_id = %s;",
+                (messageid, userid),
+            )
+            await self.db.commit()
+        else:
+            await self.sql.execute(
+                "INSERT INTO push_event_joins (message_id, user_id) VALUES (%s, %s);",
+                (messageid, userid),
+            )
+            await self.db.commit()
 
 
 # CUSTOM CONVERTER
