@@ -1,5 +1,5 @@
 import discord, requests, os, asyncio, aiohttp
-from db import db
+from db import db, funcs
 from main import guild_ids
 from discord.commands import SlashCommandGroup
 
@@ -46,17 +46,9 @@ class bs_api:
         return await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
 
 
-
-async def fix_tag(player_tag):
-    if not player_tag.startswith("#") and not player_tag.startswith("%23"):
-        player_tag = "#" + player_tag
-    player_tag = player_tag.replace("#", "%23").strip().upper()
-    return player_tag
-
-
 async def get_battledata(player_tag, player=None):
     async with bs_api() as api:
-        player_tag = await fix_tag(player_tag)
+        player_tag = await funcs.fix_tag(player_tag)
         data = await api.get_battlelog(player_tag)
         if data.status == 200:
             data = await data.json()
@@ -119,22 +111,6 @@ async def get_battledata(player_tag, player=None):
             stats[k + "_rate"] = int(round(v / total_matches, 4) * 10000) / 100
 
     return (player, stats)
-
-
-async def TagNotFoundEmbed(mode="save", player_tag=""):
-    embed = discord.Embed(colour=discord.Colour.magenta())
-    if mode == "save":
-        embed.add_field(
-            name="Tag not saved",
-            value="Save your tag first by using `/tag save` command with the `player_tag` parameter",
-        )
-    elif mode == "404":
-        embed.add_field(
-            name="User not found",
-            value=f"No such player exists with tag {player_tag}. Check the tag again.",
-        )
-    embed.set_image(url="https://imgur.com/a/yxu89nT")
-    return embed
 
 
 async def embed_player(data, battle_data):
@@ -237,10 +213,10 @@ class brawl(discord.Cog):
             if not player_tag:
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
-            player_tag = await fix_tag(player_tag)
+            player_tag = await funcs.fix_tag(player_tag)
             data = await api.get_player(player_tag)
             if data.status == 200:
                 data = await data.json()
@@ -267,7 +243,7 @@ class brawl(discord.Cog):
                 # get player's club here
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
                 # assumed if tag saved in db then its valid
@@ -279,7 +255,7 @@ class brawl(discord.Cog):
                         "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
                     )
                     return
-            club_tag = await fix_tag(club_tag)
+            club_tag = await funcs.fix_tag(club_tag)
             data = await api.get_club(club_tag)
             if data.status == 200:
                 data = await data.json()
@@ -300,7 +276,7 @@ class brawl(discord.Cog):
         if not player_tag:
             data = await db.get_player_tag(ctx.author.id)
             if data is None:
-                await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
         data_raw = await get_battledata(player_tag)
@@ -327,7 +303,7 @@ class brawl(discord.Cog):
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
         async with bs_api() as api:
-            player_tag = await fix_tag(player_tag)
+            player_tag = await funcs.fix_tag(player_tag)
             # currently no verification system on tags. so duplicate checking is waste.
             # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
             # if sql.rowcount != 0:
@@ -342,7 +318,7 @@ class brawl(discord.Cog):
                 )
                 bot_msg = await ctx.respond(embed=embed)
             elif data.status == 404:
-                await ctx.respond(embed=await TagNotFoundEmbed(mode="404", player_tag=player_tag))
+                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="404", player_tag=player_tag))
                 return
             else:
                 await ctx.respond(f"error {data.status}")
@@ -408,7 +384,7 @@ class brawl(discord.Cog):
             return 
     """
         if not data:
-            await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+            await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
             return
         else:
             embed.colour = discord.Colour.green()

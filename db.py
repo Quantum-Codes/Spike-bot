@@ -324,23 +324,23 @@ class database:
     async def check_joined_push_event(self, messageid: str, userid: str) -> int:
         await self.sql.execute(
             "SELECT * FROM push_event_joins WHERE message_id = %s AND user_id = %s;",
-            (messageid, userid),
+            (messageid, userid)
         )
         await self.sql.fetchone()
         return self.sql.rowcount  # tests truth value
 
     @ensure_connection
-    async def join_leave_push_event(self, messageid: str, userid: str, mode: str = "join") -> None:
+    async def join_leave_push_event(self, serverid: str, userid: str, details: dict = {}, mode: str = "join") -> None:
         if mode == "leave":
             await self.sql.execute(
-                "DELETE FROM push_event_joins WHERE message_id = %s AND user_id = %s;",
-                (messageid, userid),
+                "DELETE FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+                (serverid, userid)
             )
             await self.db.commit()
         else:
             await self.sql.execute(
-                "INSERT INTO push_event_joins (message_id, user_id) VALUES (%s, %s);",
-                (messageid, userid),
+                "INSERT INTO push_event_joins (server_id, user_id) VALUES (%s, %s, %s);",
+                (serverid, userid, json.dumps(details))
             )
             await self.db.commit()
 
@@ -405,6 +405,28 @@ class helper_funcs:
         for k, v in placeholders.items():
             message = message.replace(f"[{k}]", str(v))
         return message
+    
+    
+    async def fix_tag(player_tag: str) -> str:
+        if not player_tag.startswith("#") and not player_tag.startswith("%23"):
+            player_tag = "#" + player_tag
+        player_tag = player_tag.replace("#", "%23").strip().upper()
+        return player_tag
+    
+    async def TagNotFoundEmbed(mode: str = "save", player_tag: str = "") -> discord.Embed:
+        embed = discord.Embed(colour=discord.Colour.magenta())
+        if mode == "save":
+            embed.add_field(
+                name="Tag not saved",
+                value="Save your tag first by using `/tag save` command with the `player_tag` parameter",
+            )
+        elif mode == "404":
+            embed.add_field(
+                name="User not found",
+                value=f"No such player exists with tag {player_tag}. Check the tag again.",
+            )
+        embed.set_image(url="https://imgur.com/a/yxu89nT")
+        return embed
 
 
 loop = asyncio.get_event_loop()
