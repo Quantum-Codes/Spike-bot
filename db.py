@@ -33,7 +33,7 @@ class database:
         await self.sql.close()
         self.db.close()  # not a coro idk how
     
-    def ensure_connection(func):
+    def ensure_connection(func): # reconnection decorator
         async def innerfunction(self, *args, **kwargs):
             await self.db.ping(reconnect=True)
             x = await func(self, *args, **kwargs)
@@ -321,10 +321,10 @@ class database:
         await self.db.commit()
     
     @ensure_connection
-    async def check_joined_push_event(self, messageid: str, userid: str) -> int:
+    async def check_joined_push_event(self, server_id: str, userid: str) -> int:
         await self.sql.execute(
-            "SELECT * FROM push_event_joins WHERE message_id = %s AND user_id = %s;",
-            (messageid, userid)
+            "SELECT * FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+            (server_id, userid)
         )
         await self.sql.fetchone()
         return self.sql.rowcount  # tests truth value
@@ -334,15 +334,33 @@ class database:
         if mode == "leave":
             await self.sql.execute(
                 "DELETE FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
-                (serverid, userid)
+                (serverid, userid),
             )
             await self.db.commit()
         else:
             await self.sql.execute(
-                "INSERT INTO push_event_joins (server_id, user_id) VALUES (%s, %s, %s);",
-                (serverid, userid, json.dumps(details))
+                "INSERT INTO push_event_joins (server_id, user_id, details) VALUES (%s, %s, %s);",
+                (serverid, userid, json.dumps(details)),
             )
             await self.db.commit()
+            
+    @ensure_connection
+    async def check_valid_push_event(self, server_id: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_list WHERE server_id = %s;", (server_id,)
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+
+    @ensure_connection
+    async def delete_push_event(self, server_id: str) -> None:
+        await self.sql.execute(
+            "DELETE FROM push_event_list WHERE server_id = %s", (server_id,)
+        )
+        await self.sql.execute(
+            "DELETE FROM push_event_joins WHERE server_id = %s", (server_id,)
+        )
+        await self.db.commit()
 
 
 # CUSTOM CONVERTER
