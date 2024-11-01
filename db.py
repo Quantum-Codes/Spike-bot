@@ -33,7 +33,7 @@ class database:
         await self.sql.close()
         self.db.close()  # not a coro idk how
     
-    def ensure_connection(func):
+    def ensure_connection(func): # reconnection decorator
         async def innerfunction(self, *args, **kwargs):
             await self.db.ping(reconnect=True)
             x = await func(self, *args, **kwargs)
@@ -232,7 +232,7 @@ class database:
                 {"message_id": messageid, "user_id": userid}
             ).execute()"""
             await self.sql.execute(
-                "INSERT INTO gievaway_joins (message_id, user_id) VALUES (%s, %s);",
+                "INSERT INTO giveaway_joins (message_id, user_id) VALUES (%s, %s);",
                 (messageid, userid),
             )
             await self.db.commit()
@@ -269,7 +269,7 @@ class database:
         await self.db.commit()
 
     @ensure_connection
-    async def end_giveaway(self, messageid):
+    async def end_giveaway(self, messageid: str) -> dict:
         """
         Does not edit/delete db. Only reads to db
         Return value: dict. (keys: winners, winners_count, participants, participants_count)
@@ -306,6 +306,61 @@ class database:
             "participants": participants,
             "participants_count": participants_count,
         }
+    
+    @ensure_connection
+    async def create_push_event(self, serverid: str, details: dict) -> None:
+        """
+        All params required.
+        `serverid` = Server id of the server hosting
+        `details` = all details: type of push - total trophies or brawler (and which brawler/what trophy level brawler)
+        """
+        await self.sql.execute(
+            "INSERT INTO push_event_list (server_id, details) VALUES (%s, %s);",
+            (serverid, json.dumps(details))
+        )
+        await self.db.commit()
+    
+    @ensure_connection
+    async def check_joined_push_event(self, server_id: str, userid: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+            (server_id, userid)
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+
+    @ensure_connection
+    async def join_leave_push_event(self, serverid: str, userid: str, details: dict = {}, mode: str = "join") -> None:
+        if mode == "leave":
+            await self.sql.execute(
+                "DELETE FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+                (serverid, userid),
+            )
+            await self.db.commit()
+        else:
+            await self.sql.execute(
+                "INSERT INTO push_event_joins (server_id, user_id, details) VALUES (%s, %s, %s);",
+                (serverid, userid, json.dumps(details)),
+            )
+            await self.db.commit()
+            
+    @ensure_connection
+    async def check_valid_push_event(self, server_id: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_list WHERE server_id = %s;", (server_id,)
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+
+    @ensure_connection
+    async def delete_push_event(self, server_id: str) -> None:
+        await self.sql.execute(
+            "DELETE FROM push_event_list WHERE server_id = %s", (server_id,)
+        )
+        await self.sql.execute(
+            "DELETE FROM push_event_joins WHERE server_id = %s", (server_id,)
+        )
+        await self.db.commit()
 
 
 # CUSTOM CONVERTER
@@ -368,6 +423,28 @@ class helper_funcs:
         for k, v in placeholders.items():
             message = message.replace(f"[{k}]", str(v))
         return message
+    
+    
+    async def fix_tag(player_tag: str) -> str:
+        if not player_tag.startswith("#") and not player_tag.startswith("%23"):
+            player_tag = "#" + player_tag
+        player_tag = player_tag.replace("#", "%23").strip().upper()
+        return player_tag
+    
+    async def TagNotFoundEmbed(mode: str = "save", player_tag: str = "") -> discord.Embed:
+        embed = discord.Embed(colour=discord.Colour.magenta())
+        if mode == "save":
+            embed.add_field(
+                name="Tag not saved",
+                value="Save your tag first by using `/tag save` command with the `player_tag` parameter",
+            )
+        elif mode == "404":
+            embed.add_field(
+                name="User not found",
+                value=f"No such player exists with tag {player_tag}. Check the tag again.",
+            )
+        embed.set_image(url="https://imgur.com/a/yxu89nT")
+        return embed
 
 
 loop = asyncio.get_event_loop()

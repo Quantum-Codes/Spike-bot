@@ -111,6 +111,7 @@ async def on_member_update(before, after):
 bot.load_extension("commands.general")
 bot.load_extension("commands.webhook")
 bot.load_extension("commands.brawlstars")
+bot.load_extension("commands.events")
 ####bot.load_extension("commands.message_commands")
 bot.load_extension("commands.rolestat")
 t1 = keep_alive()
