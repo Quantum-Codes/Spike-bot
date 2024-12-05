@@ -148,9 +148,9 @@ async def embed_player(data, battle_data):
     embed.add_field(
         name="Champtionship Challenge",
         value=(
-            "Qualified"
+            "Qualified this month"
             if data["isQualifiedFromChampionshipChallenge"]
-            else "Not Qualified"
+            else "Not Qualified this month"
         ),
     )
 

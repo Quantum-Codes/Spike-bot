@@ -425,13 +425,13 @@ class helper_funcs:
         return message
     
     
-    async def fix_tag(player_tag: str) -> str:
+    async def fix_tag(self, player_tag: str) -> str:
         if not player_tag.startswith("#") and not player_tag.startswith("%23"):
             player_tag = "#" + player_tag
         player_tag = player_tag.replace("#", "%23").strip().upper()
         return player_tag
     
-    async def TagNotFoundEmbed(mode: str = "save", player_tag: str = "") -> discord.Embed:
+    async def TagNotFoundEmbed(self, mode: str = "save", player_tag: str = "") -> discord.Embed:
         embed = discord.Embed(colour=discord.Colour.magenta())
         if mode == "save":
             embed.add_field(
