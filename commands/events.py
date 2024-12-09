@@ -111,6 +111,34 @@ class push_event_commands(discord.Cog):
         await db.delete_push_event(str(ctx.guild_id))
         await ctx.followup.send("Successfuly deleted the push event.\nYou may create a new one using `/push event create`", ephemeral=True)
 
+    @push_event.command(name="start", description="Start a push event")
+    @discord.ext.commands.has_permissions(administrator=True)
+    async def push_event_starter(self, ctx: discord.ApplicationContext):
+        await ctx.defer(ephemeral = True)
+        
+        if not (await db.check_valid_push_event(str(ctx.guild_id))):
+            await ctx.followup.send("No active push event.", ephemeral=True)
+            return
+        
+        await db.start_push_event(str(ctx.guild_id))
+        embed = discord.Embed(
+            color=discord.Color.green(), 
+            title = "Push Event Started",
+            description= "Push event has started!\nGet busy pushing your trophies till the end of the event!"
+        )
+        await ctx.followup.send(embed = embed)
+    
+    @push_event.command(name="end", description="End a push event and display winners")
+    @discord.ext.commands.has_permissions(administrator=True)
+    async def push_event_deleter(self, ctx: discord.ApplicationContext):
+        await ctx.defer(ephemeral = True)
+        
+        if not (await db.check_valid_push_event(str(ctx.guild_id))):
+            await ctx.followup.send("No active push event.", ephemeral=True)
+            return
+        
+        await db.end_push_event(str(ctx.guild_id))
+        await ctx.followup.send("Successfuly deleted the push event.\nYou may create a new one using `/push event create`", ephemeral=True)
 
 def setup(bot):
     bot.add_cog(push_event_commands(bot))

@@ -391,6 +391,39 @@ class database:
         )
         await self.sql.fetchone()
         return self.sql.rowcount  # tests truth value
+    
+    @ensure_connection
+    async def start_push_event(self, server_id: str, mode = "total_tros") -> int:
+        await self.sql.execute(
+            "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
+        )
+        
+        update_cursor = self.db.cursor()
+        
+        async with bs_api() as api:
+            for i in self.sql.rowcount: # exectuemany and execute in loop is equivalent (unless INSERT statement)
+                row = await self.sql.fetchone()
+                details = row[1]
+                playerdata = await api.get_player(details["player_tag"])
+                details["total_trophies"] = playerdata["trophies"]
+                await update_cursor.execute(
+                    "UPDATE push_event_joins SET details = %s where user_id = %s AND server_id = %s;",
+                    (
+                        json.dumps(details),
+                        row[0],
+                        server_id
+                    )
+                )
+        await self.db.commit()
+        await update_cursor.close()
+        
+    @ensure_connection
+    async def end_push_event(self, server_id: str, mode = "total_tros") -> int:
+        await self.sql.execute(
+            "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
+        )
+        
+        pass # TODO
 
     @ensure_connection
     async def delete_push_event(self, server_id: str) -> None:
