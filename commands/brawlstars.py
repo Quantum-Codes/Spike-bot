@@ -118,7 +118,7 @@ async def embed_player(data, battle_data):
         embed.add_field(name="Club name", value="No club joined", inline=True)
 
     embed.set_thumbnail(
-        url=f"https://cdn-old.brawlify.com/profile/{data['icon']['id']}.png"
+        url=f"https://cdn.brawlify.com/profile-icons/regular/{data['icon']['id']}.png"
     )
     return embed
 
@@ -154,7 +154,7 @@ async def embed_club(data):
     embed.add_field(name="Seniors", value=roles["senior"], inline=True)
     embed.add_field(name="Members", value=roles["member"], inline=True)
 
-    embed.set_thumbnail(url=f"https://cdn-old.brawlify.com/club/{data['badgeId']}.png")
+    embed.set_thumbnail(url=f"https://cdn.brawlify.com/club-badges/regular/{data['badgeId']}.png")
     return embed
 
 
