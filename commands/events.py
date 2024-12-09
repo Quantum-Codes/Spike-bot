@@ -1,7 +1,7 @@
 import discord
 from main import guild_ids
 from discord.commands import SlashCommandGroup
-from db import db, funcs
+from db import db, funcs, bs_api
 
 class push_event_commands(discord.Cog):
     def __init__(self, bot):
@@ -52,7 +52,7 @@ class push_event_commands(discord.Cog):
                 return
             player_tag = data
         else:
-            player_tag = funcs.fix_tag(player_tag)
+            player_tag = await funcs.fix_tag(player_tag)
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
             await ctx.followup.send("No pushevent is active in this server.")
@@ -61,13 +61,19 @@ class push_event_commands(discord.Cog):
         if (await db.check_joined_push_event(str(ctx.guild_id), str(ctx.author.id))):
             await ctx.followup.send("You have already joined the event.")
             return
+        
+        async with bs_api() as api:
+            if (await api.get_player(player_tag)).status == 404:
+                await ctx.followup.send(embed = await funcs.TagNotFoundEmbed(player_tag=player_tag.replace("%23", "#")))
+                return
             
         await db.join_leave_push_event(
             str(ctx.guild_id), 
             str(ctx.author.id),
             {
                 "player_tag": player_tag # total trophies to be requested 5-10mins before start of event.
-            }
+            },
+            mode = "join"
         )
         embed = discord.Embed(colour=discord.Colour.green(), title="Joined push event", description="You have successfully joined the push event using account {}!".format(player_tag.replace("%23", "#")))
         embed.set_footer(text = "Joined by mistake? Leave using `/push event leave`\nJoined using wrong account? Leave then join using `push event join player_tag:#XXXXXXXX`")

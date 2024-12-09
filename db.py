@@ -1,9 +1,49 @@
 import discord.ui, discord.ext, discord
 import os, random, json, dotenv, re, asyncio
-import aiomysql
+import aiomysql, aiohttp
 
 dotenv.load_dotenv()
 
+class api_response: # to avoid rewrite.. keep object similar to what requests lib did
+    def __init__(self) -> None:
+        pass
+    
+    @classmethod
+    async def create(cls, resp):
+        self = cls()
+        self.resp = resp
+        self.status = resp.status
+        self.json_obj = await resp.json()
+        return self
+    
+    async def json(self):
+        return self.json_obj
+
+
+class bs_api:
+    def __init__(self):
+        self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
+        self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+
+    async def __aenter__(self):  # make async with loop work
+        self.session = aiohttp.ClientSession(headers=self.headers)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb): # from python docs
+        await self.session.close()
+
+    async def fetch(self, url):
+        async with self.session.get(url) as response:
+            return await api_response.create(response)
+
+    async def get_player(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}")
+
+    async def get_battlelog(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
+
+    async def get_club(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
 
 class database:
     def __init__(self):
