@@ -393,7 +393,7 @@ class database:
         return self.sql.rowcount  # tests truth value
     
     @ensure_connection
-    async def start_push_event(self, server_id: str, mode = "total_tros") -> int:
+    async def start_push_event(self, server_id: str, mode: str = "total_tros") -> None:
         await self.sql.execute(
             "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
         )
@@ -418,12 +418,24 @@ class database:
         await update_cursor.close()
         
     @ensure_connection
-    async def end_push_event(self, server_id: str, mode = "total_tros") -> int:
+    async def end_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
         await self.sql.execute(
             "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
         )
         
-        pass # TODO
+        data = []
+        async with bs_api() as api:
+            for i in self.sql.rowcount:
+                row = await self.sql.fetchone()
+                playerdata = await api.get_player(row[1]["player_tag"])
+                trophydelta = playerdata["trophies"] - row[1]["total_trophies"]
+                # later, for optimizing, sort as you enter data into this list, use binary search to find where to enter (or maybe track where intermediate item values exist in another list and do something better than binary search)
+                data.append((row[0], trophydelta))
+        
+        tro = lambda x: x[1] # get trophies part of item
+        data.sort(reverse=True, key = tro)
+        
+        return data
 
     @ensure_connection
     async def delete_push_event(self, server_id: str) -> None:

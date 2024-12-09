@@ -137,8 +137,8 @@ class push_event_commands(discord.Cog):
             await ctx.followup.send("No active push event.", ephemeral=True)
             return
         
-        await db.end_push_event(str(ctx.guild_id))
-        await ctx.followup.send("Successfuly deleted the push event.\nYou may create a new one using `/push event create`", ephemeral=True)
+        data = await db.end_push_event(str(ctx.guild_id))
+        await ctx.followup.send(f"TOP 3 PEOPLE: {data[:3]}")
 
 def setup(bot):
     bot.add_cog(push_event_commands(bot))
