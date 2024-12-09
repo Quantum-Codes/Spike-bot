@@ -318,7 +318,7 @@ class brawl(discord.Cog):
                 )
                 bot_msg = await ctx.respond(embed=embed)
             elif data.status == 404:
-                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="404", player_tag=player_tag))
+                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="404", player_tag=player_tag.replace("%23", "#")))
                 return
             else:
                 await ctx.respond(f"error {data.status}")
