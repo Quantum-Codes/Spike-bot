@@ -394,9 +394,7 @@ class database:
     
     @ensure_connection
     async def start_push_event(self, server_id: str, mode: str = "total_tros") -> None:
-        await self.sql.execute(
-            "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
-        )
+        await self.sql.execute("SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,))
         
         update_cursor = self.db.cursor()
         
@@ -420,7 +418,7 @@ class database:
     @ensure_connection
     async def end_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
         await self.sql.execute(
-            "SELECT (user_id, details) FROM push_event_joins WHERE server_id = %s;", (server_id,)
+            "SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,)
         )
         
         data = []
