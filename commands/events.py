@@ -1,4 +1,4 @@
-import discord
+import discord, math
 from main import guild_ids
 from discord.commands import SlashCommandGroup
 from db import db, funcs, bs_api
@@ -120,12 +120,13 @@ class push_event_commands(discord.Cog):
             await ctx.followup.send("No active push event.", ephemeral=True)
             return
         
-        await db.start_push_event(str(ctx.guild_id))
+        embedtext = await db.start_push_event(str(ctx.guild_id))
         embed = discord.Embed(
             color=discord.Color.green(), 
             title = "Push Event Started",
-            description= "Push event has started!\nGet busy pushing your trophies till the end of the event!"
+            description= f"Push event has started!\nGet busy pushing your trophies till the end of the event!\n\n{embedtext}"
         )
+        embed.set_footer(text="Note that change in trophies count. Total trophies do not matter unless a tie exists where person with more total trophies or more brawler trophies win depending on context.")
         await ctx.followup.send(embed = embed)
     
     @push_event.command(name="end", description="End a push event and display winners")
@@ -138,7 +139,20 @@ class push_event_commands(discord.Cog):
             return
         
         data = await db.end_push_event(str(ctx.guild_id))
-        await ctx.followup.send(f"TOP 3 PEOPLE: {data[:3]}")
+        embedtext = "### User       --     <:trophy:1149687899336482928> Trophy delta\n"
+        sno_len = int(math.log10(self.sql.rowcount + 1))
+        
+        i = 1
+        for playerid, trophydelta in data:
+            embedtext += f"{str(i).zfill(sno_len)}. <@!{playerid}>  --  <:trophy:1149687899336482928> {trophydelta}\n" # make this pagewise zfill eventually (1st page 0-50. so 01 02 03.)
+        
+        embed = discord.Embed(
+            color=discord.Color.green(), 
+            title = "Push Event End stats",
+            description= f"The push event has ended!\n\n## Leaderboards:\n\n{embedtext}"
+        )
+        
+        await ctx.followup.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(push_event_commands(bot))

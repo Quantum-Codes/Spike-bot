@@ -1,6 +1,6 @@
 import discord.ui, discord.ext, discord
-import os, random, json, dotenv, re, asyncio
-import aiomysql, aiohttp
+import os, random, json, dotenv, re, math
+import aiomysql, aiohttp, asyncio
 
 dotenv.load_dotenv()
 
@@ -393,17 +393,26 @@ class database:
         return self.sql.rowcount  # tests truth value
     
     @ensure_connection
-    async def start_push_event(self, server_id: str, mode: str = "total_tros") -> None:
+    async def start_push_event(self, server_id: str, mode: str = "total_tros") -> str: # better to directly generate embedtext rather than return a more general piece of data - list of users, since there is only 1 use of this function.. to keep all sql calls in this one file
+        """Does logic for starting push event - Gets everyones starting point and also generate embed text
+        
+        Returns:
+            str: Embed description text with list of users
+        """
         await self.sql.execute("SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,))
         
-        update_cursor = self.db.cursor()
+        update_cursor = await self.db.cursor()
+        embedtext = "### User       --     <:trophy:1149687899336482928> Total trophies\n"
         
+        sno_len = int(math.log10(self.sql.rowcount + 1))
         async with bs_api() as api:
-            for i in self.sql.rowcount: # exectuemany and execute in loop is equivalent (unless INSERT statement)
+            for i in range(1, self.sql.rowcount + 1): # exectuemany and execute in loop is equivalent (unless INSERT statement)
                 row = await self.sql.fetchone()
-                details = row[1]
+                details = json.loads(row[1])
                 playerdata = await api.get_player(details["player_tag"])
+                playerdata = await playerdata.json()
                 details["total_trophies"] = playerdata["trophies"]
+                embedtext += f"{str(i).zfill(sno_len)}. <@!{row[0]}>  --  <:trophy:1149687899336482928> {playerdata['trophies']}\n" # make this pagewise zfill eventually (1st page 0-50. so 01 02 03.)
                 await update_cursor.execute(
                     "UPDATE push_event_joins SET details = %s where user_id = %s AND server_id = %s;",
                     (
@@ -414,6 +423,7 @@ class database:
                 )
         await self.db.commit()
         await update_cursor.close()
+        return embedtext
         
     @ensure_connection
     async def end_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
@@ -423,15 +433,18 @@ class database:
         
         data = []
         async with bs_api() as api:
-            for i in self.sql.rowcount:
+            for i in range(self.sql.rowcount):
                 row = await self.sql.fetchone()
-                playerdata = await api.get_player(row[1]["player_tag"])
-                trophydelta = playerdata["trophies"] - row[1]["total_trophies"]
+                details = json.loads(row[1])
+                playerdata = await api.get_player(details["player_tag"])
+                playerdata = await playerdata.json()
+                trophydelta = playerdata["trophies"] - details["total_trophies"]
                 # later, for optimizing, sort as you enter data into this list, use binary search to find where to enter (or maybe track where intermediate item values exist in another list and do something better than binary search)
                 data.append((row[0], trophydelta))
         
         tro = lambda x: x[1] # get trophies part of item
         data.sort(reverse=True, key = tro)
+        
         
         return data
 
