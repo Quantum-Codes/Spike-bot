@@ -64,6 +64,7 @@ class database:
             db=os.environ["db_name"],
         )
         self.sql = await self.db.cursor()
+        print("Connected to DB")
         return self
 
     async def db(self):

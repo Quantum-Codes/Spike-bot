@@ -6,20 +6,18 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.11.0,<4.0"
-numpy = "^1.22.2"
-Flask = "^2.2.0"
-urllib3 = "^1.26.17"
-requests = "^2.31.0"
-py-cord = "^2.4.1"
-google-api-python-client = "^2.88.0"
-xmltodict = "^0.13.0"
+numpy = "^2.2.0"
+Flask = "^3.1.0"
+urllib3 = "^2.2.3"
+py-cord = "^2.6.1"
+google-api-python-client = "^2.154.0"
+xmltodict = "^0.14.2"
 python-dotenv = "^1.0.1"
 aiomysql = "^0.2.0"
 poetry-plugin-export = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
 debugpy = "^1.6.2"
-replit-python-lsp-server = {extras = ["yapf", "rope", "pyflakes"], version = "^1.5.9"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
