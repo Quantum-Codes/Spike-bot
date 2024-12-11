@@ -139,8 +139,8 @@ class push_event_commands(discord.Cog):
             return
         
         data = await db.end_push_event(str(ctx.guild_id))
-        embedtext = "### User       --     <:trophy:1149687899336482928> Trophy delta\n"
-        sno_len = int(math.log10(self.sql.rowcount + 1))
+        embedtext = "**User       --     <:trophy:1149687899336482928> Trophy delta**\n"
+        sno_len = int(math.log10(len(data)))
         
         i = 1
         for playerid, trophydelta in data:
@@ -149,7 +149,7 @@ class push_event_commands(discord.Cog):
         embed = discord.Embed(
             color=discord.Color.green(), 
             title = "Push Event End stats",
-            description= f"The push event has ended!\n\n## Leaderboards:\n\n{embedtext}"
+            description= f"The push event has ended! Here are some stats:\n\n## Leaderboards:\n\n{embedtext}"
         )
         
         await ctx.followup.send(embed=embed)

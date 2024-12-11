@@ -402,7 +402,7 @@ class database:
         await self.sql.execute("SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,))
         
         update_cursor = await self.db.cursor()
-        embedtext = "### User       --     <:trophy:1149687899336482928> Total trophies\n"
+        embedtext = "**User       --     <:trophy:1149687899336482928> Total trophies**\n"
         
         sno_len = int(math.log10(self.sql.rowcount + 1))
         async with bs_api() as api:
