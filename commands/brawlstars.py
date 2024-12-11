@@ -1,62 +1,12 @@
 import discord, requests, os, asyncio, aiohttp
-from db import db
+from db import db, funcs, bs_api
 from main import guild_ids
 from discord.commands import SlashCommandGroup
-
-class api_response: # to avoid rewrite.. keep object similar to what requests lib did
-    def __init__(self) -> None:
-        pass
     
-    @classmethod
-    async def create(cls, resp):
-        self = cls()
-        self.resp = resp
-        self.status = resp.status
-        self.json_obj = await resp.json()
-        return self
-    
-    async def json(self):
-        return self.json_obj
-    
-
-
-class bs_api:
-    def __init__(self):
-        self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
-        self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
-
-    async def __aenter__(self):  # make async with loop work
-        self.session = aiohttp.ClientSession(headers=self.headers)
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb): # from python docs
-        await self.session.close()
-
-    async def fetch(self, url):
-        async with self.session.get(url) as response:
-            return await api_response.create(response)
-
-    async def get_player(self, tag):
-        return await self.fetch(f"{self.bsapi_url}/players/{tag}")
-
-    async def get_battlelog(self, tag):
-        return await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
-
-    async def get_club(self, tag):
-        return await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
-
-
-
-async def fix_tag(player_tag):
-    if not player_tag.startswith("#") and not player_tag.startswith("%23"):
-        player_tag = "#" + player_tag
-    player_tag = player_tag.replace("#", "%23").strip().upper()
-    return player_tag
-
 
 async def get_battledata(player_tag, player=None):
     async with bs_api() as api:
-        player_tag = await fix_tag(player_tag)
+        player_tag = await funcs.fix_tag(player_tag)
         data = await api.get_battlelog(player_tag)
         if data.status == 200:
             data = await data.json()
@@ -121,22 +71,6 @@ async def get_battledata(player_tag, player=None):
     return (player, stats)
 
 
-async def TagNotFoundEmbed(mode="save", player_tag=""):
-    embed = discord.Embed(colour=discord.Colour.magenta())
-    if mode == "save":
-        embed.add_field(
-            name="Tag not saved",
-            value="Save your tag first by using `/save` command with the `player_tag` parameter",
-        )
-    elif mode == "404":
-        embed.add_field(
-            name="User not found",
-            value=f"No such player exists with tag {player_tag}. Check the tag again.",
-        )
-    embed.set_image(url="https://i.imgur.com/PZBZ9a6.png")
-    return embed
-
-
 async def embed_player(data, battle_data):
     embed = discord.Embed(
         title=f"{data['name']}",
@@ -172,9 +106,9 @@ async def embed_player(data, battle_data):
     embed.add_field(
         name="Champtionship Challenge",
         value=(
-            "Qualified"
+            "Qualified this month"
             if data["isQualifiedFromChampionshipChallenge"]
-            else "Not Qualified"
+            else "Not Qualified this month"
         ),
     )
 
@@ -184,7 +118,7 @@ async def embed_player(data, battle_data):
         embed.add_field(name="Club name", value="No club joined", inline=True)
 
     embed.set_thumbnail(
-        url=f"https://cdn-old.brawlify.com/profile/{data['icon']['id']}.png"
+        url=f"https://cdn.brawlify.com/profile-icons/regular/{data['icon']['id']}.png"
     )
     return embed
 
@@ -220,7 +154,7 @@ async def embed_club(data):
     embed.add_field(name="Seniors", value=roles["senior"], inline=True)
     embed.add_field(name="Members", value=roles["member"], inline=True)
 
-    embed.set_thumbnail(url=f"https://cdn-old.brawlify.com/club/{data['badgeId']}.png")
+    embed.set_thumbnail(url=f"https://cdn.brawlify.com/club-badges/regular/{data['badgeId']}.png")
     return embed
 
 
@@ -237,10 +171,10 @@ class brawl(discord.Cog):
             if not player_tag:
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
-            player_tag = await fix_tag(player_tag)
+            player_tag = await funcs.fix_tag(player_tag)
             data = await api.get_player(player_tag)
             if data.status == 200:
                 data = await data.json()
@@ -267,7 +201,7 @@ class brawl(discord.Cog):
                 # get player's club here
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
                 # assumed if tag saved in db then its valid
@@ -279,7 +213,7 @@ class brawl(discord.Cog):
                         "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
                     )
                     return
-            club_tag = await fix_tag(club_tag)
+            club_tag = await funcs.fix_tag(club_tag)
             data = await api.get_club(club_tag)
             if data.status == 200:
                 data = await data.json()
@@ -300,7 +234,7 @@ class brawl(discord.Cog):
         if not player_tag:
             data = await db.get_player_tag(ctx.author.id)
             if data is None:
-                await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
         data_raw = await get_battledata(player_tag)
@@ -327,7 +261,7 @@ class brawl(discord.Cog):
     async def save_tag(self, ctx, player_tag: str):
         embed = discord.Embed(colour=discord.Colour.yellow())
         async with bs_api() as api:
-            player_tag = await fix_tag(player_tag)
+            player_tag = await funcs.fix_tag(player_tag)
             # currently no verification system on tags. so duplicate checking is waste.
             # sql.execute("SELECT user_id FROM spikebot_users WHERE player_tag = %s;") #duplicate tag checker.
             # if sql.rowcount != 0:
@@ -342,7 +276,7 @@ class brawl(discord.Cog):
                 )
                 bot_msg = await ctx.respond(embed=embed)
             elif data.status == 404:
-                await ctx.respond(embed=await TagNotFoundEmbed(mode="404", player_tag=player_tag))
+                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="404", player_tag=player_tag.replace("%23", "#")))
                 return
             else:
                 await ctx.respond(f"error {data.status}")
@@ -408,7 +342,7 @@ class brawl(discord.Cog):
             return 
     """
         if not data:
-            await ctx.respond(embed=await TagNotFoundEmbed(mode="save"))
+            await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
             return
         else:
             embed.colour = discord.Colour.green()

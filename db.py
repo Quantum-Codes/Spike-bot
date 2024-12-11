@@ -1,9 +1,49 @@
 import discord.ui, discord.ext, discord
-import os, random, json, dotenv, re, asyncio
-import aiomysql
+import os, random, json, dotenv, re, math
+import aiomysql, aiohttp, asyncio
 
 dotenv.load_dotenv()
 
+class api_response: # to avoid rewrite.. keep object similar to what requests lib did
+    def __init__(self) -> None:
+        pass
+    
+    @classmethod
+    async def create(cls, resp):
+        self = cls()
+        self.resp = resp
+        self.status = resp.status
+        self.json_obj = await resp.json()
+        return self
+    
+    async def json(self):
+        return self.json_obj
+
+
+class bs_api:
+    def __init__(self):
+        self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
+        self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+
+    async def __aenter__(self):  # make async with loop work
+        self.session = aiohttp.ClientSession(headers=self.headers)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb): # from python docs
+        await self.session.close()
+
+    async def fetch(self, url):
+        async with self.session.get(url) as response:
+            return await api_response.create(response)
+
+    async def get_player(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}")
+
+    async def get_battlelog(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/players/{tag}/battlelog")
+
+    async def get_club(self, tag):
+        return await self.fetch(f"{self.bsapi_url}/clubs/{tag}")
 
 class database:
     def __init__(self):
@@ -33,7 +73,7 @@ class database:
         await self.sql.close()
         self.db.close()  # not a coro idk how
     
-    def ensure_connection(func):
+    def ensure_connection(func): # reconnection decorator
         async def innerfunction(self, *args, **kwargs):
             await self.db.ping(reconnect=True)
             x = await func(self, *args, **kwargs)
@@ -232,7 +272,7 @@ class database:
                 {"message_id": messageid, "user_id": userid}
             ).execute()"""
             await self.sql.execute(
-                "INSERT INTO gievaway_joins (message_id, user_id) VALUES (%s, %s);",
+                "INSERT INTO giveaway_joins (message_id, user_id) VALUES (%s, %s);",
                 (messageid, userid),
             )
             await self.db.commit()
@@ -269,7 +309,7 @@ class database:
         await self.db.commit()
 
     @ensure_connection
-    async def end_giveaway(self, messageid):
+    async def end_giveaway(self, messageid: str) -> dict:
         """
         Does not edit/delete db. Only reads to db
         Return value: dict. (keys: winners, winners_count, participants, participants_count)
@@ -306,6 +346,117 @@ class database:
             "participants": participants,
             "participants_count": participants_count,
         }
+    
+    @ensure_connection
+    async def create_push_event(self, serverid: str, details: dict) -> None:
+        """
+        All params required.
+        `serverid` = Server id of the server hosting
+        `details` = all details: type of push - total trophies or brawler (and which brawler/what trophy level brawler)
+        """
+        await self.sql.execute(
+            "INSERT INTO push_event_list (server_id, details) VALUES (%s, %s);",
+            (serverid, json.dumps(details))
+        )
+        await self.db.commit()
+    
+    @ensure_connection
+    async def check_joined_push_event(self, server_id: str, userid: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+            (server_id, userid)
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+
+    @ensure_connection
+    async def join_leave_push_event(self, serverid: str, userid: str, details: dict = {}, mode: str = "join") -> None:
+        if mode == "leave":
+            await self.sql.execute(
+                "DELETE FROM push_event_joins WHERE server_id = %s AND user_id = %s;",
+                (serverid, userid),
+            )
+            await self.db.commit()
+        else:
+            await self.sql.execute(
+                "INSERT INTO push_event_joins (server_id, user_id, details) VALUES (%s, %s, %s);",
+                (serverid, userid, json.dumps(details)),
+            )
+            await self.db.commit()
+            
+    @ensure_connection
+    async def check_valid_push_event(self, server_id: str) -> int:
+        await self.sql.execute(
+            "SELECT * FROM push_event_list WHERE server_id = %s;", (server_id,)
+        )
+        await self.sql.fetchone()
+        return self.sql.rowcount  # tests truth value
+    
+    @ensure_connection
+    async def start_push_event(self, server_id: str, mode: str = "total_tros") -> str: # better to directly generate embedtext rather than return a more general piece of data - list of users, since there is only 1 use of this function.. to keep all sql calls in this one file
+        """Does logic for starting push event - Gets everyones starting point and also generate embed text
+        
+        Returns:
+            str: Embed description text with list of users
+        """
+        await self.sql.execute("SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,))
+        
+        update_cursor = await self.db.cursor()
+        embedtext = "**User       --     <:trophy:1149687899336482928> Total trophies**\n"
+        
+        sno_len = int(math.log10(self.sql.rowcount + 1))
+        async with bs_api() as api:
+            for i in range(1, self.sql.rowcount + 1): # exectuemany and execute in loop is equivalent (unless INSERT statement)
+                row = await self.sql.fetchone()
+                details = json.loads(row[1])
+                playerdata = await api.get_player(details["player_tag"])
+                playerdata = await playerdata.json()
+                details["total_trophies"] = playerdata["trophies"]
+                embedtext += f"{str(i).zfill(sno_len)}. <@!{row[0]}>  --  <:trophy:1149687899336482928> {playerdata['trophies']}\n" # make this pagewise zfill eventually (1st page 0-50. so 01 02 03.)
+                await update_cursor.execute(
+                    "UPDATE push_event_joins SET details = %s where user_id = %s AND server_id = %s;",
+                    (
+                        json.dumps(details),
+                        row[0],
+                        server_id
+                    )
+                )
+        await self.db.commit()
+        await update_cursor.close()
+        return embedtext
+        
+    @ensure_connection
+    async def end_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
+        await self.sql.execute(
+            "SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,)
+        )
+        
+        data = []
+        async with bs_api() as api:
+            for i in range(self.sql.rowcount):
+                row = await self.sql.fetchone()
+                details = json.loads(row[1])
+                playerdata = await api.get_player(details["player_tag"])
+                playerdata = await playerdata.json()
+                trophydelta = playerdata["trophies"] - details["total_trophies"]
+                # later, for optimizing, sort as you enter data into this list, use binary search to find where to enter (or maybe track where intermediate item values exist in another list and do something better than binary search)
+                data.append((row[0], trophydelta))
+        
+        tro = lambda x: x[1] # get trophies part of item
+        data.sort(reverse=True, key = tro)
+        
+        
+        return data
+
+    @ensure_connection
+    async def delete_push_event(self, server_id: str) -> None:
+        await self.sql.execute(
+            "DELETE FROM push_event_list WHERE server_id = %s", (server_id,)
+        )
+        await self.sql.execute(
+            "DELETE FROM push_event_joins WHERE server_id = %s", (server_id,)
+        )
+        await self.db.commit()
 
 
 # CUSTOM CONVERTER
@@ -368,6 +519,28 @@ class helper_funcs:
         for k, v in placeholders.items():
             message = message.replace(f"[{k}]", str(v))
         return message
+    
+    
+    async def fix_tag(self, player_tag: str) -> str:
+        if not player_tag.startswith("#") and not player_tag.startswith("%23"):
+            player_tag = "#" + player_tag
+        player_tag = player_tag.replace("#", "%23").strip().upper()
+        return player_tag
+    
+    async def TagNotFoundEmbed(self, mode: str = "save", player_tag: str = "") -> discord.Embed:
+        embed = discord.Embed(colour=discord.Colour.magenta())
+        if mode == "save":
+            embed.add_field(
+                name="Tag not saved",
+                value="Save your tag first by using `/tag save` command with the `player_tag` parameter",
+            )
+        elif mode == "404":
+            embed.add_field(
+                name="User not found",
+                value=f"No such player exists with tag {player_tag}. Check the tag again.",
+            )
+        embed.set_image(url="https://imgur.com/a/yxu89nT")
+        return embed
 
 
 loop = asyncio.get_event_loop()
