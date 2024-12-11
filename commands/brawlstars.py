@@ -56,7 +56,6 @@ async def get_battledata(player_tag, player=None):
         else:
             raw_stats.setdefault(battleresult, 1)
     stats = {}
-    print(raw_stats)
     raw_stats2 = raw_stats.copy()
     raw_stats2.pop("starplayer")
     total_matches = sum(raw_stats2.values())

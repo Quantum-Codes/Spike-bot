@@ -23,7 +23,10 @@ class api_response: # to avoid rewrite.. keep object similar to what requests li
 class bs_api:
     def __init__(self):
         self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
-        self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+        if os.getenv("dev", False):
+            self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
+        else:
+            self.bsapi_url = "https://api.brawlstars.com/v1" # prod
 
     async def __aenter__(self):  # make async with loop work
         self.session = aiohttp.ClientSession(headers=self.headers)
