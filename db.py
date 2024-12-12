@@ -1,4 +1,5 @@
-import discord.ui, discord.ext, discord
+import discord.ui, discord
+from discord.ext.commands import Converter
 import os, random, json, dotenv, re, math
 import aiomysql, aiohttp, asyncio
 
@@ -464,7 +465,7 @@ class database:
 
 
 # CUSTOM CONVERTER
-class Colour(discord.ext.commands.Converter):
+class Colour(Converter):
     async def convert(self, ctx, arg: str):
         arg = arg.strip().lower()
         if arg.startswith("#"):
@@ -544,6 +545,14 @@ class helper_funcs:
                 value=f"No such player exists with tag {player_tag}. Check the tag again.",
             )
         embed.set_image(url="https://imgur.com/a/yxu89nT")
+        return embed
+    
+    async def LoadingEmbed(self) -> discord.Embed:
+        embed = discord.Embed(
+            color=discord.Color.embed_background(),
+            description="<a:loading:1316704804256616510>"
+        )
+        #embed.set_image(url="https://i.imgur.com/wE9lgqu.gif")
         return embed
 
 

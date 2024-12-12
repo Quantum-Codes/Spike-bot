@@ -165,12 +165,12 @@ class brawl(discord.Cog):
 
     @discord.slash_command(name="playerstats", description="GET a player's stats")
     async def playerstats(self, ctx, player_tag: str = ""):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         async with bs_api() as api:
             if not player_tag:
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
+                    await load_msg.edit(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
             player_tag = await funcs.fix_tag(player_tag)
@@ -182,25 +182,25 @@ class brawl(discord.Cog):
                     battle_data = None
                 else:
                     battle_data = battle_data[1]
-                await ctx.followup.send(embed=await embed_player(data, battle_data))
+                await load_msg.edit(embed=await embed_player(data, battle_data))
             elif data.status == 404:
                 data = await data.json()
                 reason = data.get("reason")
                 if reason == "notFound":
-                    await ctx.followup.send("No such player exists")
+                    await load_msg.edit(content = "No such player exists", embed=None)
             else:
-                await ctx.followup.send(f"error {data.status}")
+                await load_msg.edit(content = f"error {data.status}", embed = None)
                 print(vars(data), data)
 
     @discord.slash_command(name="clubstats", description="GET a club's stats")
     async def clubstats(self, ctx, club_tag: str = None):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         async with bs_api() as api:
             if club_tag is None:
                 # get player's club here
                 data = await db.get_player_tag(ctx.author.id)
                 if data is None:
-                    await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
+                    await load_msg.edit(embed=await funcs.TagNotFoundEmbed(mode="save"))
                     return
                 player_tag = data
                 # assumed if tag saved in db then its valid
@@ -208,32 +208,32 @@ class brawl(discord.Cog):
                 playerdata = await playerdata.json()
                 club_tag = playerdata["club"].get("tag")
                 if club_tag is None:
-                    await ctx.respond(
-                        "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club."
+                    await load_msg.edit(
+                        "You are not part of a club... Use the `club_tag` parameter to see stats of a specific club.", embed=None
                     )
                     return
             club_tag = await funcs.fix_tag(club_tag)
             data = await api.get_club(club_tag)
             if data.status == 200:
                 data = await data.json()
-                await ctx.followup.send(embed=await embed_club(data))
+                await load_msg.edit(embed=await embed_club(data))
             elif data.status == 404:
                 data = await data.json()
                 reason = data.get("reason")
                 if reason == "notFound":
-                    await ctx.followup.send("No such club exists")
+                    await load_msg.edit(content = "No such club exists", embed = None)
             else:
-                await ctx.followup.send(f"error {data.status}")
+                await load_msg.edit(content = f"error {data.status}", embed = None)
 
     @discord.slash_command(
         name="battlestats", description="GET a player's battle stats"
     )
     async def battlestats(self, ctx, player_tag: str = ""):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         if not player_tag:
             data = await db.get_player_tag(ctx.author.id)
             if data is None:
-                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
+                await load_msg.edit(embed=await funcs.TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
         data_raw = await get_battledata(player_tag)
@@ -248,13 +248,13 @@ class brawl(discord.Cog):
                 embed.add_field(name=k, value=str(v) + "%")
             embed.set_footer(text="Data from last 25 matches")
 
-            await ctx.followup.send(embed=embed)
+            await load_msg.edit(embed=embed)
         elif data_raw == 404:  # also 404 with modded accs
-            await ctx.followup.send(
-                "No such player exists OR this player hasn't played any battles..."
+            await load_msg.edit(
+                "No such player exists OR this player hasn't played any battles...", embed = None
             )
         else:
-            await ctx.followup.send(f"error {data.status}")
+            await load_msg.edit(content = f"error {data.status}", embed = None)
 
     @tagcommands.command(name="save", description="Save your player tag")
     async def save_tag(self, ctx, player_tag: str):

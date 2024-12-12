@@ -10,7 +10,7 @@ class message_commands(discord.Cog):
 
     @discord.message_command(name="purge_react")
     async def purge_reacts(self, ctx, message):
-        await ctx.defer(ephemeral=True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed(), ephemeral=True)
         reacts = message.reactions[0]
         users = ""
         async for user in reacts.users():

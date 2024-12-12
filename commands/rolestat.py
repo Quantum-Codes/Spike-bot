@@ -1,4 +1,5 @@
 import discord
+from db import funcs
 from main import guild_ids
 
 
@@ -24,7 +25,7 @@ class RoleStats(discord.Cog):
         role9: discord.Role = None,
         role10: discord.Role = None,
     ):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         embed = discord.Embed(
             title=title,
             color=discord.Colour.blurple(),
@@ -44,7 +45,7 @@ class RoleStats(discord.Cog):
             if not role:
                 continue
             embed.add_field(name=role.name, value=len(role.members))
-        await ctx.followup.send(embed=embed)
+        await load_msg.edit(embed=embed)
 
 
 def setup(bot):

@@ -22,7 +22,7 @@ class push_event_commands(discord.Cog):
     @push_event.command(name="create", description="Create a push event")
     @discord.ext.commands.has_permissions(administrator=True)
     async def push_event_maker(self, ctx: discord.ApplicationContext):
-        await ctx.defer(ephemeral = True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed(), ephemeral=True)
         
         if (await db.check_valid_push_event(str(ctx.guild_id))):
             embed = discord.Embed(
@@ -44,27 +44,27 @@ class push_event_commands(discord.Cog):
     
     @push_event.command(name="join", description="Join an active push event")
     async def push_event_join(self, ctx: discord.ApplicationContext, player_tag: str = ""):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         if not player_tag:
             data = await db.get_player_tag(ctx.author.id)
             if data is None:
-                await ctx.respond(embed=await funcs.TagNotFoundEmbed(mode="save"))
+                await load_msg.edit(embed=await funcs.TagNotFoundEmbed(mode="save"))
                 return
             player_tag = data
         else:
             player_tag = await funcs.fix_tag(player_tag)
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await ctx.followup.send("No pushevent is active in this server.")
+            await load_msg.edit(content = "No pushevent is active in this server.", embed = None)
             return
 
         if (await db.check_joined_push_event(str(ctx.guild_id), str(ctx.author.id))):
-            await ctx.followup.send("You have already joined the event.")
+            await load_msg.edit(content = "You have already joined the event.", embed = None)
             return
         
         async with bs_api() as api:
             if (await api.get_player(player_tag)).status == 404:
-                await ctx.followup.send(embed = await funcs.TagNotFoundEmbed(player_tag=player_tag.replace("%23", "#")))
+                await load_msg.edit(embed = await funcs.TagNotFoundEmbed(player_tag=player_tag.replace("%23", "#")))
                 return
             
         await db.join_leave_push_event(
@@ -77,17 +77,16 @@ class push_event_commands(discord.Cog):
         )
         embed = discord.Embed(colour=discord.Colour.green(), title="Joined push event", description="You have successfully joined the push event using account {}!".format(player_tag.replace("%23", "#")))
         embed.set_footer(text = "Joined by mistake? Leave using `/push event leave`\nJoined using wrong account? Leave then join using `push event join player_tag:#XXXXXXXX`")
-        await ctx.followup.send(embed=embed)
+        await load_msg.edit(embed=embed)
     
     @push_event.command(name="leave", description="Leave a push event")
     async def push_event_leave(self, ctx: discord.ApplicationContext):
-        await ctx.defer()
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await ctx.followup.send("No pushevent is active in this server.")
+            await ctx.respond("No pushevent is active in this server.")
             return
         
         if not (await db.check_joined_push_event(str(ctx.guild_id), str(ctx.author.id))):
-            await ctx.followup.send("You are not participating in this event.")
+            await ctx.respond("You are not participating in this event.")
             return
         
         await db.join_leave_push_event(
@@ -97,27 +96,25 @@ class push_event_commands(discord.Cog):
         )
         embed = discord.Embed(colour=discord.Colour.green(), title="Left push event", description="You have successfully left the push event!")
         embed.set_footer(text = "Want to join back? Join using `/push event join`")
-        await ctx.followup.send(embed=embed)
+        await ctx.repsond(embed=embed)
     
     @push_event.command(name="delete", description="Delete a push event and its data")
     @discord.ext.commands.has_permissions(administrator=True)
-    async def push_event_deleter(self, ctx: discord.ApplicationContext):
-        await ctx.defer(ephemeral = True)
-        
+    async def push_event_deleter(self, ctx: discord.ApplicationContext):        
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await ctx.followup.send("No active push event.", ephemeral=True)
+            await ctx.respond("No active push event.", ephemeral=True)
             return
         
         await db.delete_push_event(str(ctx.guild_id))
-        await ctx.followup.send("Successfuly deleted the push event.\nYou may create a new one using `/push event create`", ephemeral=True)
+        await ctx.respond("Successfuly deleted the push event.\nYou may create a new one using `/push event create`", ephemeral=True)
 
     @push_event.command(name="start", description="Start a push event")
     @discord.ext.commands.has_permissions(administrator=True)
     async def push_event_starter(self, ctx: discord.ApplicationContext):
-        await ctx.defer(ephemeral = True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await ctx.followup.send("No active push event.", ephemeral=True)
+            await load_msg.edit(content = "No active push event.", embed = None, ephemeral=True)
             return
         
         embedtext = await db.start_push_event(str(ctx.guild_id))
@@ -127,15 +124,15 @@ class push_event_commands(discord.Cog):
             description= f"Push event has started!\nGet busy pushing your trophies till the end of the event!\n\n{embedtext}"
         )
         embed.set_footer(text="Note that change in trophies count. Total trophies do not matter unless a tie exists where person with more total trophies or more brawler trophies win depending on context.")
-        await ctx.followup.send(embed = embed)
+        await load_msg.edit(embed = embed)
     
     @push_event.command(name="end", description="End a push event and display winners")
     @discord.ext.commands.has_permissions(administrator=True)
     async def push_event_deleter(self, ctx: discord.ApplicationContext):
-        await ctx.defer(ephemeral = True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await ctx.followup.send("No active push event.", ephemeral=True)
+            await load_msg.edit(content = "No active push event.", ephemeral=True, embed=None)
             return
         
         data = await db.end_push_event(str(ctx.guild_id))
@@ -152,7 +149,7 @@ class push_event_commands(discord.Cog):
             description= f"The push event has ended! Here are some stats:\n\n## Leaderboards:\n\n{embedtext}"
         )
         
-        await ctx.followup.send(embed=embed)
+        await load_msg.edit(embed=embed)
 
 def setup(bot):
     bot.add_cog(push_event_commands(bot))
