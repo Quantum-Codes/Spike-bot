@@ -24,7 +24,7 @@ class giveawaycommands(discord.Cog):
     @giveaway.command(name="create", description="Host a giveaway")
     @discord.ext.commands.has_permissions(administrator=True)
     async def giveaway_maker(self, ctx, message: str, winners: int):
-        await ctx.defer(ephemeral=True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed(), ephemeral=True)
         msg = await ctx.send(
             embed=discord.Embed(description=await funcs.replace_placeholders(message, ctx)),
             view=GiveawayJoin(),
@@ -35,7 +35,7 @@ class giveawaycommands(discord.Cog):
     @giveaway.command(name="end", description="Ends a giveaway")
     @discord.ext.commands.has_permissions(administrator=True)
     async def giveaway_end(self, ctx, messageid: discord.Message, reward: str):
-        await ctx.defer(ephemeral=True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed(), ephemeral=True)
         message = messageid  # alias
         if not await db.check_valid_giveaway(message.id):
             await ctx.followup.send("not valid giveaway", ephemeral=True)
@@ -68,7 +68,7 @@ class giveawaycommands(discord.Cog):
             await ctx.respond("Cancelled cleanup.", ephemeral=True)
             return
 
-        await ctx.defer(ephemeral=True)
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed(), ephemeral=True)
 
         message = messageid  # alias
         if not await db.check_valid_giveaway(message.id):
@@ -120,8 +120,9 @@ class utilitycommands(discord.Cog):
     )
     @discord.ext.commands.is_owner()
     async def killbot(self, ctx):
+        await ctx.defer()
         await db.close_db()
-        await ctx.respond("closed all processes")
+        await ctx.followup.send("closed all processes")
 
     @serverscommand.error
     async def serverscommanderror(self, ctx, error):
@@ -140,7 +141,7 @@ class utilitycommands(discord.Cog):
         image_url: str = "",
         thumb_url: str = "",
     ):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         # add url validation, color option and validation
         embed = discord.Embed(
             colour=discord.Colour(colour),
@@ -170,11 +171,11 @@ class utilitycommands(discord.Cog):
                 "colour": colour,
             },
         )
-        await ctx.followup.send(embed=embed)
+        await load_msg.edit(embed=embed)
 
     @discord.slash_command(name="ping", description="bot latency including a db query")
     async def ping_time(self, ctx):
-        await ctx.defer()
+        load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         t1 = time.time()
         await db.get_server_settings(ctx.guild.id)  # just run a query
         t1 = time.time() - t1
@@ -182,7 +183,7 @@ class utilitycommands(discord.Cog):
         async with bs_api() as api:
             await api.get_player("#28PUJ2VP9")
         t2 = time.time() - t2
-        await ctx.followup.send(f"Ping: {self.bot.latency}s\nQuery: {t1}s\nAPI: {t2}s")
+        await load_msg.edit(content = f"Ping: {self.bot.latency}s\nQuery: {t1}s\nAPI: {t2}s", embed = None)
 
     @welcome.command(name="test_message", description="Test the welcome message")
     @discord.ext.commands.has_permissions(administrator=True)
@@ -214,14 +215,13 @@ class utilitycommands(discord.Cog):
     @welcome.command(name="remove", description="Disable and delete welcome message")
     @discord.ext.commands.has_permissions(administrator=True)
     async def removewelcome(self, ctx):
-        await ctx.defer()
         data = await db.get_server_settings(ctx.guild.id, "welcomer")
         if data is None:
             embed = discord.Embed(
                 colour=discord.Colour.red(),
                 description="No welcome message set for this server.\nSet it up using `/utility welcome setup` command.",
             )
-            await ctx.followup.send(embed=embed)
+            await ctx.respond(embed=embed)
             return
 
         await db.delete_server_settings(ctx.guild.id, "welcomer")
@@ -240,31 +240,29 @@ class utilitycommands(discord.Cog):
             name="thumbnail",
             value=data["thumb_url"] if data["thumb_url"] else "not set",
         )
-        await ctx.followup.send(embed=embed)
+        await ctx.respond(embed=embed)
 
     @autokick.command(name="setup", description="Kick newly created accounts")
     @discord.ext.commands.has_permissions(administrator=True)
     async def autokick_setup(self, ctx, age_in_seconds: int = 7 * 24 * 3600):
-        await ctx.defer()
         embed = discord.Embed(
             colour=discord.Colour.green(),
             title="Autokick enabled",
             description=f"Any account younger than {age_in_seconds} seconds will be kicked when they join.\nTo disable, use `/utility autokick disable`",
         )
         await db.save_server_settings(ctx.guild.id, "autokick", {"age": age_in_seconds})
-        await ctx.followup.send(embed=embed)
+        await ctx.respond(embed=embed)
 
     @autokick.command(name="disable", description="Disable autokick")
     @discord.ext.commands.has_permissions(administrator=True)
     async def autokick_disable(self, ctx):
-        await ctx.defer()
         if await db.get_server_settings(ctx.guild.id, "autokick") is None:
             embed = discord.Embed(
                 colour=discord.Colour.red(),
                 title="Autokick was not setup",
                 description="Autokick was not setup for this server.\nEnable it using `/utility autokick setup`",
             )
-            await ctx.followup.send(embed=embed)
+            await ctx.respond(embed=embed)
             return
 
         await db.delete_server_settings(ctx.guild.id, "autokick")
@@ -273,7 +271,7 @@ class utilitycommands(discord.Cog):
             title="Autokick is disabled",
             description="Autokick is now disabled for this server.\nYou may enable autokick again using `/utility autokick setup`",
         )
-        await ctx.followup.send(embed=embed)
+        await ctx.respond(embed=embed)
 
     @welcomer.error
     @removewelcome.error

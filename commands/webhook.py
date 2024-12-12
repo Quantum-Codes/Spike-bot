@@ -1,4 +1,5 @@
 from logger import getlog, writelog
+from db import funcs
 import os, discord, aiohttp, dotenv
 import googleapiclient.discovery
 
