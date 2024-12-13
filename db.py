@@ -555,7 +555,7 @@ class helper_funcs:
         #embed.set_image(url="https://i.imgur.com/wE9lgqu.gif")
         return embed
 
-print("Dev env: ", os.environ.get("env"))
+print("Dev env: ", os.environ.get("dev"))
 loop = asyncio.get_event_loop()
 db = loop.run_until_complete(database.create())
 # sup_db = await db.db()
