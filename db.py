@@ -24,7 +24,7 @@ class api_response: # to avoid rewrite.. keep object similar to what requests li
 class bs_api:
     def __init__(self):
         self.headers = {"Authorization": f"Bearer {os.environ['bs_token']}"}
-        if os.getenv("dev", False):
+        if os.getenv("dev", "False") == "True":
             self.bsapi_url = "https://bsproxy.royaleapi.dev/v1"
         else:
             self.bsapi_url = "https://api.brawlstars.com/v1" # prod
@@ -68,7 +68,7 @@ class database:
             db=os.environ["db_name"],
         )
         self.sql = await self.db.cursor()
-        print("Connected to DB")
+        print(f"Connected to DB {os.environ['db_host']}")
         return self
 
     async def db(self):
@@ -555,7 +555,7 @@ class helper_funcs:
         #embed.set_image(url="https://i.imgur.com/wE9lgqu.gif")
         return embed
 
-
+print("Dev env: ", os.environ.get("env"))
 loop = asyncio.get_event_loop()
 db = loop.run_until_complete(database.create())
 # sup_db = await db.db()
