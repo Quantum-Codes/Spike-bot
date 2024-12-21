@@ -7,8 +7,8 @@ class push_event_commands(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    pushing_comms = SlashCommandGroup("push", "Handles push stats", guild_ids=guild_ids)
-    push_event = pushing_comms.create_subgroup("event", "Push event commands", guild_ids=guild_ids)
+    pushing_comms = SlashCommandGroup("push", "Handles push stats")
+    push_event = pushing_comms.create_subgroup("event", "Push event commands")
 
     """async def cog_command_error(self, ctx, error):
         print(error, error.__cause__, type(error))
