@@ -383,6 +383,10 @@ class database:
             )
             await self.db.commit()
         else:
+            async with bs_api() as api:
+                playerdata = await api.get_player(details["player_tag"])
+                playerdata = await playerdata.json()
+                details["total_trophies"] = playerdata["trophies"]
             await self.sql.execute(
                 "INSERT INTO push_event_joins (server_id, user_id, details) VALUES (%s, %s, %s);",
                 (serverid, userid, json.dumps(details)),
