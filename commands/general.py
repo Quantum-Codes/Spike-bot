@@ -113,7 +113,7 @@ class utilitycommands(discord.Cog):
     )
     @discord.ext.commands.is_owner()
     async def serverscommand(self, ctx):
-        await ctx.respond("\n".join(guild.name for guild in self.bot.guilds))
+        await ctx.respond("1. " + "\n- ".join(guild.name for guild in self.bot.guilds))
         
     @discord.slash_command(
         name="kill", description="shut down bot"
