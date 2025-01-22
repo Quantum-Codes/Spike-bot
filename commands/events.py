@@ -114,7 +114,7 @@ class push_event_commands(discord.Cog):
         load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await load_msg.edit(content = "No active push event.", embed = None, ephemeral=True)
+            await load_msg.edit(content = "No active push event.", embed = None)
             return
         
         embedtext = await db.start_push_event(str(ctx.guild_id))
