@@ -135,6 +135,9 @@ class push_event_commands(discord.Cog):
             csv_file.seek(0)
             file = discord.File(csv_file, filename="push_event.csv")
         
+        if count == 0:
+            embedtext = "Nobody... \:("
+        
         return embedtext, file, count
     
     @push_event.command(name="status", description="Show current progress of push event")
