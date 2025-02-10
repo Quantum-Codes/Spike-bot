@@ -435,7 +435,7 @@ class database:
         return embedtext
         
     @ensure_connection
-    async def end_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
+    async def status_push_event(self, server_id: str, mode: str = "total_tros") -> list[tuple[str, int]]:
         await self.sql.execute(
             "SELECT user_id, details FROM push_event_joins WHERE server_id = %s;", (server_id,)
         )
@@ -449,7 +449,7 @@ class database:
                 playerdata = await playerdata.json()
                 trophydelta = playerdata["trophies"] - details["total_trophies"]
                 # later, for optimizing, sort as you enter data into this list, use binary search to find where to enter (or maybe track where intermediate item values exist in another list and do something better than binary search)
-                data.append((row[0], trophydelta))
+                data.append((row[0], trophydelta, details["trophies"], playerdata["trophies"]))
         
         tro = lambda x: x[1] # get trophies part of item
         data.sort(reverse=True, key = tro)
