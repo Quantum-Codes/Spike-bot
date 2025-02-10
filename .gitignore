@@ -7,3 +7,4 @@ replit.nix
 /.config
 .env
 /.idea
+/.venv

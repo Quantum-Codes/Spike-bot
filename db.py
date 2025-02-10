@@ -77,6 +77,7 @@ class database:
     async def close_db(self):
         await self.sql.close()
         self.db.close()  # not a coro idk how
+        print("---------DB SHUTDOWN----------")
     
     def ensure_connection(func): # reconnection decorator
         async def innerfunction(self, *args, **kwargs):
@@ -449,7 +450,7 @@ class database:
                 playerdata = await playerdata.json()
                 trophydelta = playerdata["trophies"] - details["total_trophies"]
                 # later, for optimizing, sort as you enter data into this list, use binary search to find where to enter (or maybe track where intermediate item values exist in another list and do something better than binary search)
-                data.append((row[0], trophydelta, details["trophies"], playerdata["trophies"]))
+                data.append((row[0], trophydelta, details["total_trophies"], playerdata["trophies"]))
         
         tro = lambda x: x[1] # get trophies part of item
         data.sort(reverse=True, key = tro)

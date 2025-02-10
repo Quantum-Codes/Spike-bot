@@ -31,7 +31,7 @@ class push_event_commands(discord.Cog):
                 title = "Failed creation",
                 description=f"A push event is already active for this server.\nDelete it using `/push event delete`\n\nCreation command used now:\n`/push event create`"
             )
-            await ctx.followup.send(embed=embed)
+            await load_msg.edit(embed=embed)
             return
         
         await db.create_push_event(
@@ -41,7 +41,7 @@ class push_event_commands(discord.Cog):
                 "join_req": 10000
             }
         )
-        await ctx.respond("Succesfully created push event. Members may join using `/push event join`.", ephemeral = True)
+        await load_msg.edit(content="Succesfully created push event. Members may join using `/push event join`.", embed=None)
     
     @push_event.command(name="join", description="Join an active push event")
     async def push_event_join(self, ctx: discord.ApplicationContext, player_tag: str = ""):
@@ -97,7 +97,7 @@ class push_event_commands(discord.Cog):
         )
         embed = discord.Embed(colour=discord.Colour.green(), title="Left push event", description="You have successfully left the push event!")
         embed.set_footer(text = "Want to join back? Join using `/push event join`")
-        await ctx.repsond(embed=embed)
+        await ctx.respond(embed=embed)
     
 
     @push_event.command(name="start", description="Start a push event")
@@ -121,19 +121,21 @@ class push_event_commands(discord.Cog):
     async def generate_push_leaderboards(self, guild_id: str):
         data = await db.status_push_event(guild_id)
         embedtext = "**User       --     <:trophy:1149687899336482928> Trophy delta**\n"
-        sno_len = int(math.log10(len(data)))
+        count = len(data)
+        sno_len = int(math.log10(count)) if count > 0 else 1
         
-        i = 1
-        for playerid, trophydelta in data[:25]:
-            embedtext += f"{str(i).zfill(sno_len)}. <@!{playerid}>  --  <:trophy:1149687899336482928> {trophydelta}\n" # make this pagewise zfill eventually (1st page 0-50. so 01 02 03.)
+        for i in range(min(25, count)):
+            embedtext += f"{str(i).zfill(sno_len)}. <@!{data[i][0]}>  --  <:trophy:1149687899336482928> {data[i][1]}\n" # make this pagewise zfill eventually (1st page 0-50. so 01 02 03.)
         
-        csv_file = StringIO(newline="\n")
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(["User", "Trophy delta", "Start trophies", "End trophies"])
-        csv_writer.writerows(data)
-        file = discord.File(csv_file, filename="push_event.csv")
+        with StringIO(newline="\n") as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(["User", "Trophy delta", "Start trophies", "End trophies"])
+            csv_writer.writerows(data)
+            csv_file.flush()
+            csv_file.seek(0)
+            file = discord.File(csv_file, filename="push_event.csv")
         
-        return embedtext, file
+        return embedtext, file, count
     
     @push_event.command(name="status", description="Show current progress of push event")
     @discord.ext.commands.has_permissions(administrator=True)
@@ -141,19 +143,22 @@ class push_event_commands(discord.Cog):
         load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await load_msg.edit(content = "No active push event.", ephemeral=True, embed=None)
+            await load_msg.edit(content = "No active push event.", embed=None)
             return
         
-        embedtext, file = await self.generate_push_leaderboards(str(ctx.guild_id))
+        embedtext, file, count = await self.generate_push_leaderboards(str(ctx.guild_id))
         
         embed = discord.Embed(
             color=discord.Color.green(), 
             title = "Push Event Progress",
-            description= f"## Top 25 Leaderboards:\n\n{embedtext}",
-            footer="Full leaderboard can be seen through the attached file below (csv format, can use excel to view)"
+            description= f"## Top 25 Leaderboards:\n\n{embedtext}"
         )
         
-        await load_msg.edit(embed=embed, file=file)
+        if count > 25:
+            embed.set_footer(text="Full leaderboard can be seen through the attached csv file (can use excel to view)")
+        
+        
+        await load_msg.edit(embed=embed, files=[file] if count > 25 else [])
     
     
     @push_event.command(name="end", description="End a push event and display winners")
@@ -162,18 +167,19 @@ class push_event_commands(discord.Cog):
         load_msg = await ctx.respond(embed=await funcs.LoadingEmbed())
         
         if not (await db.check_valid_push_event(str(ctx.guild_id))):
-            await load_msg.edit(content = "No active push event.", ephemeral=True, embed=None)
+            await load_msg.edit(content = "No active push event.", embed=None)
             return
         
-        embedtext, file = await db.end_push_event(str(ctx.guild_id))
+        embedtext, file, count = await self.generate_push_leaderboards(str(ctx.guild_id))
         
         embed = discord.Embed(
             color=discord.Color.green(), 
             title = "Push Event Ended!",
-            description= f"The push event has ended! Here are the leaderboards:\n## Top 25 final Leaderboards:\n\n{embedtext}",
-            footer="Full leaderboard can be seen through the attached file below (csv format, can use excel to view)"
+            description= f"The push event has ended! Here are the leaderboards:\n## Top 25 final Leaderboards:\n\n{embedtext}"
         )
+        embed.set_footer(text="Full leaderboard can be seen through the attached file below (csv format, can use excel to view)")
         
+    
         await load_msg.edit(embed=embed, file=file)
         await db.delete_push_event(str(ctx.guild_id))
 
