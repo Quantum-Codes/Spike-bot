@@ -1,4 +1,4 @@
-import discord, random, json
+"""import discord, random, json
 from main import guild_ids
 from components.buttons import ConfirmWinners
 from components.modals import GetWinnersCount
@@ -25,4 +25,4 @@ class message_commands(discord.Cog):
 
 
 def setup(bot):
-    bot.add_cog(message_commands(bot))
+    bot.add_cog(message_commands(bot))"""
